@@ -1,0 +1,96 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+
+    <main class="main-wrap">
+        <%- include('../layouts/admin/navbar.ejs') %>
+            <section class="content-main">
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-title card-title">Add New Brand</h2>
+                    </div>
+                    <div>
+                        <input type="text" placeholder="Search Categories" class="form-control bg-white">
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                <form method="post" id="formDataBrand"  enctype="multipart/form-data">
+                                    <option value="brand" hidden>Brand Logo</option>
+                                    <div class="mb-4">
+                                        <label for="product_name" class="form-label">Brand Name</label>
+                                        <input type="text" name="name" placeholder="Brand Name" class="form-control" id="product_name" />
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Description</label>
+                                        <textarea placeholder="Type here" id="description" name="description" class="form-control"></textarea>
+                                    </div>
+                                    <div class="mb-4">
+                                        <input id="brandLogo" name="file" type="file" accept="image/png, image/jpeg, image/jpg, image/gif">
+                                    </div>
+                                    <div class="d-grid">
+                                        <button class="btn btn-primary">Add New Brand</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div> <!-- .row // -->
+                    </div> <!-- card body .// -->
+                </div> <!-- card .// -->
+            </section> <!-- content-main end// -->
+    </main>
+    
+<%- include('../layouts/admin/footer.ejs') %>
+
+
+<script>
+    const createBrandForm = document.getElementById("formDataBrand");
+
+    createBrandForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append('name', document.getElementById('product_name').value.trim());
+        formData.append('description', document.getElementById("description").value.trim());
+
+        const logoFile = document.getElementById('brandLogo').files[0];
+        if (logoFile) {
+            formData.append('file', logoFile);
+        } else {
+            Swal.fire({
+                title: 'Error!',
+                text: 'Please select a logo to upload.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            return;
+        }
+
+        axios.post('/admin/add_new_brand', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        })
+        .then(response => {
+            
+            Swal.fire({
+                title: 'Success!',
+                text: 'Brand has been added successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                createBrandForm.reset(); 
+            });
+        })
+        .catch(error => {
+            console.error('Error adding brand:', error);
+            Swal.fire({
+                title: 'Error!',
+                text: 'Failed to add brand. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+    });
+</script>
+

@@ -1,0 +1,444 @@
+<%- include('../layouts/user/header.ejs') %>
+    <title>Address Form</title>
+
+    <link rel="stylesheet" href="/user_asset/css/main.css?v=3.4">
+    <section class="pt-150 pb-150">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-10 m-auto">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="dashboard-menu">
+                                <ul class="nav flex-column" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>My Address</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="account-detail-tab" data-bs-toggle="tab" href="#account-detail" role="tab" aria-controls="account-detail" aria-selected="true"><i class="fi-rs-user mr-10"></i>Account details</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="/logout"><i class="fi-rs-sign-out mr-10"></i>Logout</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="tab-content dashboard-content">
+                                <div class="tab-pane fade active show" id="dashboard" role="tabpanel" aria-labelledby="dashboard-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Hello <%= id.name %>! </h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <p>From your account dashboard. you can easily check &amp; view your <a href="#">recent orders</a>, manage your <a href="#">shipping and billing addresses</a> and <a href="#">edit your password and account details.</a></p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Your Orders</h5>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Order ID</th>
+                                                            <th>User ID</th>
+                                                            <th>Shipping Address</th>
+                                                            <th>Items</th>
+                                                            <th>Total Price</th>
+                                                            <th>Payment Method</th>
+                                                            <th>Order Status</th>
+                                                            <th>Order Date</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        <% if (Array.isArray(orders) && orders.length) { %>
+                                                            <% orders.forEach(order => { %>
+                                                            <tr>
+                                                                <td><%= order._id %></td>
+                                                                <td><%= order.user %></td>
+                                                                <td>
+                                                                    <strong>Name:</strong> <%= order.shipping_address.name %><br>
+                                                                    <strong>Mobile:</strong> <%= order.shipping_address.mobile %><br>
+                                                                    <strong>Address:</strong> <%= order.shipping_address.address %><br>
+                                                                    <strong>City:</strong> <%= order.shipping_address.city %><br>
+                                                                    <strong>State:</strong> <%= order.shipping_address.state %><br>
+                                                                    <strong>Postal Code:</strong> <%= order.shipping_address.postal_code %><br>
+                                                                    <strong>Landmark:</strong> <%= order.shipping_address.landmark || "N/A" %>
+                                                                </td>
+                                                                <td>
+                                                                    <% order.items.forEach(item => { %>
+                                                                    <div>
+                                                                        <img src="<%= item.product.product_card_image %>" alt="Product Image" style="width: 50px; height: 50px;">
+                                                                        <strong>Product:</strong> <%= item.product.name %><br>
+                                                                        <strong>Brand:</strong> <%= item.product.brand.brandName %><br>
+                                                                        <strong>Category:</strong> <%= item.product.category.name %><br>
+                                                                        <strong>Volume:</strong> <%= item.product.variants.volume %>ml<br>
+                                                                        <strong>Price:</strong> ₹<%= item.product.variants.price %><br>
+                                                                        <strong>Quantity:</strong> <%= item.quantity %><br>
+                                                                    </div>
+                                                                    <hr>
+                                                                    <% }) %>
+                                                                </td>
+                                                                <td>₹<%= order.total_price %></td>
+                                                                <td><%= order.payment_method %></td>
+                                                                <td><%= order.order_status %></td>
+                                                                <td><%= new Date(order.createdAt).toLocaleString() %></td>
+                                                            </tr>
+                                                            <% }) %>
+                                                        <% } else { %>
+                                                            <tr>
+                                                                <td colspan="8" class="text-center">No orders found.</td>
+                                                            </tr>
+                                                        <% } %>
+                                                    </tbody>
+                                                </table>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5 class="mb-0">Orders tracking</h5>
+                                        </div>
+                                        <div class="card-body contact-from-area">
+                                            <p>To track your order please enter your OrderID in the box below and press "Track" button. This was given to you on your receipt and in the confirmation email you should have received.</p>
+                                            <div class="row">
+                                                <div class="col-lg-8">
+                                                    <form class="contact-form-style mt-30 mb-50" action="#" method="post">
+                                                        <div class="input-style mb-20">
+                                                            <label>Order ID</label>
+                                                            <input name="order-id" placeholder="Found in your order confirmation email" type="text" class="square">
+                                                        </div>
+                                                        <div class="input-style mb-20">
+                                                            <label>Billing email</label>
+                                                            <input name="billing-email" placeholder="Email you used during checkout" type="email" class="square">
+                                                        </div>
+                                                        <button class="submit submit-auto-width" type="submit">Track</button>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="address" role="tabpanel" aria-labelledby="address-tab">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <% if (!addresses || addresses.length === 0) { %>
+                                                <p>Please add an address.</p>
+                                            <% } else { %>    
+                                                <% addresses.forEach((address) => { %>
+                                                    <div class="card mb-15 mb-sm-0">
+                                                        <div class="card-header">
+                                                            <h5 class="mb-0">Billing Address</h5>
+                                                        </div>
+                                                        <div class="card-body">
+                                                            <address>
+                                                                <%= address.name %><br>
+                                                                <%= address.address %><br>
+                                                                <%= address.state %><br>
+                                                                <%= address.city %>, <%= address.postal_code %>
+                                                            </address>
+                                                            <a href="#" class="btn-small">Edit</a>
+                                                        </div>
+                                                    </div>
+                                                <% }) %>    
+                                            <% } %>
+                                        </div>
+
+                                        <div class="modal fade" id="shippingModal" tabindex="-1" aria-labelledby="shippingModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="shippingModalLabel">Shipping Address</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <div class="modal-body">
+                                                        <form method="post" id="shippingForm"  >
+                                                            <div class="row">
+                                                                <div class="col-md-6">
+                                                                    <div class="mb-3">
+                                                                        <label for="full-name" class="form-label">Full name (First and Last name)</label>
+                                                                        <input type="text" class="form-control" id="full-name" name="full_name" placeholder="Full Name">
+                                                                        <div class="invalid-feedback" id="nameError">Please enter your full name.</div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="mobile-number" class="form-label">Mobile number</label>
+                                                                        <input type="tel" class="form-control" id="mobile-number" name="mobile_number" placeholder="+1 (234) 567-8900">
+                                                                        <div class="invalid-feedback" id="mobileError">Please enter a valid mobile number.</div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="pincode" class="form-label">Pincode</label>
+                                                                        <input type="text" class="form-control" id="pincode" name="pincode" placeholder="6 digits PIN code">
+                                                                        <div class="invalid-feedback" id="pincodeError">Please enter a valid 6-digit PIN code.</div>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="col-md-6">
+                                                                    <div class="mb-3">
+                                                                        <label for="address" class="form-label">Address</label>
+                                                                        <input type="text" class="form-control" id="address" name="address" placeholder="Address">
+                                                                        <div class="invalid-feedback" id="flatError">Please enter your address.</div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="landmark" class="form-label">Landmark</label>
+                                                                        <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Landmark">
+                                                                        <div class="invalid-feedback" id="landmarkError">Please provide a landmark.</div>
+                                                                    </div>
+                                                                    <div class="mb-3">
+                                                                        <label for="town-city" class="form-label">Town/City</label>
+                                                                        <input type="text" class="form-control" id="town-city" name="town_city" placeholder="City">
+                                                                        <div class="invalid-feedback" id="cityError">Please enter your town or city.</div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <div class="col-md-6 mb-3">
+                                                                    <label for="state" class="form-label">State</label>
+                                                                    <select class="form-select" id="state" name="state">
+                                                                      <option value="">Choose a state</option>
+                                                                      <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                                                      <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                                                      <option value="Assam">Assam</option>
+                                                                      <option value="Bihar">Bihar</option>
+                                                                      <option value="Chhattisgarh">Chhattisgarh</option>
+                                                                      <option value="Goa">Goa</option>
+                                                                      <option value="Gujarat">Gujarat</option>
+                                                                      <option value="Haryana">Haryana</option>
+                                                                      <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                                                      <option value="Jharkhand">Jharkhand</option>
+                                                                      <option value="Karnataka">Karnataka</option>
+                                                                      <option value="Kerala">Kerala</option>
+                                                                      <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                                                      <option value="Maharashtra">Maharashtra</option>
+                                                                      <option value="Manipur">Manipur</option>
+                                                                      <option value="Meghalaya">Meghalaya</option>
+                                                                      <option value="Mizoram">Mizoram</option>
+                                                                      <option value="Nagaland">Nagaland</option>
+                                                                      <option value="Odisha">Odisha</option>
+                                                                      <option value="Punjab">Punjab</option>
+                                                                      <option value="Rajasthan">Rajasthan</option>
+                                                                      <option value="Sikkim">Sikkim</option>
+                                                                      <option value="Tamil Nadu">Tamil Nadu</option>
+                                                                      <option value="Telangana">Telangana</option>
+                                                                      <option value="Tripura">Tripura</option>
+                                                                      <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                                                      <option value="Uttarakhand">Uttarakhand</option>
+                                                                      <option value="West Bengal">West Bengal</option>
+                                                                      <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                                                      <option value="Chandigarh">Chandigarh</option>
+                                                                      <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
+                                                                      <option value="Daman and Diu">Daman and Diu</option>
+                                                                      <option value="Lakshadweep">Lakshadweep</option>
+                                                                      <option value="Delhi">Delhi</option>
+                                                                      <option value="Puducherry">Puducherry</option>
+                                                                      <option value="Ladakh">Ladakh</option>
+                                                                      <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                                                    </select>
+                                                                    <div class="invalid-feedback" id="stateError">Please select your state.</div>
+                                                                </div>
+                                                                <div class="col-md-6"></div>
+                                                            </div>
+                                                            <div class="modal-footer">
+                                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                <button type="submit" class="btn btn-primary">Save Address</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>   
+                                        
+                                    </div>
+                                    <button type="submit" class="btn btn-block mt-4 mb-15" data-bs-toggle="modal" data-bs-target="#shippingModal">
+                                        Add Address
+                                    </button>
+                                </div>
+                               
+                                <div class="tab-pane fade" id="account-detail" role="tabpanel" aria-labelledby="account-detail-tab">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h5>Account Details</h5>   
+                                        </div>
+                                        <div class="card-body">
+                                            <form method="post" name="enq">
+                                                <div class="row">
+                                                    <div class="form-group col-md-12">
+                                                        <input required="" class="form-control square" value="<%= id.name %>" name="dname" type="text" id="dname" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md-12">
+                                                        <input required="" class="form-control square" name="email" value="<%= id.email %>" type="email" id="email" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md-12">
+                                                        <input class="form-control square" name="mobile" placeholder="Enter Mobile Number (optional)" type="text" id="mobile" disabled>
+                                                    </div>
+                                                    <div class="form-group col-md-12">
+                                                        <button type="submit" class="btn btn-fill-out submit" id="save-btn" style="display:none;" name="submit" value="Submit">Save</button>
+                                                    </div>
+                                                </div>
+                                                <a href="#" class="btn-small" id="edit-btn">Edit</a>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+<%- include('../layouts/user/footer.ejs') %>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("#shippingForm");
+    const fullNameInput = document.getElementById("full-name");
+    const mobileInput = document.getElementById("mobile-number");
+    const pincodeInput = document.getElementById("pincode");
+    const addressInput = document.getElementById("address");
+    const landmarkInput = document.getElementById("landmark");
+    const townCityInput = document.getElementById("town-city");
+    const stateSelect = document.getElementById("state");
+    const submitButton = form.querySelector('button[type="submit"]');
+    const namePattern = /^[a-zA-Z ]{2,}$/;
+    const mobilePattern = /^[0-9]{10}$/;
+    const pincodePattern = /^[0-9]{6}$/;
+
+    function validateInput(input, pattern, errorId) {
+        const value = input.value.trim();
+        const isValid = pattern ? pattern.test(value) : value !== "";
+        input.classList.toggle("is-invalid", !isValid);
+        document.getElementById(errorId).style.display = isValid ? "none" : "block";
+        return isValid;
+    }
+
+    function validateFullName() {
+        return validateInput(fullNameInput, namePattern, "nameError");
+    }
+
+    function validateMobile() {
+        return validateInput(mobileInput, mobilePattern, "mobileError");
+    }
+
+    function validatePincode() {
+        return validateInput(pincodeInput, pincodePattern, "pincodeError");
+    }
+
+    function validateAddress() {
+        return validateInput(addressInput, null, "flatError");
+    }
+
+    function validateLandmark() {
+        return validateInput(landmarkInput, null, "landmarkError");
+    }
+
+    function validateTownCity() {
+        return validateInput(townCityInput, null, "cityError");
+    }
+
+    function validateState() {
+        return validateInput(stateSelect, null, "stateError");
+    }
+
+    function validateForm() {
+        const isValid = validateFullName() && validateMobile() && validatePincode() &&
+            validateAddress() && validateLandmark() && validateTownCity() && validateState();
+        submitButton.disabled = !isValid;
+        return isValid;
+    }
+
+    [fullNameInput, mobileInput, pincodeInput, addressInput, landmarkInput, townCityInput, stateSelect]
+        .forEach(input => input.addEventListener("input", validateForm));
+
+    async function submitFormData() {
+        const data = {
+            full_name: fullNameInput.value.trim(),
+            mobile_number: mobileInput.value.trim(),
+            pincode: pincodeInput.value.trim(),
+            address: addressInput.value.trim(),
+            landmark: landmarkInput.value.trim(),
+            town_city: townCityInput.value.trim(),
+            state: stateSelect.value.trim()
+        };
+
+        try {
+            const response = await fetch("/user_address", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    text: 'Address saved successfully!',
+                    toast: true,
+                    position: 'top-right',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+                form.reset();
+                
+                const modalElement = document.getElementById("shippingModal");
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
+            } else {
+                alert("Error saving address: " + result.message);
+            }
+        } catch (error) {
+            console.error("Error submitting form data:", error);
+            alert("An unexpected error occurred. Please try again later.");
+        }
+    }
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (validateForm()) {
+            submitFormData();
+        }
+    });
+
+    // Initial validation to set button state
+    validateForm();
+});
+
+
+
+
+
+
+
+
+
+
+
+document.getElementById('edit-btn').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('dname').disabled = false;
+    document.getElementById('mobile').disabled = false;
+    document.getElementById('save-btn').style.display = 'inline-block';
+    this.style.display = 'none';
+});
+
+</script>
+
+

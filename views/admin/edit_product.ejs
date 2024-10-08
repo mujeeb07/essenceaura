@@ -1,0 +1,158 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+
+<main class="main-wrap">
+    <%- include('../layouts/admin/navbar.ejs') %>
+    <section class="content-main">
+        <div class="row">
+            <div class="col-9">
+                <div class="content-header">
+                    <h2 class="content-title">Edit Product</h2>
+                </div>
+            </div>
+
+            <!-- Product Form Start -->
+            <div class="col-lg-12">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>Basic Information</h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="editProductForm" enctype="multipart/form-data" method="post" action="/admin/edit_product/<%= product._id %>">
+                            <!-- Product Name and Description -->
+                            <div class="row">
+                                <div class="col-lg-6 mb-4">
+                                    <label for="product_name" class="form-label">Product Title</label>
+                                    <input type="text" value="<%= product.name %>" placeholder="Type here" class="form-control" id="product_name" name="product_name">
+                                </div>
+
+                                <div class="col-lg-6 mb-4">
+                                    <label class="form-label">Full Description</label>
+                                    <textarea placeholder="Type here" class="form-control" id="product_description" name="product_description" rows="4"><%= product.description %></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Product Card Image -->
+                            <div class="mb-4">
+                                <label for="product_card_image" class="form-label">Product Card Image</label>
+                                <input id="product_card_image" name="product_card_image" class="form-control" type="file" accept="image/*">
+                                <img id="product_card_image_preview" src="<%= product.product_card_image %>" alt="Product Card Image" style="max-width: 200px;">
+                                <button type="button" id="remove_card_image" class="btn btn-danger btn-sm" style="display: none;">Remove</button>
+                            </div>
+
+                            <!-- Product Detail Images -->
+                            <div class="mb-4">
+                                <label for="product_details_images" class="form-label">Product Detail Images</label>
+                                <input id="product_details_images" name="product_details_images" class="form-control" type="file" accept="image/*" multiple>
+                                <div id="product_details_images_preview">
+                                    <% product.product_details_images.forEach(function(image) { %>
+                                        <img src="<%= image %>" alt="Detail Image" style="max-width: 100px; margin-right: 10px;">
+                                    <% }); %>
+                                </div>
+                                <small class="form-text text-muted">You can select multiple images. Click on an image to remove it.</small>
+                            </div>
+
+                            <!-- Brand and Category -->
+
+                            <div class="row">
+                                <div class="col-lg-4 mb-4">
+                                    <h5>Brand</h5>
+                                    <select class="form-select" id="brand" name="brand">
+                                        <option value="" disabled>Select</option>
+                                        <% brands.forEach(function(brand) { %>
+                                            <option value="<%= brand._id %>" <%= brand._id.toString() === product.brand._id.toString() ? 'selected' : '' %>><%= brand.brandName %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+
+                                <div class="col-lg-4 mb-4">
+                                    <h5>Category</h5>
+                                    <select class="form-select" id="category" name="category">
+                                        <option value="" disabled>Select</option>
+                                        <% categories.forEach(function(category) { %>
+                                            <option value="<%= category._id %>" <%= category._id.toString() === product.category._id.toString() ? 'selected' : '' %>><%= category.name %></option>
+                                        <% }); %>
+                                    </select>
+                                </div>
+                            </div>
+
+
+                            <!-- Product Status Checkbox -->
+                            <div class="mb-4">
+                                <label for="product_status" class="form-label">Product Status</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="product_status" name="status" <%= product.is_blocked ? '' : 'checked' %>>
+                                    <label class="form-check-label" for="product_status">
+                                        Active
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Variants -->
+                            <h5>Variants</h5>
+                            <div class="row">
+                                <% product.variants.forEach(function(variant) { %>
+                                    <div class="col-lg-4 mb-3">
+                                        <input type="checkbox" id="size<%= variant.volume %>" checked onchange="toggleVariant('<%= variant.volume %>')" />
+                                        <label for="size<%= variant.volume %>"><%= variant.volume %> ML</label>
+                                        <div id="variant<%= variant.volume %>" class="row gx-2 mt-2">
+                                            <div class="col-lg-6">
+                                                <label class="form-label">Price for <%= variant.volume %> ML</label>
+                                                <input id="price<%= variant.volume %>" name="variants[<%= variant.volume %>][price]" placeholder="₹" type="number" class="form-control" value="<%= variant.price %>">
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label class="form-label">Stock for <%= variant.volume %> ML</label>
+                                                <input id="stock<%= variant.volume %>" name="variants[<%= variant.volume %>][stock]" placeholder="Stock" type="number" class="form-control" value="<%= variant.stock %>">
+                                            </div>
+                                            
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            </div>
+
+                            <div>
+                                <button class="btn btn-md rounded hover-up mt-50" id="submitButton">Update Product</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- Product Form End -->
+        </div>
+    </section>
+</main>
+
+<%- include('../layouts/admin/footer.ejs') %>
+
+<script>
+    document.getElementById('submitButton').addEventListener('click', function(event) {
+  event.preventDefault();
+  
+
+  const variants = {};
+  document.querySelectorAll('[id^="size"]').forEach(input => {
+    if (input.checked) {
+      const volume = input.id.replace('size', '');
+      const price = document.getElementById(`price${volume}`).value;
+      const stock = document.getElementById(`stock${volume}`).value;
+      variants[volume] = { price, stock };
+    }
+    const product_name = document.getElementById("product_name").value;
+    const product_description = document.getElementById("product_description").value;
+
+    console.log(product_name,product_description)
+  });
+
+  const form = document.getElementById('editProductForm');
+  const variantsInput = document.createElement('input');
+  variantsInput.type = 'hidden';
+  variantsInput.name = 'variants';
+  variantsInput.value = JSON.stringify(variants);
+  const product_name = document.getElementById("product_name").value;
+  const product_description = document.getElementById("product_description").value;
+  form.appendChild(variantsInput);
+
+  form.submit();
+});
+
+</script>

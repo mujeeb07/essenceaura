@@ -1,0 +1,230 @@
+<%- include('../layouts/admin/header.ejs') %> <%- include('../layouts/admin/sidebar.ejs') %>
+
+        <main class="main-wrap">
+            <%- include('../layouts/admin/navbar.ejs') %>
+                <section class="content-main">
+                    <div class="content-header">
+                        <div>
+                            <h2 class="content-title card-title">Categories</h2>
+                            <p>Add, edit or delete a category</p>
+                        </div>
+                        <div>
+                            <input type="text" placeholder="Search Categories" class="form-control bg-white" />
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <form id="category_data">
+                                        <input type="hidden" id="category_id" />
+
+                                        <div class="mb-4">
+                                            <label for="product_name" class="form-label">Name</label>
+                                            <input name="name" type="text" placeholder="Type here" class="form-control"
+                                                id="category_name" />
+                                            <span id="category_name_error" class="error text-danger"></span>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label for="gender" class="form-label">Gender</label>
+                                            <select class="form-select" id="gender">
+                                                <option value="" selected disabled>Select</option>
+                                                <option value="Men">Men</option>
+                                                <option value="Women">Women</option>
+                                                <option value="Unisex">Unisex</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-4">
+                                            <label class="form-label">Description</label>
+                                            <textarea placeholder="Type here" id="category_description"
+                                                class="form-control" name="description"></textarea>
+                                            <span id="category_description_error" class="error text-danger"></span>
+                                        </div>
+                                        <div class="">
+                                            <button id="submit_button" class="btn btn-primary">
+                                                Create category
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="col-md-9">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Name</th>
+                                                    <th>Description</th>
+                                                    <th>Gender</th>
+                                                    <th>List/Unlist</th>
+                                                    <th>Status</th>
+                                                    <th>Edit</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="get_category"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                <!-- .col// -->
+                            </div>
+                            <!-- .row // -->
+                        </div>
+                        <!-- card body .// -->
+                    </div>
+                    <!-- card .// -->
+                </section>
+                <!-- content-main end// -->
+        </main>
+
+        <%- include('../layouts/admin/footer.ejs') %>
+            <script>
+                const validate_form = () => {
+                    let is_valid = true;
+                    let errors = {};
+                    const name = document.getElementById("category_name").value.trim();
+                    const description = document.getElementById("category_description").value.trim();
+                    if (!name) {
+                        errors.name = "Name is required";
+                        is_valid = false;
+                    }
+
+                    if (!description) {
+                        errors.description = "Description is required";
+                        is_valid = false;
+                    }
+
+                    
+                    document.querySelectorAll(".error").forEach((el) => (el.textContent = ""));
+
+                    
+                    Object.keys(errors).forEach((key) => {
+                        document.getElementById(`category_${key}_error`).textContent =
+                            errors[key]; 
+                    });
+
+                    return is_valid;
+                };
+
+                const fetchCategories = async () => {
+                    try {
+                        const response = await axios.get("/admin/get_category");
+                        const categories = response.data;
+
+                        const categoryTableBody = document.getElementById("get_category");
+                        categoryTableBody.innerHTML = ""; 
+
+                        categories.forEach((cat, index) => {
+                            const newRow = document.createElement("tr");
+                            newRow.innerHTML = `
+                                            <td>${index + 1}</td>
+                                            <td><b>${cat.name}</b></td>
+                                            <td>${cat.description || "No description"}</td>
+                                            <td>${cat.gender}</td>
+                                            <td>
+                                                ${cat.is_active 
+                                                ? `<a class="btn btn-light rounded btn-sm font-sm" onclick="softDeleteCategory('${cat._id}')">Unlist</a>` 
+                                                : `<a class="btn btn-light rounded btn-sm font-sm" onclick="softDeleteCategory('${cat._id}')">List</a>`
+                                                }
+                                            </td>
+                                            <td>
+                                                ${cat.is_active
+                                                ? '<span class="badge rounded-pill alert-success">Active</span>'
+                                                : '<span class="badge rounded-pill alert-danger">Inactive</span>'}
+                                            </td>
+                                            <td>
+                                                <a class="btn btn-light rounded btn-sm font-sm" onclick="populateCategoryForm('${cat._id}')">Edit</a>
+                                            </td>
+                                        `;
+
+                            categoryTableBody.appendChild(newRow);
+                        });
+                    } catch (error) {
+                        console.error("Error fetching categories:", error);
+                    }
+                };
+
+                
+                fetchCategories();
+
+                const create_category = document.getElementById("category_data");
+
+                create_category.addEventListener("submit", (e) => {
+                    e.preventDefault();
+
+                    document.getElementById("category_name_error").textContent = "";
+
+                    if (!validate_form()) return;
+
+                    const form_data = {
+                        name: document.getElementById("category_name").value.trim(),
+                        gender: document.getElementById("gender").value,
+                        description: document.getElementById("category_description").value,
+                    };
+
+                    const category_id = document.getElementById("category_id").value;
+
+                    if (category_id) {
+                        axios
+                        .put(`/admin/update_category/${category_id}`, form_data)
+                        .then((response) => {
+                            console.log("Category updated:", response.data);
+                            fetchCategories();
+                        })
+                        .catch((error) => {
+                            if (error.response && error.response.data.error) {
+                            document.getElementById("category_name_error").textContent =
+                                error.response.data.error;
+                            } else {
+                            console.error("Error updating category:", error);
+                            }
+                        });
+                    } else {
+                        axios
+                        .post("/admin/add_category", form_data)
+                        .then((response) => {
+                            console.log("Category created:", response.data);
+                            fetchCategories();
+                        })
+                        .catch((error) => {
+                            if (error.response && error.response.data.error) {
+                            document.getElementById("category_name_error").textContent =
+                                error.response.data.error;
+                            } else {
+                            console.error("Error creating category:", error);
+                            }
+                        });
+                    }
+
+                    create_category.reset();
+                    fetchCategories();
+                    });
+
+                                
+
+                const populateCategoryForm = async (category_id) => {
+                    try {
+                        
+                        const response = await axios.get(`/admin/get_category/${category_id}`);
+                        const category = response.data;
+                        
+                        document.getElementById("category_name").value = category.name;
+                        document.getElementById("category_description").value = category.description;
+                        document.getElementById("gender").value = category.gender;
+                        
+                        document.getElementById("category_id").value = category._id; 
+
+                        document.getElementById("submit_button").textContent = "Update Category";
+                    } catch (error) {
+                        console.error("Error fetching category for editing:", error);
+                    }
+                };
+
+                const softDeleteCategory = async (categoryId) => {
+                    try {
+                        await axios.put(`/admin/soft_delete_category/${categoryId}`);
+                        fetchCategories(); 
+                    } catch (error) {
+                        console.error("Error soft deleting category:", error);
+                    }
+                };
+</script>

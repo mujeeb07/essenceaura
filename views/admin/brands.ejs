@@ -1,0 +1,55 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+<main class="main-wrap">
+    <%- include('../layouts/admin/navbar.ejs') %>
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Brand </h2>
+                <p>Brand and vendor management</p>
+            </div>
+            <div>
+                <a href="/admin/add_new_brand" class="btn btn-primary"><i class="text-muted material-icons md-post_add"></i>Add New Brand</a>
+            </div>
+        </div>
+        <div class="card mb-4">
+            <header class="card-header">
+                <div class="row gx-3">
+                    <div class="col-lg-4w me-auto">
+                        <input type="text" placeholder="Search..." class="form-control">
+                    </div>
+                    
+                    <div class="col-lg-2 col-6 mt-10">
+                        <input type="date" class="form-control" name="">
+                    </div>
+                </div>
+            </header>
+            <div class="card-body">
+                <div class="row gx-3">
+                    <% for(let i = 0; i < brands.length; i++) { %>
+                        <div class="col-xl-2 col-lg-3 col-md-4 col-6 mb-4">
+                            <figure class="card border-1 h-100">
+                                <div class="card-header bg-white text-center">
+                                    <img  src="<%= brands[i].logo %>" class="img-fluid" alt="Logo">
+                                </div>
+                                <figcaption class="card-body text-center">
+                                    <h6 class="card-title m-0" style="  overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    white-space: nowrap;"><%= brands[i].brandName %></h6>
+                                    <p style="  overflow: hidden;
+                                    text-overflow: ellipsis;
+                                    white-space: nowrap;"><%= brands[i].description %></p>
+                                    <!-- Edit Button -->
+                                    <a href="/admin/edit_brand/<%= brands[i]._id %>" class="btn btn-sm btn-brand">
+                                        <i class="material-icons md-edit"></i> Edit
+                                    </a>
+                                </figcaption>
+                            </figure>
+                        </div> 
+                    <% } %>
+                </div> 
+            </div> 
+        </div> 
+    </section>
+</main>
+<%- include('../layouts/admin/footer.ejs') %>

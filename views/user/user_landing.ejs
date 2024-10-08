@@ -1,0 +1,68 @@
+<%- include('../layouts/user/header.ejs') %>
+
+    <link rel="stylesheet" href="/user_asset/css/main.css?v=3.4">
+    <main class="main">
+        <%- include('../layouts/user/featured_section.ejs') %>
+        <section class="product-tabs section-padding position-relative wow fadeIn animated">
+            <div class="container">
+                <div class="tab-pane fade show active" id="tab-one" role="tabpanel" aria-labelledby="tab-one">
+                    <div class="row product-grid-4 d-flex flex-row flex-wrap">
+                        <% products_list.forEach((product) => { %>
+                            <div class="col-lg-3 col-md-4 col-12 col-sm-6 d-flex"> 
+                                <div class="product-cart-wrap mb-30 flex-grow-1"> 
+                                    <div class="product-img-action-wrap">
+                                        <div class="product-img product-img-zoom">
+                                            <a href="/product/<%= product._id %>">
+                                                <img class="default-img" src="<%= product.product_card_image %>" alt="">
+                                            </a>
+                                        </div>
+                                        <div class="product-action-1">
+                                            <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal">
+                                                <i class="fi-rs-eye"></i>
+                                            </a>
+                                            <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html">
+                                                <i class="fi-rs-heart"></i>
+                                            </a>
+                                            <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html">
+                                                <i class="fi-rs-shuffle"></i>
+                                            </a>
+                                        </div>
+                                        <div class="product-badges product-badges-position product-badges-mrg">
+                                            <span class="sale"><%= product.category.gender %></span>
+                                        </div>
+                                    </div>
+                                    <div class="product-content-wrap">
+                                        <div class="product-category">
+                                            <a href="shop-grid-right.html"><%= product.category.name %></a>
+                                        </div>
+                                        <h2><a href="/product/<%= product._id %>"><%= product.name %></a></h2>
+
+                                        <div class="rating-result" title="90%">
+                                            <span>
+                                                <span>70%</span>
+                                            </span>
+                                        </div>
+                                        <div class="product-price">
+                                            <span>₹<%= product.variants[0].price %> </span>
+                                            <span class="old-price">₹<%= product.variants[0].price + 4000 %></span>
+                                        </div>
+                                        <div class="product-action-1 show">
+                                            <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html">
+                                                <i class="fi-rs-shopping-bag-add"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }) %>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <%- include('../layouts/user/footer.ejs') %>
+
+    <script>
+
+    </script>

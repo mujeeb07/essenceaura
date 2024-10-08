@@ -1,0 +1,309 @@
+<%- include('../layouts/user/header.ejs') %>
+    <link rel="stylesheet" href="/user_asset/css/main.css?v=3.4">
+<style>
+    .zoom-lens {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    border: 1px solid #d4d4d4;
+    display: none;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    }
+
+    .quantity-selector {
+    margin: 20px 0;
+    }
+
+    .quantity-controls {
+    display: flex;
+    align-items: center;
+    margin-top: 5px;
+    }
+
+    .quantity-btn {
+    width: 30px;
+    height: 30px;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    cursor: pointer;
+    }
+
+    #quantity {
+    width: 50px;
+    height: 30px;
+    text-align: center;
+    margin: 0 5px;
+    border: 1px solid #ccc;
+    }
+</style>
+<main class="main">
+    <section class="mt-50 mb-50">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-9">
+                    <div class="product-detail accordion-detail">
+                        <div class="row mb-50">
+                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                <div class="container">
+                                    <input type="hidden" id="productId" value="<%= product._id %>">
+                                    <div id="mainImageContainer" class="border-radius-10 position-relative">
+                                        <img id="mainImage" src="<%= product.product_card_image %>" class="d-block w-100" alt="product image">
+                                        <div id="zoomLens" class="zoom-lens"></div>
+                                    </div>
+                                    
+                                    <div class="row mt-3">
+                                        <div class="col-2">
+                                            <img src="<%= product.product_card_image %>" class="img-thumbnail small-image" alt="product image" onclick="changeMainImage('<%= product.product_card_image %>')">
+                                        </div>
+                                        <% for(let i = 0; i < product.product_details_images.length; i++) { %>
+                                        <div class="col-2">
+                                            <img src="<%= product.product_details_images[i] %>" class="img-thumbnail small-image" alt="product image" onclick="changeMainImage('<%= product.product_details_images[i] %>')">
+                                        </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-50 social-icons single-share">
+                                    <ul class="text-grey-5 d-inline-block">
+                                        <li><strong class="mr-10">Share this:</strong></li>
+                                        <li class="social-facebook"><a href="#"><img
+                                                    src="/user_asset/imgs/theme/icons/icon-facebook.svg" alt=""></a></li>
+                                        <li class="social-twitter"> <a href="#"><img
+                                                    src="/user_asset/imgs/theme/icons/icon-twitter.svg" alt=""></a></li>
+                                        <li class="social-instagram"><a href="#"><img
+                                                    src="/user_asset/imgs/theme/icons/icon-instagram.svg" alt=""></a>
+                                        </li>
+                                        <li class="social-linkedin"><a href="#"><img
+                                                    src="/user_asset/imgs/theme/icons/icon-pinterest.svg" alt=""></a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 col-sm-12 col-xs-12">
+                                <div class="detail-info">
+                                    <h2 class="title-detail">
+                                        <%= product.name %>
+                                    </h2>
+                                    <div class="product-detail-rating">
+                                        <div class="pro-details-brand">
+                                            <span>
+                                                 Brand: <a href="shop-grid-right.html"><%= product.brand.brandName %></a>
+                                            </span>
+                                        </div>
+                                        <div class="product-rate-cover text-end">
+                                            <div class="product-rate d-inline-block">
+                                                <div class="product-rating" style="width:90%">
+                                                </div>
+                                            </div>
+                                            <span class="font-small ml-5 text-muted"> (25 reviews)</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="bt-1 border-color-1 mt-15 mb-15"></div>
+                                    <div class="short-desc mb-30">
+                                        <p>
+                                            <%= product.description %>
+                                        </p>
+                                    </div>
+
+                                    <div class="product_sort_info font-xs mb-30">
+                                        <ul>
+                                            <li class="mb-10"><i class="fi-rs-crown mr-5"></i> 12 Hours Lasting</li>
+                                            <li class="mb-10"><i class="fi-rs-refresh mr-5"></i> 30 Day Return
+                                                Policy</li>
+                                            <li><i class="fi-rs-credit-card mr-5"></i> Cash on Delivery
+                                                available</li>
+                                        </ul>
+                                    </div>
+
+                                    <div class="attr-detail attr-size">
+                                        <strong class="mr-10">Size</strong>
+                                        <ul class="list-filter size-filter font-small">
+                                            <% product.variants.forEach((variant, index) => { %>
+                                                <li>
+                                                    <a href="#" 
+                                                    class="size-button <%= index === 0 ? 'selected' : '' %>" 
+                                                    data-price="<%= variant.price %>" 
+                                                    data-volume="<%= variant.volume %>"
+                                                    data-stock="<%= variant.stock %>"
+                                                    onclick="selectSize(this); return false;">
+                                                    <%= variant.volume %>ML
+                                                    </a>
+                                                </li>
+                                            <% }); %>
+                                        </ul>
+                                        <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                                    </div>
+
+                                    
+                                    <div class="quantity-selector">
+                                        <label for="quantity"><strong>Quantity:</strong></label>
+                                        <div class="quantity-controls">
+                                          <button class="quantity-btn minus" onclick="updateQuantity(-1)">-</button>
+                                          <input type="number" id="quantity" name="quantity" value="1" min="1" max="5">
+                                          <button class="quantity-btn plus" onclick="updateQuantity(1)">+</button>
+                                        </div>
+                                      </div>
+                                    
+                                    <div class="clearfix product-price-cover">
+                                        <div class="product-price primary-color float-left">
+                                            <ins><span id="selectedPrice" class="text-brand">₹<%= product.variants[0].price %></span></ins>
+                                            <ins><span class="old-price font-md ml-15">₹<%= product.variants[0].price+4000 %></span></ins>
+                                        
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bt-1 border-color-1 mt-30 mb-30"></div>
+                                    <div class="detail-extralink">
+                                        <div class="product-extra-link2">
+                                            <button id="shop_cart" class="button button-add-to-cart" >Add to cart</button>
+                                            <a aria-label="Add To Wishlist" class="action-btn hover-up"
+                                                href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                            <a aria-label="Compare" class="action-btn hover-up"
+                                                href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                                        </div>
+                                    </div>
+                                    <ul class="product-meta font-xs color-grey mt-50">
+                                        <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
+                                        <li id="selectedStock"> Stock: <%= product.variants[0].stock %></li>
+                                        <li>Availability:
+                                            <% if (product.variants[0].stock >= 5 ) { %>
+                                                <span class="in-stock text-success ml-5">Item In Stock</span></li>
+                                            <% }else{ %>
+                                                <span class="in-stock text-success ml-5">Only <%= product.variants[0].stock %> Items In Stock </span></li>
+                                            <% } %>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<%- include('../layouts/user/footer.ejs') %>
+<script>
+
+let selectedSize = {
+    price: '<%= product.variants[0].price %>',
+    volume: '<%= product.variants[0].volume %>'
+};
+
+function selectSize(element) {
+    const sizeButtons = document.querySelectorAll('.size-button');
+    sizeButtons.forEach(button => button.classList.remove('selected'));
+    element.classList.add('selected');
+    selectedSize.price = element.getAttribute('data-price');
+    selectedSize.volume = element.getAttribute('data-volume');
+    selectedSize.stock = element.getAttribute('data-stock');
+    document.getElementById('selectedPrice').textContent = `₹ ${selectedSize.price}`;
+    document.getElementById("selectedStock").textContent = `Stock: ${selectedSize.stock}`;
+}
+
+function updateQuantity(change) {
+  const input = document.getElementById('quantity');
+  let value = parseInt(input.value) + change;
+  value = Math.max(1, Math.min(value, 5));
+  input.value = value;
+}
+
+
+
+
+
+document.getElementById("shop_cart").addEventListener("click", async (event) => {
+    event.preventDefault();
+    try {
+        const productId = document.getElementById('productId').value;
+        const quantity = document.getElementById('quantity').value;
+        console.log(quantity);
+
+        const postData = {
+            product_id: productId,
+            price: selectedSize.price,
+            volume: selectedSize.volume,
+            stock: selectedSize.stock,
+            quantity: parseInt(quantity, 10)
+        };
+        console.log(postData);
+
+        const response = await fetch("/shop_cart", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(postData)
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Product added to cart',
+                showConfirmButton: true,
+                confirmButtonText: 'OK'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                   
+                    document.getElementById('cart_total').textContent = `Total: ${data.cartTotal}`;
+                    document.getElementById('cart_quantity').textContent = `Items: ${data.cartQuantity}`;
+
+                }
+            });
+        } else {
+            const errorData = await response.json();
+            Swal.fire({
+                icon: 'error',
+                title: 'Failed to add to cart',
+                text: errorData.message || 'Please try again later.',
+                confirmButtonText: 'OK'
+            });
+        }
+    } catch (error) {
+        console.error("Error adding product to cart:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Something went wrong',
+            text: 'Please try again later',
+            confirmButtonText: 'OK'
+        });
+    }
+});
+
+
+
+    function changeMainImage(imageUrl) {
+        document.getElementById("mainImage").src = imageUrl;
+    }
+
+    
+    const mainImage = document.getElementById('mainImage');
+    const zoomLens = document.getElementById('zoomLens');
+    const mainImageContainer = document.getElementById('mainImageContainer');
+
+    mainImageContainer.addEventListener('mousemove', zoomImage);
+    mainImageContainer.addEventListener('mouseleave', () => {
+        zoomLens.style.display = 'none';
+    });
+
+    function zoomImage(e) {
+        const containerRect = mainImageContainer.getBoundingClientRect();
+        const x = e.pageX - containerRect.left;
+        const y = e.pageY - containerRect.top;
+
+        zoomLens.style.display = 'block';
+        zoomLens.style.backgroundImage = `url(${mainImage.src})`;
+        zoomLens.style.backgroundSize = `${mainImage.width * 2}px ${mainImage.height * 2}px`;
+        zoomLens.style.left = `${x - zoomLens.offsetWidth / 2}px`;
+        zoomLens.style.top = `${y - zoomLens.offsetHeight / 2}px`;
+
+        const bgPosX = (x / mainImageContainer.offsetWidth) * 100;
+        const bgPosY = (y / mainImageContainer.offsetHeight) * 100;
+        zoomLens.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+    }
+</script>
+

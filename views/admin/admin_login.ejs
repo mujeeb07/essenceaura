@@ -1,0 +1,27 @@
+<%- include('../layouts/admin/header.ejs') %>
+
+    <section class="content-main mt-80 mb-80">
+        <div class="card mx-auto card-login">
+            <div class="card-body">
+                <h4 class="card-title mb-4 text-center">Admin Sign in</h4>
+                <form method="post" action="/admin">
+                    <div class="mb-3">
+                        <input class="form-control" name="email" placeholder="email" type="text">
+                    </div> 
+                    <div class="mb-3">
+                        <input class="form-control" name="password" placeholder="Password" type="password">
+                    </div> 
+                       
+                        <% if (message) { %>
+                            <p class="mb-3 alert alert-danger"><%= message %></p>
+                        <% } %>             
+                        
+                    <div class="mb-4">
+                        <button type="submit" class="btn btn-primary w-100"> Login </button>
+                    </div> 
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <%- include('../layouts/admin/footer.ejs') %>

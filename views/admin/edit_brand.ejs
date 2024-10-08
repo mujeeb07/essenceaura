@@ -1,0 +1,95 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+
+<main class="main-wrap">
+    <%- include('../layouts/admin/navbar.ejs') %>
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Edit Brand</h2>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <form method="post" id="formDataBrand" enctype="multipart/form-data" action="/admin/edit_brand/<%= brand._id %>" onsubmit="return handleBrandUpdate(event)">
+                    <div class="mb-4">
+                        <label for="brand_name" class="form-label">Brand Name</label>
+                        <input type="text" name="name" placeholder="Brand Name" class="form-control" id="brand_name" value="<%= brand.brandName %>" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Description</label>
+                        <textarea placeholder="Type here" id="description" name="description" class="form-control"><%= brand.description %></textarea>
+                    </div>
+                    <div class="mb-4">
+                        <img src="<%= brand.logo %>" alt="Brand Logo" style="max-width: 200px;" />
+                    </div>
+
+                    <!-- Update Brand Logo -->
+                    <div class="mb-4">
+                        <label for="brandLogo" class="form-label">Update Brand Logo</label>
+                        <input id="brandLogo" name="file" type="file" />
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label"><h5>Status</h5></label>
+                        <div>
+                            <input type="checkbox" id="brandStatus" name="status" value="true" <%= brand.is_deleted ? '' : 'checked' %> />
+                            <label for="brandStatus"><h6>Active</h6></label>
+                        </div>
+                    </div>
+                    <div class="d-grid">
+                        <button class="btn btn-primary">Update Brand</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+
+<%- include('../layouts/admin/footer.ejs') %>
+
+<script>
+    function handleBrandUpdate(event) {
+        event.preventDefault(); 
+
+        
+        const formData = new FormData(document.getElementById('formDataBrand'));
+
+       
+        fetch('/admin/edit_brand/<%= brand._id %>', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Brand has been updated successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    
+                    window.location.href = '/admin/brands';
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'Failed to update the brand. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            Swal.fire({
+                title: 'Error!',
+                text: 'An error occurred while updating the brand.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+
+        return false; 
+    }
+</script>
+

@@ -1,0 +1,162 @@
+
+<link rel="stylesheet" href="/user_asset/css/main.css?v=3.4"> 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<section class="py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4 p-md-5">
+                        <h3 class="card-title text-center mb-4">OTP Verification</h3>
+                        
+                        <% if (typeof message !== 'undefined') { %>
+                            <div class="alert alert-success mb-4">
+                                <%= message %>
+                            </div>
+                        <% } %>
+                        
+                        <p class="text-muted text-center mb-4">Please enter the OTP sent to your email</p>
+
+                        <div class="form-group mb-4">
+                            <input id="otp-input" class="form-control form-control-lg" type="text" placeholder="Enter OTP">
+                        </div>
+                        <div class="form-group mb-4">
+                            <button type="button" id="verify" class="btn btn-primary btn-lg w-100" onclick="verifyOtp()">Verify OTP</button>
+                        </div>
+                        
+                        <div id="resend-container" class="text-center">
+                            <p id="timer" class="text-muted mb-3">Time remaining: <span id="time">1:00</span></p>
+                            <div class="form-group">
+                                <button class="btn btn-outline-secondary w-100" id="resend-button" onclick="resendOtp()" style="display: none;">Resend OTP</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+
+<script>
+    
+    let time = 60;
+    let interval;
+    const timerElement = document.getElementById('time');
+    const resendButton = document.getElementById('resend-button');
+    const verifyButton = document.getElementById('verify');
+
+    function startTimer() {
+        interval = setInterval(() => {
+            let minutes = Math.floor(time / 60);
+            let seconds = time % 60;
+
+            timerElement.textContent = `${minutes}:${seconds < 10 ? '0' + seconds : seconds}`;
+            time--;
+
+            if (time < 0) {
+                clearInterval(interval);
+                resendButton.style.display = 'block';
+                verifyButton.style.display = 'none';
+            }
+        }, 1000);
+    }
+
+    function resetTimer() {
+        clearInterval(interval);
+        time = 60;
+        resendButton.style.display = 'none';
+        verifyButton.style.display = 'block';
+        startTimer();
+    }
+
+    function showMessage(message, type) {
+    const messageContainer = document.getElementById('message-container');
+    const messageText = document.getElementById('message-text');
+    
+    messageText.textContent = message;
+    messageContainer.style.display = 'block';
+    messageContainer.className = type;
+
+    setTimeout(() => {
+        messageContainer.style.display = 'none';  
+    }, 3000);
+}
+
+function verifyOtp() {
+        const otp = document.getElementById('otp-input').value;
+        fetch('/verify-otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ otp })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                setTimeout(function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'OTP verified successfully.',
+                        confirmButtonText: 'OK'
+                    }).then(function() {
+                        window.location.href = "/login";
+                    });
+                }, 3000);
+            } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Invalid OTP. Please try again.',
+                confirmButtonText: 'OK'
+            })
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                    icon: 'error',
+                    title: 'Invalid OTP. Please try again.',
+                    confirmButtonText: 'OK'
+                })
+        });
+    }
+
+    function resendOtp() {
+        fetch('/resend-otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                
+                Swal.fire({
+                    icon: 'success',
+                    title: 'OTP resent. Please check your email.',
+                    confirmButtonText: 'OK'
+                })
+                resetTimer();
+            } else {
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Failed to resend OTP. Please try again.',
+                    confirmButtonText: 'OK'
+                })
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    startTimer();
+</script>
+
+
+
+
+

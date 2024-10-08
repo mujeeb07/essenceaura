@@ -1,0 +1,490 @@
+<%- include('../layouts/user/header.ejs') %>
+<link rel="stylesheet" href="/user_asset/css/main.css?v=3.4">
+
+<style>
+        input::-webkit-outer-spin-button,
+        input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .modal-header {
+            background-color: #f8f9fa;
+            border-bottom: none;
+            padding: 20px 30px;
+        }
+        .modal-title {
+            font-weight: 600;
+            color: #333;
+        }
+        .modal-body {
+            padding: 30px;
+        }
+        .form-label {
+            font-weight: 500;
+            color: #555;
+            margin-bottom: 5px;
+        }
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid #ced4da;
+            padding: 10px 15px;
+            transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #80bdff;
+            /* box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25); */
+        }
+        .text-muted {
+            font-size: 0.85em;
+        }
+        .modal-footer {
+            border-top: none;
+            padding: 20px 30px;
+        }
+        .btn {
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 500;
+            transition: all 0.2s ease-in-out;
+        }
+        .btn-secondary {
+            background-color: #f1f3f5;
+            border-color: #f1f3f5;
+        }
+       
+        /* ... (previous styles remain the same) ... */
+        .error-message {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+ 
+    </style>
+
+
+<div class="container mt-50">
+    <div class="row">
+        <!-- modal for shipping address -->
+        <div class="col-lg-7 mb-4">
+          <h3 class="section-title mb-4">Checkout</h3>
+            <!-- Button to Open Modal -->
+            <button type="button" class="btn btn-block mt-4 mb-15" data-bs-toggle="modal" data-bs-target="#shippingModal">
+                Add Shipping Address
+            </button>
+            <div class="col-lg-6">
+                <% if (!addresses || addresses.length === 0) { %>
+                    <p>Please add an address.</p>
+                <% } else { %>    
+                    <% addresses.forEach((address, index) => { %>
+                        <div class="card mb-15 mb-sm-0">
+                            <div class="card-header">
+                                <div class="form-check">
+                                    <input class="form-check-input address-checkbox" type="radio" name="selectedAddress" id="address<%= index %>" value="<%= address._id %>">
+                                    <label class="form-check-label" for="address<%= index %>">
+                                        <h5 class="mb-0">Billing Address <%= index + 1 %></h5>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <address>
+                                    <%= address.name %><br>
+                                    <%= address.address %><br>
+                                    <%= address.state %><br>
+                                    <%= address.city %>, <%= address.postal_code %>
+                                </address>
+                                <a href="#" class="btn-small">Edit</a>
+                            </div>
+                        </div>
+                    <% }) %>    
+                <% } %>
+            </div>
+            <div id="addressError" class="error-message" style="display: none;">Please select an address.</div>
+        
+            
+                <!-- Modal Structure -->
+                <div class="modal fade" id="shippingModal" tabindex="-1" aria-labelledby="shippingModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="shippingModalLabel">Shipping Address</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form action="/user_address" method="post" >
+                                    <div class="row">
+                                        <!-- Left side of the form -->
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="full-name" class="form-label">Full name (First and Last name)</label>
+                                                <input type="text" class="form-control" id="full-name" name="full_name" placeholder="Full Name">
+                                                <div class="invalid-feedback" id="nameError">Please enter your full name.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="mobile-number" class="form-label">Mobile number</label>
+                                                <input type="tel" class="form-control" id="mobile-number" name="mobile_number" placeholder="+1 (234) 567-8900">
+                                                <div class="invalid-feedback" id="mobileError">Please enter a valid mobile number.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="pincode" class="form-label">Pincode</label>
+                                                <input type="text" class="form-control" id="pincode" name="pincode" placeholder="6 digits PIN code">
+                                                <div class="invalid-feedback" id="pincodeError">Please enter a valid 6-digit PIN code.</div>
+                                            </div>
+                                        </div>
+                                        <!-- Right side of the form -->
+                                        <div class="col-md-6">
+                                            <div class="mb-3">
+                                                <label for="address" class="form-label">Address</label>
+                                                <input type="text" class="form-control" id="address" name="address" placeholder="Address">
+                                                <div class="invalid-feedback" id="flatError">Please enter your address.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="landmark" class="form-label">Landmark</label>
+                                                <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Landmark">
+                                                <div class="invalid-feedback" id="landmarkError">Please provide a landmark.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="town-city" class="form-label">Town/City</label>
+                                                <input type="text" class="form-control" id="town-city" name="town_city" placeholder="City">
+                                                <div class="invalid-feedback" id="cityError">Please enter your town or city.</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="sourcePage" value="checkout">
+                                    <div class="row">
+                                        <!-- Left side -->
+                                        <div class="col-md-6 mb-3">
+                                            <label for="state" class="form-label">State</label>
+                                            <select class="form-select" id="state" name="state">
+                                              <option value="">Choose a state</option>
+                                              <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                              <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                                              <option value="Assam">Assam</option>
+                                              <option value="Bihar">Bihar</option>
+                                              <option value="Chhattisgarh">Chhattisgarh</option>
+                                              <option value="Goa">Goa</option>
+                                              <option value="Gujarat">Gujarat</option>
+                                              <option value="Haryana">Haryana</option>
+                                              <option value="Himachal Pradesh">Himachal Pradesh</option>
+                                              <option value="Jharkhand">Jharkhand</option>
+                                              <option value="Karnataka">Karnataka</option>
+                                              <option value="Kerala">Kerala</option>
+                                              <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                              <option value="Maharashtra">Maharashtra</option>
+                                              <option value="Manipur">Manipur</option>
+                                              <option value="Meghalaya">Meghalaya</option>
+                                              <option value="Mizoram">Mizoram</option>
+                                              <option value="Nagaland">Nagaland</option>
+                                              <option value="Odisha">Odisha</option>
+                                              <option value="Punjab">Punjab</option>
+                                              <option value="Rajasthan">Rajasthan</option>
+                                              <option value="Sikkim">Sikkim</option>
+                                              <option value="Tamil Nadu">Tamil Nadu</option>
+                                              <option value="Telangana">Telangana</option>
+                                              <option value="Tripura">Tripura</option>
+                                              <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                              <option value="Uttarakhand">Uttarakhand</option>
+                                              <option value="West Bengal">West Bengal</option>
+                                              <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                              <option value="Chandigarh">Chandigarh</option>
+                                              <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
+                                              <option value="Daman and Diu">Daman and Diu</option>
+                                              <option value="Lakshadweep">Lakshadweep</option>
+                                              <option value="Delhi">Delhi</option>
+                                              <option value="Puducherry">Puducherry</option>
+                                              <option value="Ladakh">Ladakh</option>
+                                              <option value="Jammu and Kashmir">Jammu and Kashmir</option>
+                                            </select>
+                                            <div class="invalid-feedback" id="stateError">Please select your state.</div>
+                                        </div>
+                                        <div class="col-md-6"></div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save Address</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>                            
+        </div>
+
+        
+
+      <!-- Right side (order summary) -->
+      <div class="col-lg-5">
+        <div class="card shadow-sm mb-4">
+          <div class="card-body">
+            <h4 class="mb-4">Order Summary</h4>
+            <table class="table">
+                <tbody>
+                  <!-- Subtotal and GST Calculation -->
+                  <% let subtotal = 0; %>
+                  <% let total_tax = 0; %>
+              
+                  <% cartItems.forEach(function(item) { %>
+                    <!-- Extract Base Price (excluding tax) -->
+                    <% let basePrice = item.price / 1.18; %>
+                    
+                    <!-- Calculate the tax for the item -->
+                    <% let itemTax = item.price - basePrice; %>
+                    
+                    <!-- Add the base price to subtotal -->
+                    <% subtotal += basePrice * item.quantity; %>
+              
+                    <!-- Add the tax amount to the total tax -->
+                    <% total_tax += itemTax * item.quantity; %>
+                  <% }); %>
+              
+                  <!-- Table Rows -->
+                  <tr>
+                    <td>Subtotal (Excluding Tax)</td>
+                    <td class="text-right">₹ <%= subtotal.toFixed(2) %></td>
+                  </tr>
+                  <tr>
+                    <td>Taxes <span class="text-muted">( GST 18%)</span></td>
+                    <td class="text-right">₹ <%= total_tax.toFixed(2) %></td>
+                  </tr>
+                  <tr>
+                    <td>Shipping (<%= cartItems.length %> Items)</td>
+                    <td class="text-right">Free</td>
+                  </tr>                  
+                  <tr>
+                    <td><strong>Total</strong></td>
+                    <td class="text-right"><strong>₹ <%= (subtotal + total_tax ).toFixed(2) %></strong></td>
+                  </tr>
+                </tbody>
+              </table>
+  
+            <!-- Bag Summary -->
+            <div class="mt-10">
+                <h5 class="mt-10 mb-10">Bag Summary (<%= cartItems.length %>)</h5>
+                <% cartItems.forEach(function(item) { %>
+                  <div class="d-flex mb-3">
+                    <img src="<%= item.product.product_card_image %>" class="d-block h-25 w-25" alt="Product Image" width="60">
+                    <div class="ml-3">
+                      <p class="mb-0"><%= item.product.name %> x <%= item.quantity %></p>
+                      <small>Volume: <%= item.volume %> ml</small><br>
+                      <strong>₹ <%= item.price %></strong>
+                    </div>
+                  </div>
+                <% }); %>
+              </div>
+              
+          </div>
+        </div>
+        <div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="paymentMethod" id="codOption" value="COD">
+                <label class="form-check-label" for="codOption">
+                    <span>Cash on Delivery (COD)</span>
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="paymentMethod" id="razorpayOption" value="razorpay">
+                <label class="form-check-label" for="razorpayOption">
+                    <span>RazorPay</span>
+                </label>
+            </div>
+            <div id="paymentError" class="error-message" style="display: none;">Please select a payment method.</div>
+            <button id="placeOrder" class="btn btn-block mt-4 mb-15">Place Order</button>
+        </div>
+      </div>
+    </div>
+</div>
+  
+
+<%- include('../layouts/user/footer.ejs') %>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js"></script>
+
+<script>
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.querySelector("form");
+    const fullNameInput = document.getElementById("full-name");
+    const mobileInput = document.getElementById("mobile-number");
+    const pincodeInput = document.getElementById("pincode");
+    const addressInput = document.getElementById("address");
+    const landmarkInput = document.getElementById("landmark");
+    const townCityInput = document.getElementById("town-city");
+    const stateSelect = document.getElementById("state");
+    const submitButton = document.querySelector('button[type="submit"]');
+    const placeOrderBtn = document.getElementById('placeOrder');
+    const addressError = document.getElementById('addressError');
+    const paymentError = document.getElementById('paymentError');
+
+    const namePattern = /^[a-zA-Z ]{2,}$/;
+    const mobilePattern = /^[0-9]{10}$/;
+    const pincodePattern = /^[0-9]{6}$/;
+
+    function validateInput(input, pattern, errorId) {
+        const value = input.value.trim();
+        const isValid = pattern ? pattern.test(value) : value !== "";
+        input.classList.toggle("is-invalid", !isValid);
+        document.getElementById(errorId).style.display = isValid ? "none" : "block";
+        return isValid;
+    }
+
+    function validateFullName() {
+        return validateInput(fullNameInput, namePattern, "nameError");
+    }
+
+    function validateMobile() {
+        return validateInput(mobileInput, mobilePattern, "mobileError");
+    }
+
+    function validatePincode() {
+        return validateInput(pincodeInput, pincodePattern, "pincodeError");
+    }
+
+    function validateAddress() {
+        return validateInput(addressInput, null, "flatError");
+    }
+
+    function validateLandmark() {
+        return validateInput(landmarkInput, null, "landmarkError");
+    }
+
+    function validateTownCity() {
+        return validateInput(townCityInput, null, "cityError");
+    }
+
+    function validateState() {
+        return validateInput(stateSelect, null, "stateError");
+    }
+
+    function validateForm() {
+        const isValid = validateFullName() && validateMobile() && validatePincode() &&
+            validateAddress() && validateLandmark() && validateTownCity() && validateState();
+        submitButton.disabled = !isValid;
+        return isValid;
+    }
+
+    [fullNameInput, mobileInput, pincodeInput, addressInput, landmarkInput, townCityInput, stateSelect]
+        .forEach(input => input.addEventListener("input", validateForm));
+
+    async function submitFormData() {
+        const data = {
+            full_name: fullNameInput.value.trim(),
+            mobile_number: mobileInput.value.trim(),
+            pincode: pincodeInput.value.trim(),
+            address: addressInput.value.trim(),
+            landmark: landmarkInput.value.trim(),
+            town_city: townCityInput.value.trim(),
+            state: stateSelect.value.trim()
+        };
+
+        try {
+            const response = await fetch("/user_address", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    icon: 'success',
+                    text: 'Address saved successfully!',
+                    toast: true,
+                    position: 'top-right',
+                    showConfirmButton: false,
+                    timer: 3000
+                });
+                form.reset();
+                
+                const modalElement = document.getElementById("shippingModal");
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                modal.hide();
+            } else {
+                alert("Error saving address: " + result.message);
+            }
+        } catch (error) {
+            console.error("Error submitting form data:", error);
+            alert("An unexpected error occurred. Please try again later.");
+        }
+    }
+
+    form.addEventListener("submit", function (event) {
+        event.preventDefault();
+        if (validateForm()) {
+            submitFormData();
+        }
+    });
+
+    placeOrderBtn.addEventListener('click', async function(e) {
+        e.preventDefault();
+        
+        const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+        const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
+        
+        let isValid = true;
+
+        if (!selectedAddress) {
+            addressError.style.display = 'block';
+            isValid = false;
+        } else {
+            addressError.style.display = 'none';
+        }
+
+        if (!selectedPayment) {
+            paymentError.style.display = 'block';
+            isValid = false;
+        } else {
+            paymentError.style.display = 'none';
+        }
+
+        if (isValid) {
+            const address = selectedAddress.value;
+            const payment = selectedPayment.value;
+
+            try {
+                const response = await fetch("/checkout", {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({address, payment})
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    Swal.fire({
+                        icon: 'success',
+                        text: 'Order placed successfully!',
+                        toast: true,
+                        position: 'top-right',
+                        showConfirmButton: false,
+                        timer: 3000
+                    });
+                    
+                } else {
+                    alert("Error placing order: " + result.message);
+                }
+            } catch (error) {
+                console.error("Error during checkout:", error);
+                alert("An unexpected error occurred during checkout. Please try again later.");
+            }
+        }
+    });
+
+    validateForm();
+});
+</script>
+                                              

@@ -1,0 +1,41 @@
+const express = require("express");
+const passport = require("./config/passport")
+const connect_db = require("./config/database_config");
+const session_config = require("./config/session_config");
+require("dotenv").config();
+const user_route = require("./routes/user/user_route");
+const admin_route = require("./routes/admin/admin_route");
+const file_upload = require('express-fileupload');
+const path = require('path');
+const cookie_parser = require('cookie-parser')
+
+const app = express();
+connect_db();
+
+app.use(session_config);
+
+app.use(cookie_parser());
+
+const PORT = process.env.PORT;
+app.set('view engine', 'ejs');
+app.use(express.json());
+app.use(express.static("public")); 
+app.use(express.urlencoded({ extended: true }));  
+
+app.use(file_upload({
+  limits: { fileSize:50*1024*1024, files:6, },
+  useTempFiles: true,
+  tempFileDir: path.join(__dirname, 'public/tmp')
+}));
+
+app.use("/", user_route);
+  
+app.use("/admin", admin_route);
+
+app.use(passport.initialize());
+
+app.use(passport.session());
+
+app.listen(PORT, () => { 
+  console.log("server started"); 
+}); 

@@ -1,0 +1,177 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+
+    <main class="main-wrap">
+        <%- include('../layouts/admin/navbar.ejs') %>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">User List </h2>
+                    <p>Lorem ipsum dolor sit amet.</p>
+                </div>
+                <div>
+                    <input type="text" placeholder="Search order ID" class="form-control bg-white">
+                </div>
+            </div>
+            <div class="card mb-4">
+                <header class="card-header">
+                    <div class="row gx-3">
+                        <div class="col-lg-4 col-md-6 me-auto">
+                            <input type="text" placeholder="Search..." class="form-control">
+                        </div>
+                        <div class="col-lg-2 col-6 col-md-3">
+                            <select class="form-select">
+                                <option>Status</option>
+                                <option>Active</option>
+                                <option>Disabled</option>
+                                <option>Show all</option>
+                            </select>
+                        </div>
+                        <div class="col-lg-2 col-6 col-md-3">
+                            <select class="form-select">
+                                <option>Show 20</option>
+                                <option>Show 30</option>
+                                <option>Show 40</option>
+                            </select>
+                        </div>
+                    </div>
+                </header> <!-- card-header end// -->
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Email</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Date</th>
+                                    <th scope="col">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% for(let i = 0; i < user_data.length; i++) {%>
+                                <tr id="user-row-<%= user_data[i]._id %>">
+                                    <td><b><%= user_data[i].name %></b></td>
+                                    <td><%= user_data[i].email %></td>
+                                    <td id="user-status-<%= user_data[i]._id %>">
+                                        <% if(user_data[i].is_active) { %>
+                                            <span class="badge rounded-pill alert-success">Active</span>
+                                        <% } else { %>
+                                            <span class="badge rounded-pill alert-danger">Blocked</span>
+                                        <% } %>
+                                    </td>
+                                    <td><%= new Date(user_data[i].createdAt).toLocaleDateString() %></td>
+                                    <td>
+                                        <% if(user_data[i].is_active) { %>
+                                            <!-- Block User Button -->
+                                            <button onclick="updateUserStatus('<%= user_data[i]._id %>', false)" class="btn btn-md btn-light font-sm hover-up">Block</button>
+                                        <% } else { %>
+                                            <!-- Unblock User Button -->
+                                            <button onclick="updateUserStatus('<%= user_data[i]._id %>', true)" class="btn btn-md btn-light font-sm hover-up">Unblock</button>
+                                        <% } %>
+                                    </td>
+                                </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div> <!-- table-responsive //end -->
+                    <!-- table-responsive //end -->
+                </div> <!-- card-body end// -->
+            </div> <!-- card end// -->
+            <div class="pagination-area mt-15 mb-50">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination justify-content-start">
+                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
+                        <li class="page-item"><a class="page-link" href="#">02</a></li>
+                        <li class="page-item"><a class="page-link" href="#">03</a></li>
+                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
+                        <li class="page-item"><a class="page-link" href="#">16</a></li>
+                        <li class="page-item"><a class="page-link" href="#"><i
+                                    class="material-icons md-chevron_right"></i></a></li>
+                    </ul>
+                </nav>
+            </div>
+        </section>
+    </main>
+
+<%- include('../layouts/admin/footer.ejs') %>
+
+
+<script>
+    async function updateUserStatus(userId, isActive) {
+        try {
+            // Trigger Swal confirmation before updating
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you really want to update this user's status?",
+                icon: 'warning',
+                showCancelButton: true, // Shows the cancel button
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, update it!',
+                cancelButtonText: 'Cancel'
+            });
+
+            if (result.isConfirmed) {
+                // Proceed with the fetch request after confirmation
+                const response = await fetch(`/admin/block_user`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ id: userId, is_active: isActive }),
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    const userRow = document.getElementById(`user-row-${userId}`);
+                    const userStatus = document.getElementById(`user-status-${userId}`);
+
+                    if (isActive) {
+                        // Update to Active
+                        userStatus.innerHTML = '<span class="badge rounded-pill alert-success">Active</span>';
+                        userRow.querySelector('button').innerHTML = 'Block';
+                        userRow.querySelector('button').setAttribute('onclick', `updateUserStatus('${userId}', false)`);
+
+                        Swal.fire({
+                            text: 'Updated user status successfully',
+                            title: '',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                        });
+                    } else {
+                        // Update to Blocked
+                        userStatus.innerHTML = '<span class="badge rounded-pill alert-danger">Blocked</span>';
+                        userRow.querySelector('button').innerHTML = 'Unblock';
+                        userRow.querySelector('button').setAttribute('onclick', `updateUserStatus('${userId}', true)`);
+
+                        Swal.fire({
+                            text: 'Updated user status successfully',
+                            title: '',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                        });
+                    }
+                } else {
+                    Swal.fire({
+                        text: 'Failed to update user status',
+                        title: '',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                    });
+                }
+            } else {
+                // Handle the cancel action
+                Swal.fire(
+                    'Cancelled',
+                    'User status update was canceled.',
+                    'error'
+                );
+            }
+        } catch (error) {
+            console.error('Error updating user status:', error);
+        }
+    }
+</script>
+
