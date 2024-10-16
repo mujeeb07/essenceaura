@@ -1,21 +1,35 @@
 const Cart = require("../../models/cart_model");
+const mongoose = require("mongoose");
+
 
 const load_shop_cart = async (req, res) => {
   try {
-    const user = req.session.user;
+    let user;
+    if (req?.session?.user) {
+      user = req.session.user;
+    } else if (req?.session?.passport?.user) {
+      user = mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    }
+
+    console.log("load shop cart:", user);
+
 
     const cart = await Cart.findOne({ user: user }).populate("item.product");
 
+
     return res.render("user/shop_cart", { cart });
+
   } catch (error) {
+    console.log("load shop cart catch block.");
     console.error("Error fetching cart:", error);
     return res.status(500).json({ message: "Unable to fetch cart details" });
   }
 };
 
+
 const shop_cart = async (req, res) => {
   try {
-    const user = req.session.user || req.user;
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user)
 
     const { product_id, price, volume, quantity } = req.body;
 
@@ -59,7 +73,7 @@ const update_quantity = async (req, res) => {
 
     const updatedCart = await Cart.findOneAndUpdate(
       {
-        user: req.session.user,
+        user: req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user),
         "item.product": productId,
         "item.volume": productSize,
       },

@@ -61,14 +61,12 @@
         })
         .then(response => {
             if (response.ok) {
-                
                 Swal.fire({
                     title: 'Success!',
                     text: 'Brand has been updated successfully!',
                     icon: 'success',
                     confirmButtonText: 'OK'
                 }).then(() => {
-                    
                     window.location.href = '/admin/brands';
                 });
             } else {

@@ -1,14 +1,12 @@
 
 const is_authenticated = (req, res, next) => {
+    const user = req?.session?.user || req?.session?.passport?.user
 
-    if(!req.session.user || !req.user){
+    console.log("middleware user :", user);
 
-        console.log("getting inside");
-        
+    if(!user){
         return res.render('user/user_login',{message:'You need login to continue.'});
-
     }
-    
     next();
 }
 

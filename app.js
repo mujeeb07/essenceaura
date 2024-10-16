@@ -1,7 +1,7 @@
 const express = require("express");
-const passport = require("./config/passport")
-const connect_db = require("./config/database_config");
 const session_config = require("./config/session_config");
+const passport = require("./config/passport");
+const connect_db = require("./config/database_config");
 require("dotenv").config();
 const user_route = require("./routes/user/user_route");
 const admin_route = require("./routes/admin/admin_route");
@@ -10,6 +10,7 @@ const path = require('path');
 const cookie_parser = require('cookie-parser')
 
 const app = express();
+
 connect_db();
 
 app.use(session_config);
@@ -33,7 +34,6 @@ app.use("/", user_route);
 app.use("/admin", admin_route);
 
 app.use(passport.initialize());
-
 app.use(passport.session());
 
 app.listen(PORT, () => { 

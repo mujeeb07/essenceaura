@@ -1,0 +1,158 @@
+<%- include('../layouts/user/header.ejs') %>
+<link rel="stylesheet" href="/user_asset/css/main.css?v=3.4"> 
+
+
+<div class="container">
+    <div class="container mt-30 mb-30">
+        <h2>Edit Address</h2>
+    <form id="editAddressForm" action="/edit_address/<%= address._id %>" method="POST">
+        
+        <div class="row">
+            <%console.log("hello",address)%>
+            <div class="col-md-6 mb-3">
+            <label for="name" class="form-label">Full Name</label>
+            <input type="text" class="form-control" name="name" value="<%= address.name %>" required>
+            <input class="form-control" type="hidden" name="id" value="<%= address._id %>" >
+            <div class="invalid-feedback" id="nameError">Please enter a valid name.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+            <label for="mobile" class="form-label">Mobile Number</label>
+            <input type="text" class="form-control" id="mobile" name="mobile" value="<%= address.mobile %>" required>
+            <div class="invalid-feedback" id="mobileError">Please enter a valid 10-digit mobile number.</div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12 mb-3">
+                <label for="address" class="form-label">Address</label>
+                <input type="text" class="form-control" id="address" name="address" value="<%= address.address %>" required>
+                <div class="invalid-feedback" id="addressError">
+                    Please enter a valid address.
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="city" class="form-label">City</label>
+                <input type="text" class="form-control" id="city" name="city" value="<%= address.city %>" required>
+                <div class="invalid-feedback" id="cityError">
+                    Please enter a valid city.
+                </div>
+            </div>
+
+            <% const states = [
+            "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana", 
+            "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur", 
+            "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana", 
+            "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal", "Andaman and Nicobar Islands", "Chandigarh", 
+            "Dadra and Nagar Haveli", "Daman and Diu", "Lakshadweep", "Delhi", "Puducherry", "Ladakh", "Jammu and Kashmir"
+          ]; %>
+          
+          <div class="col-md-6 mb-3">
+            <label for="state" class="form-label">State</label>
+            <select class="form-select" id="state" name="state" required>
+              <option value="">Select a state</option>
+              <% states.forEach(function(state) { %>
+                <option value="<%= state %>" <%= address.state === state ? "selected" : "" %>><%= state %></option>
+              <% }); %>
+            </select>
+            <div class="invalid-feedback" id="stateError">Please select your state.</div>
+          </div>
+            
+            <div class="col-md-6 mb-3">
+                <label for="postal_code" class="form-label">Postal Code</label>
+                <input type="text" class="form-control" id="postal_code" name="postal_code" value="<%= address.postal_code %>" required>
+                <div class="invalid-feedback" id="postalCodeError">
+                    Please enter a valid postal code.
+                </div>
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <label for="landmark" class="form-label">Landmark</label>
+                <input type="text" class="form-control" id="landmark" name="landmark" value="<%= address.landmark %>" required>
+                <div class="invalid-feedback" id="landmarkError">
+                    Please enter a landmark.
+                </div>
+            </div>
+        </div>
+    
+
+        <div class="row mt-4">
+            <div class="col-md-12 text-center">
+            <button id="editAddressSubmit" type="submit" class="btn btn-primary">Update Address</button>
+
+            <a href="/user_profile" class="btn btn-secondary ms-3">Cancel</a>
+            </div>
+        </div>
+    
+        </form>
+    </div>
+</div>
+    
+  
+
+
+<%- include('../layouts/user/footer.ejs') %>
+  
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const editForm = document.getElementById("editAddressForm");
+    const nameInput = document.getElementById("name");
+    const addressInput = document.getElementById("address");
+    const cityInput = document.getElementById("city");
+    const stateInput = document.getElementById("state");
+    const mobileInput = document.getElementById("mobile");
+    const postalCodeInput = document.getElementById("postal_code");
+    const landmarkInput = document.getElementById("landmark");
+    const submitButton = document.getElementById("editAddressSubmit");
+
+    const mobilePattern = /^[0-9]{10}$/;
+    const postalCodePattern = /^[0-9]{6}$/;
+
+    function validateInput(input, errorId, pattern = null) {
+        const value = input.value.trim();
+        const isValid = pattern ? pattern.test(value) : value !== "";
+        input.classList.toggle("is-invalid", !isValid);
+        document.getElementById(errorId).style.display = isValid ? "none" : "block";
+        return isValid;
+    }
+
+    function validateForm() {
+        const validName = validateInput(nameInput, "nameError");
+        const validAddress = validateInput(addressInput, "addressError");
+        const validCity = validateInput(cityInput, "cityError");
+        const validState = validateInput(stateInput, "stateError");
+        const validMobile = validateInput(mobileInput, "mobileError", mobilePattern);
+        const validPostalCode = validateInput(postalCodeInput, "postalCodeError", postalCodePattern);
+        const validLandmark = validateInput(landmarkInput, "landmarkError");
+
+        const isFormValid = validName && validAddress && validCity && validState && validMobile && validPostalCode && validLandmark;
+        submitButton.disabled = !isFormValid;
+        return isFormValid;
+    }
+
+    [nameInput, addressInput, cityInput, stateInput, mobileInput, postalCodeInput, landmarkInput].forEach(input => {
+        input.addEventListener("input", validateForm);
+    });
+
+    editForm.addEventListener("submit", function (event) {
+        if (!validateForm()) {
+            event.preventDefault();
+        } else {
+            event.preventDefault();
+            
+            Swal.fire({
+                title: 'Success!',
+                text: 'Your address has been updated successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                
+                 window.location.href = "/user_profile";
+                //editForm.submit(); // Remove this preventDefault if the form should be submitted normally
+            });
+        }
+    });
+});
+
+
+  </script>

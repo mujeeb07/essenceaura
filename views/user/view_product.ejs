@@ -240,26 +240,26 @@ document.getElementById("shop_cart").addEventListener("click", async (event) => 
 
         if (response.ok) {
             const data = await response.json();
-
             Swal.fire({
-                icon: 'success',
-                title: 'Product added to cart',
-                showConfirmButton: true,
-                confirmButtonText: 'OK'
-            }).then((result) => {
+                    icon: 'success',
+                    text: 'Product added to cart successfully',
+                    toast: true,
+                    position: 'top-right',
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    timer: 2000
+                }).then((result) => {
                 if (result.isConfirmed) {
-                   
                     document.getElementById('cart_total').textContent = `Total: ${data.cartTotal}`;
                     document.getElementById('cart_quantity').textContent = `Items: ${data.cartQuantity}`;
-
                 }
             });
         } else {
-            const errorData = await response.json();
+            const errorData = await response.json({message:"error while adding to cart."});
             Swal.fire({
                 icon: 'error',
                 title: 'Failed to add to cart',
-                text: errorData.message || 'Please try again later.',
+                text: 'Please try again later.',
                 confirmButtonText: 'OK'
             });
         }

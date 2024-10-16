@@ -5,6 +5,11 @@
             <div class="card-body">
                 <h4 class="card-title mb-4 text-center">Admin Sign in</h4>
                 <form method="post" action="/admin">
+
+                    <% if (message) { %>
+                        <p class="mb-3 alert alert-danger"><%= message %></p>
+                    <% } %>
+
                     <div class="mb-3">
                         <input class="form-control" name="email" placeholder="email" type="text">
                     </div> 
@@ -12,10 +17,6 @@
                         <input class="form-control" name="password" placeholder="Password" type="password">
                     </div> 
                        
-                        <% if (message) { %>
-                            <p class="mb-3 alert alert-danger"><%= message %></p>
-                        <% } %>             
-                        
                     <div class="mb-4">
                         <button type="submit" class="btn btn-primary w-100"> Login </button>
                     </div> 

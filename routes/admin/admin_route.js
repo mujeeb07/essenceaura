@@ -11,13 +11,12 @@ const admin_auth = require("../../middleware/admin_auth")
 admin_route.get("/", admin_controller.load_admin_login);
 admin_route.post("/", admin_controller.admin_login);
 admin_route.get('/dashboard', admin_auth, admin_controller.admin_dashboard);
-admin_route.get("/admin/logout", admin_controller.admin_logout)
+admin_route.get("/logout", admin_controller.admin_logout)
 
 //users
 admin_route.get('/users', admin_auth, user_controller.users_list);
 admin_route.post("/block_user", admin_auth, user_controller.block_user);
 admin_route.get("/orders", admin_auth, user_controller.orders)
-
 
 // Brand
 admin_route.get('/brands', admin_auth, brand_controller.load_brands);
@@ -25,7 +24,6 @@ admin_route.get('/add_new_brand', admin_auth, brand_controller.load_add_new_bran
 admin_route.post('/add_new_brand', admin_auth, brand_controller.add_new_brand);
 admin_route.get('/edit_brand/:id', admin_auth, brand_controller.load_edit_brand);
 admin_route.post('/edit_brand/:id', admin_auth, brand_controller.edit_brand);
-
 
 // Product
 admin_route.get('/load_add_product', admin_auth, product_controller.load_add_product);

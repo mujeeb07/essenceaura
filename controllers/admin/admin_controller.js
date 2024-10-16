@@ -43,10 +43,11 @@ const admin_dashboard = async (req, res) => {
 
 const admin_logout = async (req, res) => {
   try {
-    req.session.admin.destroy();
-    return res.status(204).redirect("/");
+    req.session.destroy();
+    return res.status(204).redirect("/admin");
   } catch (error) {
-    return res.status(500).json({message: error})
+    console.log(error)
+    return res.status(500).json({message:"admin logout controller error"})
   }
 }
 

@@ -100,12 +100,12 @@
 <script>
     async function updateUserStatus(userId, isActive) {
         try {
-            // Trigger Swal confirmation before updating
+            
             const result = await Swal.fire({
                 title: 'Are you sure?',
                 text: "Do you really want to update this user's status?",
                 icon: 'warning',
-                showCancelButton: true, // Shows the cancel button
+                showCancelButton: true,
                 confirmButtonColor: '#3085d6',
                 cancelButtonColor: '#d33',
                 confirmButtonText: 'Yes, update it!',
@@ -113,7 +113,7 @@
             });
 
             if (result.isConfirmed) {
-                // Proceed with the fetch request after confirmation
+                
                 const response = await fetch(`/admin/block_user`, {
                     method: 'POST',
                     headers: {
@@ -129,7 +129,7 @@
                     const userStatus = document.getElementById(`user-status-${userId}`);
 
                     if (isActive) {
-                        // Update to Active
+                        
                         userStatus.innerHTML = '<span class="badge rounded-pill alert-success">Active</span>';
                         userRow.querySelector('button').innerHTML = 'Block';
                         userRow.querySelector('button').setAttribute('onclick', `updateUserStatus('${userId}', false)`);
@@ -141,7 +141,7 @@
                             confirmButtonText: 'OK',
                         });
                     } else {
-                        // Update to Blocked
+                        
                         userStatus.innerHTML = '<span class="badge rounded-pill alert-danger">Blocked</span>';
                         userRow.querySelector('button').innerHTML = 'Unblock';
                         userRow.querySelector('button').setAttribute('onclick', `updateUserStatus('${userId}', true)`);
@@ -162,7 +162,6 @@
                     });
                 }
             } else {
-                // Handle the cancel action
                 Swal.fire(
                     'Cancelled',
                     'User status update was canceled.',

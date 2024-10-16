@@ -1,7 +1,6 @@
 const admin_auth = (req, res, next) => {
     if(req.session.admin){
-        next();
-        return
+        return  next();
     }
     return res.redirect('/admin');
 }

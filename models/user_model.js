@@ -12,6 +12,9 @@ const user_schema = new mongoose.Schema({
         required:true,
         unique:true
     },
+    phone: {
+        type: String,
+    },
     google_id:{
         type:String,
         unique:true
@@ -32,6 +35,14 @@ const user_schema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref:"address"
     }],
+    hashed_token:{
+
+        type:String
+    },
+    token_expires:{
+
+        type:Date
+    }
 },{ timestamps: true });
 
 

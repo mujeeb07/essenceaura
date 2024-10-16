@@ -122,7 +122,7 @@ const load_edit_product = async (req, res) => {
     const brand = await Brand.find();
     const category = await Category.find();
 
-    res.render("admin/edit_product", {
+    return res.status(200).render("admin/edit_product", {
       product,
       brands: brand,
       categories: category,

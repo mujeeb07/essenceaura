@@ -5,16 +5,16 @@ const categories = async (req, res) => {
     const categories = await Category.find();
     return res.status(200).render("admin/catagories", { categories });
   } catch (error) {
-    res.status(500).json({ error: "server error" });
+    return res.status(500).json({ error: "server error" });
   }
 };
 
 const get_categories = async (req, res) => {
   try {
     const categories = await Category.find();
-    res.status(200).json(categories);
+    return res.status(200).json(categories);
   } catch (error) {
-    res.status(500).json({ error: "server error " });
+    return res.status(500).json({ error: "server error " });
   }
 };
 const add_category = async (req, res) => {
@@ -48,9 +48,9 @@ const add_category = async (req, res) => {
 const get_category_by_id = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
-    res.status(200).json(category);
+    return res.status(200).json(category);
   } catch (error) {
-    res.status(500).json({ error: "server error" });
+    return res.status(500).json({ error: "server error" });
   }
 };
 
@@ -74,9 +74,9 @@ const update_category = async (req, res) => {
       { name, description, gender },
       { new: true }
     );
-    res.status(200).json({ updated_category });
+    return res.status(200).json({ updated_category });
   } catch (error) {
-    res.status(500).json({ error: "Error updating category" });
+    return res.status(500).json({ error: "Error updating category" });
   }
 };
 
@@ -90,14 +90,9 @@ const soft_delete_category = async (req, res) => {
       { $set: { is_active: !category.is_active } },
       { new: true }
     );
-    res
-      .status(200)
-      .json({
-        message: "Category soft deleted successfully",
-        updated_category,
-      });
+    return res.status(200).json({message: "Category soft deleted successfully",updated_category,});
   } catch (error) {
-    res.status(500).json({ error: "Error deleting category" });
+    return res.status(500).json({ error: "Error deleting category" });
   }
 };
 
