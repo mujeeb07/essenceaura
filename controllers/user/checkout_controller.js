@@ -3,6 +3,7 @@ const  Product = require("../../models/product_model");
 const mongoose = require("mongoose");
 const Address = require("../../models/address_model");
 const Order_model = require("../../models/order_model");
+const { get_estimated_date } = require("../../utils/estimate_date")
 
 
 const checkout = async (req, res) => {
@@ -32,12 +33,11 @@ const checkout = async (req, res) => {
 };
 
 const post_checkout = async (req, res) => {
+
   try {
 
     const { payment, address } = req.body;
-
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
-
     const cart_data = await Cart.findOne({ user: user }).populate({ path: "item.product", populate: ["brand", "category"] });
 
     const ordered_items = cart_data.item.map((item) => ({
@@ -82,8 +82,9 @@ const post_checkout = async (req, res) => {
 
     }, 0);
 
-    console.log("orders:", ordered_items);
-
+    const sub_total = total_price;
+    const tax = (sub_total * 0.18).toFixed(2);
+    const total = sub_total + parseFloat(tax);
     const user_address = await Address.findOne({ _id: address });
 
     const order = new Order_model({
@@ -100,48 +101,46 @@ const post_checkout = async (req, res) => {
 
       items: ordered_items,
       payment_method: payment,
-      total_price: total_price,
+      sub_total,
+      tax,
+      total
+
     });
-    order.save();
+    
+    await order.save();
+    // console.log("asdgafgdsdsfudddddddddddd",order.payment_method);
 
     for(let item of cart_data.item){
       await Product.updateOne(
         {_id: item.product._id, "variants.volume": item.volume },
-        {$inc: { "variants.$.quantity": -item.quantity } }
+        {$inc: { "variants.$.stock": -item.quantity } }
       );
     }
 
     await Cart.updateOne({ user: user }, { $set: { item:[] } });
 
-    return res.status(200).redirect("/order_confirmation");
+    return res.status(200).json({message:"order created successfully"})
 
   } catch (error) {
     return res.status(200).json({ message:"Error while checking out", error });
   }
 };
 
-const order_confirmation = async(req, res) => {
 
-  const { payment, address } = req.body;
-
-    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
-
-    const cart_data = await Cart.findOne({ user: user }).populate({ path: "item.product", populate: ["brand", "category"] });
-
-    const order_id = Math.floor(Math.random() * 9000000000) + 1000000; // 10-digit random number
-
+const order_confirmation = async (req, res) => {
 
   try {
 
-    return res.status(200).render('user/order_confirmation',order_id);
-
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    const order = await Order_model.findOne({ user: user }).sort({ _id: -1 });
+    const estimated_delivery = get_estimated_date();
+  
+    return res.status(200).render('user/order_confirmation', { order, estimated_delivery, cartItems: order.items });
   } catch (error) {
-
-    return res.status(500).json({message: "error while rendering the order confirmation page."});
-
+    return res.status(500).json({ message: "Error while rendering the order confirmation page.", error });
   }
+};
 
-}
 
 module.exports = {
   checkout,

@@ -7,7 +7,7 @@ const user_route = require("./routes/user/user_route");
 const admin_route = require("./routes/admin/admin_route");
 const file_upload = require('express-fileupload');
 const path = require('path');
-const cookie_parser = require('cookie-parser')
+
 
 const app = express();
 
@@ -15,7 +15,7 @@ connect_db();
 
 app.use(session_config);
 
-app.use(cookie_parser());
+
 
 const PORT = process.env.PORT;
 app.set('view engine', 'ejs');

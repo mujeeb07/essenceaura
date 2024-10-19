@@ -64,5 +64,21 @@
     <%- include('../layouts/user/footer.ejs') %>
 
     <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        let success_message = '<%= success_message %>';
+
+       
+        if(success_message){
+            Swal.fire({
+                icon: 'success',
+                text: `login success${success_message}` ,
+                toast: true,
+                position: 'top-right',
+                showConfirmButton: false,
+                timerProgressBar: true,
+                timer: 3000
+                });
+        }
+    })
 
     </script>

@@ -50,9 +50,17 @@ const order_schema = new mongoose.Schema({
       }
     }
   ],
-  total_price: {
+  sub_total: {
     type: String,
     required: true
+  },
+  tax: {
+    type: String,
+    required: true
+  },
+  total: {
+    type: String,
+    reqwiured: true
   },
   payment_method: {
     type: String,

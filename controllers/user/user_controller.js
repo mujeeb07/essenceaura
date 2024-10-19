@@ -10,16 +10,15 @@ const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
 
 
-
 const load_login = async (req, res) => {
 
   try {
 
     let success_message = req.session.success_message;
 
-    req.session.success_message = null;
+    req.session.success_message;
 
-    return res.status(200).render("user/user_login", { message: "", show_message: true, success_message});
+    return res.status(200).render("user/user_login", { message: "", show_message: true, });
 
   } catch (error) {
 
@@ -263,9 +262,12 @@ const load_home_page = async (req, res) => {
 
   try {
 
+    let success_message = req.session.success_message;
+
+    req.session.success_message = null;
     const products_list = await Product.find({ is_blocked: false }).populate("brand").populate("category");
 
-    return res.render("user/user_landing", { products_list });
+    return res.render("user/user_landing", { products_list,success_message });
 
   } catch (error) {
 
@@ -277,7 +279,7 @@ const load_home_page = async (req, res) => {
 const login_user = async (req, res) => {
   try {
 
-    console.log("req.body:", req.body);
+    // console.log("req.body:", req.body);
 
     const { email, password } = req.body;
 
@@ -302,12 +304,12 @@ const login_user = async (req, res) => {
     const password_match = await bcrypt.compare(password.trim(), user_data.password);
 
     if (!password_match) {
-      return res.status(400).render("user/user_login", { message: "Invalid email or password.", show_message: true });
+      return res.status(400).render("user/user_login", { message: "Invalid email or password.", show_message: "false" });
     }
-
+    req.session.success_message = `welcome back ${user_data.name}`
     req.session.user = user_data._id;
 
-    console.log("user:", req.session.user);
+    // console.log("user:", req.session.user);
 
     return res.status(200).redirect("/");
 
@@ -387,7 +389,7 @@ const user_address = async (req, res) => {
 
     await current_user.save();
 
-    console.log("address added successfully.", address_data);
+    // console.log("address added successfully.", address_data);
 
     const sourcePage = req.body.sourcePage;
 
@@ -420,6 +422,7 @@ const delete_address = async (req, res) => {
     return res.status(200).json({ success: true, message: 'Address deleted successfully' });
 
   } catch (error) {
+
     return res.status(500).json({ success: false, message: 'Failed to delete address' })
   }
 }
@@ -429,7 +432,7 @@ const user_profile = async (req, res) => {
   try {
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
 
-    console.log("profile controller");
+    // console.log("profile controller");
 
     const id = await user.findById({ _id: user_id });
 
@@ -456,11 +459,12 @@ const user_profile = async (req, res) => {
 const load_edit_address = async (req, res) => {
 
   const address_id = req.params.id;
-  console.log("address id:", address_id)
+  // console.log("address id:", address_id)
   try {
 
-    const address = await Address.findOne({_id:address_id})
-    console.log('address data:', address)
+    const address = await Address.findOne({_id:address_id});
+
+    // console.log('address data:', address)
 
     return res.status(200).render('user/edit_address', {address});
 
@@ -492,6 +496,37 @@ const edit_address = async (req, res) => {
 
 }
 
+const load_my_orders = async(req, res) => {
+
+  try {
+    
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    const my_orders = await orders.find({ user: user });
+    // console.log("MY ORDERS DATA: ", my_orders)
+
+    return res.status(200).render('user/my_orders', { my_orders } );
+
+  } catch (error) {
+    console.log("error while renders the my orders page", error);
+   return res.status(500).json({messge: "error while renders the my orders page.", error});
+  }
+}
+
+const cancel_order = async (req, res) => {
+  const { id } = req.params;
+  try {
+
+    const order_data = await orders.findByIdAndUpdate({ _id:id },
+      {$set: { order_status:'Cancelled' }}
+    );
+    order_data.save()
+
+    
+  } catch (error) {
+    
+  }
+}
+
 
 module.exports = {
   load_login,
@@ -508,5 +543,7 @@ module.exports = {
   user_profile,
   delete_address,
   load_edit_address,
-  edit_address
+  edit_address,
+  load_my_orders,
+  cancel_order
 };

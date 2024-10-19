@@ -168,7 +168,7 @@
                                     <ul class="product-meta font-xs color-grey mt-50">
                                         <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
                                         <li id="selectedStock"> Stock: <%= product.variants[0].stock %></li>
-                                        <li>Availability:
+                                        <li id="selectedStock">Availability:
                                             <% if (product.variants[0].stock >= 5 ) { %>
                                                 <span class="in-stock text-success ml-5">Item In Stock</span></li>
                                             <% }else{ %>
@@ -189,7 +189,8 @@
 
 let selectedSize = {
     price: '<%= product.variants[0].price %>',
-    volume: '<%= product.variants[0].volume %>'
+    volume: '<%= product.variants[0].volume %>',
+    stock: '<%= product.variants[0].stock %>'
 };
 
 function selectSize(element) {

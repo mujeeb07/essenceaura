@@ -1,4 +1,5 @@
-const user = require("../../models/user_model")
+const user = require("../../models/user_model");
+const Orders = require("../../models/order_model");
 
 const users_list = async (req, res) => {
     try {
@@ -36,15 +37,47 @@ const users_list = async (req, res) => {
   };
 
 const orders = async (req, res) => {
+
     try {
-        return res.status(200).render("admin/orders");
+      const orders = await Orders.find().populate('user')
+      // console.log(orders);
+      
+        return res.status(200).render("admin/orders",  {orders}  );
     } catch (error) {
         return res.status(500).json({message: error});
     }
 }
 
+const load_order_details = async (req, res) => {
+  const { id } = req.params;
+  console.log("Order Id: ",id);
+  try {
+    const order_details = await Orders.findOne({_id:id}).populate('user')
+    // console.log("fguyfvuyfvuy",order_details);
+    return res.status(200).render('admin/order_details', { order_details })
+  } catch (error) {
+    
+  }
+}
+
+const order_details = async(req, res) => {
+  console.log('...................Hello...................');
+  const { orderId, status } = req.body
+  console.log("status body: ", orderId, status);
+  try {
+    await Orders.findByIdAndUpdate(orderId, {order_status: status});
+
+    return res.status(200).json({success: true});
+  } catch (error) {
+    console.log("order status error :", error);
+    return res.status(500).json({ message:"Error while changing order status", success: false });
+  }
+}
+
   module.exports = {
   users_list,
   block_user,
-  orders
+  orders,
+  load_order_details,
+  order_details
 }

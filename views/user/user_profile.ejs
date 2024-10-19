@@ -14,7 +14,7 @@
                                         <a class="nav-link active" id="dashboard-tab" data-bs-toggle="tab" href="#dashboard" role="tab" aria-controls="dashboard" aria-selected="false"><i class="fi-rs-settings-sliders mr-10"></i>Dashboard</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="orders-tab" data-bs-toggle="tab" href="#orders" role="tab" aria-controls="orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
+                                        <a class="nav-link" href="/my_orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
@@ -43,86 +43,7 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="tab-pane fade" id="orders" role="tabpanel" aria-labelledby="orders-tab">
-                                    <div class="card">
-                                        <div class="card-header">
-                                            <h5 class="mb-0">Your Orders</h5>
-                                        </div>
-                                        <div class="card-body">
-                                            <div class="table-responsive">
-                                                <table class="table table-striped table-hover table-bordered">
-                                                    <thead class="thead-dark">
-                                                        <tr>
-                                                            <th>Order ID</th>
-                                                            <th>User ID</th>
-                                                            <th>Shipping Address</th>
-                                                            <th>Items</th>
-                                                            <th>Total Price</th>
-                                                            <th>Payment Method</th>
-                                                            <th>Order Status</th>
-                                                            <th>Order Date</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        <% if (Array.isArray(orders) && orders.length) { %>
-                                                            <% orders.forEach(order => { %>
-                                                            <tr>
-                                                                <td><%= order._id %></td>
-                                                                <td><%= order.user %></td>
-                                                                <td>
-                                                                    <strong>Name:</strong> <%= order.shipping_address.name %><br>
-                                                                    <strong>Mobile:</strong> <%= order.shipping_address.mobile %><br>
-                                                                    <strong>Address:</strong> <%= order.shipping_address.address %><br>
-                                                                    <strong>City:</strong> <%= order.shipping_address.city %><br>
-                                                                    <strong>State:</strong> <%= order.shipping_address.state %><br>
-                                                                    <strong>Postal Code:</strong> <%= order.shipping_address.postal_code %><br>
-                                                                    <strong>Landmark:</strong> <%= order.shipping_address.landmark || "N/A" %>
-                                                                </td>
-                                                                <td>
-                                                                    <% order.items.forEach(item => { %>
-                                                                    <div class="d-flex align-items-center mb-2">
-                                                                        <img src="<%= item.product.product_card_image %>" alt="Product Image" style="width: 50px; height: 50px; border-radius: 4px; margin-right: 10px;">
-                                                                        <div>
-                                                                            <strong>Product:</strong> <%= item.product.name %><br>
-                                                                            <strong>Brand:</strong> <%= item.product.brand.brandName %><br>
-                                                                            <strong>Category:</strong> <%= item.product.category.name %><br>
-                                                                            <strong>Volume:</strong> <%= item.product.variants.volume %>ml<br>
-                                                                            <strong>Price:</strong> ₹<%= item.product.variants.price %><br>
-                                                                            <strong>Quantity:</strong> <%= item.quantity %>
-                                                                        </div>
-                                                                    </div>
-                                                                    <hr>
-                                                                    <% }) %>
-                                                                </td>
-                                                                <td class="text-right">₹<%= order.total_price %></td>
-                                                                <td>
-                                                                    <%= order.payment_method %>
-                                                                    <% if(order.payment_method === 'Credit Card') { %>
-                                                                    <i class="fas fa-credit-card ml-2"></i>
-                                                                    <% } else if(order.payment_method === 'Cash on Delivery') { %>
-                                                                    <i class="fas fa-money-bill-wave ml-2"></i>
-                                                                    <% } %>
-                                                                </td>
-                                                                <td>
-                                                                    <span class="badge 
-                                                                        <%= order.order_status === 'Pending' ? 'badge-warning' : order.order_status === 'Shipped' ? 'badge-primary' : 'badge-success' %>">
-                                                                        <%= order.order_status %>
-                                                                    </span>
-                                                                </td>
-                                                                <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
-                                                            </tr>
-                                                            <% }) %>
-                                                        <% } else { %>
-                                                            <tr>
-                                                                <td colspan="8" class="text-center">No orders found.</td>
-                                                            </tr>
-                                                        <% } %>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>                                
+                                                           
                                 <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
                                     <div class="card">
                                         <div class="card-header">

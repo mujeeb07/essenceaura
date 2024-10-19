@@ -16,7 +16,9 @@ admin_route.get("/logout", admin_controller.admin_logout)
 //users
 admin_route.get('/users', admin_auth, user_controller.users_list);
 admin_route.post("/block_user", admin_auth, user_controller.block_user);
-admin_route.get("/orders", admin_auth, user_controller.orders)
+admin_route.get("/orders", admin_auth, user_controller.orders);
+admin_route.get("/order_details/:id", admin_auth, user_controller.load_order_details);
+admin_route.post("/update_order_status", admin_auth, user_controller.order_details);
 
 // Brand
 admin_route.get('/brands', admin_auth, brand_controller.load_brands);

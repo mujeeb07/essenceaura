@@ -4,12 +4,8 @@ const mongoose = require("mongoose");
 
 const load_shop_cart = async (req, res) => {
   try {
-    let user;
-    if (req?.session?.user) {
-      user = req.session.user;
-    } else if (req?.session?.passport?.user) {
-      user = mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
-    }
+    
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user)
 
     console.log("load shop cart:", user);
 
@@ -59,9 +55,7 @@ const shop_cart = async (req, res) => {
       await cart.save();
     }
 
-    return res
-      .status(200)
-      .json({ message: "Product added to cart successfully", cart });
+    return res.status(200).json({ message: "Product added to cart successfully", cart });
   } catch (error) {
     return res.status(500).json({ message: "Unable to add product to cart" });
   }
@@ -69,6 +63,7 @@ const shop_cart = async (req, res) => {
 
 const update_quantity = async (req, res) => {
   try {
+
     const { productId, productSize, quantity } = req.body;
 
     const updatedCart = await Cart.findOneAndUpdate(
@@ -82,9 +77,7 @@ const update_quantity = async (req, res) => {
     );
 
     if (!updatedCart) {
-      return res
-        .status(400)
-        .json({ message: "Cart or product not found", success: false });
+      return res.status(400).json({ message: "Cart or product not found", success: false });
     }
 
     const cartItem = updatedCart.item.find(
@@ -94,16 +87,13 @@ const update_quantity = async (req, res) => {
     );
 
     if (!cartItem) {
-      return res
-        .status(400)
-        .json({ message: "Product not found in cart", success: false });
+      return res.status(400).json({ message: "Product not found in cart", success: false });
     }
 
     const subtotal = cartItem.price * quantity;
-    const total = updatedCart.item.reduce(
-      (acc, item) => acc + item.price * item.quantity,
-      0
-    );
+    const total = updatedCart.item.reduce((acc, item) => 
+      acc + item.price * item.quantity,
+    0);
 
     return res.status(200).json({
       message: "Quantity updated successfully",
@@ -114,14 +104,13 @@ const update_quantity = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating quantity:", error);
-    return res
-      .status(500)
-      .json({ message: "An error occurred", success: false });
+    return res.status(500).json({ message: "An error occurred", success: false });
   }
 };
 
 const remove_item = async (req, res) => {
   try {
+
     const cartItem = req.params.id;
 
     const updatedCart = await Cart.findOneAndUpdate(
@@ -135,9 +124,7 @@ const remove_item = async (req, res) => {
       return res.status(404).json({ message: "Item not found" });
     }
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "An error occurred while removing item from cart" });
+    return res.status(500).json({ message: "An error occurred while removing item from cart" });
   }
 };
 

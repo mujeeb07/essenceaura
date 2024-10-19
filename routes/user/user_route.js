@@ -20,10 +20,8 @@ user_route.get("/login", user_controller.load_login);
 user_route.post("/login", user_controller.login_user); 
 user_route.get('/register', user_controller.load_register);
 user_route.post('/register', user_controller.register_user);
-
 user_route.get("/auth/google", passport.authenticate('google', { scope: ['profile', 'email'] }));
 user_route.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: "/login", successRedirect: "/" }));
-  
 user_route.get("/home", user_controller.load_home_page);
 user_route.get("/otp", user_controller.user_send_otp);
 user_route.post("/verify-otp", user_controller.verify_otp);
@@ -37,7 +35,7 @@ user_route.delete('/delete_address/:id', user_blocked, is_authenticated, user_co
 user_route.get('/edit_address/:id', user_blocked, is_authenticated, user_controller.load_edit_address);
 user_route.post('/edit_address/:id', user_blocked, is_authenticated, user_controller.edit_address);
 
-
+//profile
 user_route.get("/user_profile", user_blocked, is_authenticated, user_controller.user_profile);
 user_route.post("/user_profile", user_blocked, is_authenticated, user_controller.user_profile);
 user_route.get('/edit_profile_detials/:id', user_blocked, is_authenticated, user_details.edit_details);
@@ -63,7 +61,10 @@ user_route.post("/filter_products", shop_page_controller.filter_items);
 //checkout
 user_route.get("/checkout", user_blocked, is_authenticated, checkout_controller.checkout);
 user_route.post("/checkout", user_blocked, is_authenticated, checkout_controller.post_checkout);
-user_route.get('/order_confirmation', user_blocked, is_authenticated, checkout_controller.order_confirmation)
+user_route.get('/order_confirmation', user_blocked, is_authenticated, checkout_controller.order_confirmation);
 
+//order
+user_route.get('/my_orders', user_blocked, is_authenticated, user_controller.load_my_orders)
+user_route.post("/cancel_order/:id", user_blocked, is_authenticated, user_controller.cancel_order)
 
 module.exports = user_route;

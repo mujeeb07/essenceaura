@@ -1,137 +1,111 @@
 <%- include('../layouts/user/header.ejs') %>
-<link rel="stylesheet" href="/user_asset/css/main.css?v=3.4">
+
 <style>
-    h2, h5 {
-  color: #333;
-}
-
-p {
-  color: #666;
-}
-
-.table th, .table td {
-  vertical-align: middle;
-}
-
-.card {
-  border: none;
-  border-radius: 10px;
-}
-
-.card .card-body {
-  padding: 30px;
-}
-
-.container {
-  max-width: 800px;
-}
-
-.btn-primary {
-  background-color: #007bff;
-  border-color: #007bff;
-}
-
-.btn-outline-secondary {
-  color: #6c757d;
-  border-color: #6c757d;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.table-bordered {
-  border: 1px solid #dee2e6;
-}
-
-.table-bordered th, .table-bordered td {
-  border: 1px solid #dee2e6;
-}
-
+  p {
+    color: #666;
+  }
+  .table th, .table td {
+    vertical-align: middle;
+  }
+  .table-bordered {
+    border: 1px solid #dee2e6;
+  }
+  .table-bordered th, .table-bordered td {
+    border: 1px solid #dee2e6;
+  }
 </style>
 
-
 <div class="container mt-5">
-    <div class="card shadow-lg p-4 mb-4">
-      
-      <!-- Header Section -->
-      <h2 class="text-center mb-4">Order Confirmation</h2>
-      <p class="text-center text-muted">Thank you for your purchase! Your order has been placed successfully.</p>
-      
-      <!-- Order Details -->
-      <div class="row mb-4">
-        <div class="col-md-6">
-          <h5>Order ID: <strong>#<%= order_id %></strong></h5>
-          <p><strong>Order Date:</strong> <%= new Date().toLocaleDateString() %></p>
-          <p><strong>Estimated Delivery:</strong> <%= estimated_delivery %></p>
-        </div>
-        <div class="col-md-6 text-md-right">
-          <h5>Total Amount: <strong>₹ <%= (subtotal + gst).toFixed(2) %></strong></h5>
-          <p><strong>Payment Method:</strong> <%= payment_method === "COD" ? "Cash on Delivery" : "Razorpay" %></p>
-        </div>
-      </div>
+  <div class="card shadow-lg p-4 mb-4">
+    <!-- Header Section -->
+    <h2 class="text-center mb-4">Order Confirmation</h2>
+    <p class="text-center text-muted pb-15">Thank you for your purchase! Your order has been placed successfully.</p>
+    
+   <!-- Order Details and Shipping Address -->
+<div class="row mb-4">
   
-      <!-- Shipping Address -->
-      <div class="row mb-4">
-        <div class="col-md-12">
-          <h5>Shipping Address</h5>
-          <div class="border p-3">
-            <p><strong>Name:</strong> <%= shipping_address.name %></p>
-            <p><strong>Address:</strong> <%= shipping_address.address %>, <%= shipping_address.city %>, <%= shipping_address.state %> - <%= shipping_address.postal_code %></p>
-            <p><strong>Mobile:</strong> <%= shipping_address.mobile %></p>
+
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Order Details</h5>
+          <div class="mb-3">
+            <h6>Order ID: <strong>#<%= order._id.toString().slice(-5) %></strong></h6>
+            <p class="mb-1"><strong>Order Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></p>
+            <p class="mb-1"><strong>Estimated Delivery:</strong> <%= estimated_delivery %></p>
+          </div>
+          <div>
+            <h6>Total Amount: <strong>₹ <%= order.total %></strong></h6>
+            <p class="mb-1"><strong>Payment Method:</strong> <%= order.payment_method === "COD" ? "Cash on Delivery" : "Razorpay" %></p>
           </div>
         </div>
       </div>
-  
-      <!-- Order Summary Table -->
-      <div class="row mb-4">
-        <div class="col-md-12">
-          <h5>Order Summary</h5>
-          <table class="table table-bordered">
-            <thead>
-              <tr>
-                <th>Product</th>
-                <th>Quantity</th>
-                <th>Price</th>
-                <th>Subtotal</th>
-              </tr>
-            </thead>
-            <tbody>
-              <% cartItems.forEach(function(item) { %>
-                <tr>
-                  <td><%= item.product.name %></td>
-                  <td><%= item.quantity %></td>
-                  <td>₹ <%= item.price %></td>
-                  <td>₹ <%= (item.price * item.quantity).toFixed(2) %></td>
-                </tr>
-              <% }); %>
-            </tbody>
-            <tfoot>
-              <tr>
-                <td colspan="3" class="text-right"><strong>Subtotal</strong></td>
-                <td>₹ <%= subtotal.toFixed(2) %></td>
-              </tr>
-              <tr>
-                <td colspan="3" class="text-right"><strong>Taxes (GST 18%)</strong></td>
-                <td>₹ <%= gst.toFixed(2) %></td>
-              </tr>
-              <tr>
-                <td colspan="3" class="text-right"><strong>Total Amount</strong></td>
-                <td><strong>₹ <%= (subtotal + gst).toFixed(2) %></strong></td>
-              </tr>
-            </tfoot>
-          </table>
+    </div>
+    
+    
+    <div class="col-md-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h5 class="card-title">Shipping Address</h5>
+          <p class="mb-1"><strong>Name:</strong> <%= order.shipping_address.name %></p>
+          <p class="mb-1"><strong>Address:</strong> <%= order.shipping_address.address %></p>
+          <p class="mb-1"><%= order.shipping_address.city %>, <%= order.shipping_address.state %> - <%= order.shipping_address.postal_code %></p>
+          <p class="mb-1"><strong>Mobile:</strong> <%= order.shipping_address.mobile %></p>
         </div>
       </div>
+    </div>
+
   
-      <!-- Call to Action -->
-      <div class="text-center mt-4">
-        <a href="/home" class="btn btn-primary">Go To Home</a>
-        <a href="/shop" class="btn btn-primary">Continue Shopping</a>
-        <a href="/orders" class="btn btn-outline-secondary">View Your Orders</a>
+</div>
+
+    <!-- Order Summary Table -->
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <h5>Order Summary</h5>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% cartItems.forEach(function(item) { %>
+              <tr>
+                <td><%= item.product.name %></td>
+                <td><%= item.quantity %></td>
+                <td>₹ <%= item.price %></td>
+                <td>₹ <%= (item.price * item.quantity) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-right"><strong>Subtotal</strong></td>
+              <td>₹ <%= order.sub_total %></td>
+            </tr>
+            <tr>
+              <td colspan="3" class="text-right"><strong>Taxes (GST 18%)</strong></td>
+              <td>₹ <%= order.tax %></td>
+            </tr>
+            <tr>
+              <td colspan="3" class="text-right"><strong>Total Amount</strong></td>
+              <td><strong>₹ <%= order.total %></strong></td>
+            </tr>
+          </tfoot>
+        </table>
       </div>
-  
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center mt-4">
+      <a href="/home" class="btn btn-primary">Go To Home</a>
+      <a href="/shoping_page" class="btn btn-primary">Continue Shopping</a>
+      <a href="/user_profile" class="btn btn-outline-secondary">View Your Orders</a>
     </div>
   </div>
-  
-  <%- include('../layouts/user/footer.ejs') %>
+</div>
+
+<%- include('../layouts/user/footer.ejs') %>

@@ -74,19 +74,4 @@
         }
     });
 
-    document.addEventListener('DOMContentLoaded', () => {
-        let success_message = '<%= success_message %>';
-
-        if(success_message){
-            Swal.fire({
-                icon: 'success',
-                text: success_message,
-                position: 'top-right',
-                showConfirmButton: false,
-                timerProgressBar: true,
-                timer:3000
-            });
-        }
-    })
-
 </script>

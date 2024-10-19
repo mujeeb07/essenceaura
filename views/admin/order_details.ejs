@@ -1,0 +1,192 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+<main class="main-wrap">
+    <%- include('../layouts/admin/navbar.ejs') %>
+    
+    <div class="container-fluid py-4">
+        <div class="card shadow-sm">
+            <div class="row align-items-center p-10">
+                <div class="col-lg-6 col-md-6 mb-lg-0mt-15 mb-15">
+                    <h3 class="mb-0">Order Details</h3>
+                </div>
+                <div class="col-lg-6 col-md-6 ms-auto text-md-end mt-15">
+                    
+                    <select id="order-status-dropdown" class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
+                        <option value="">Change status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Awaiting payment">Awaiting payment</option>
+                        <option value="Confirmed">Confirmed</option>
+                        <option value="Shipped">Shipped</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancel</option>
+                    </select>
+                    <a id="save-status-btn" class="btn btn-primary" href="#">Save</a>
+                </div>
+            </div>
+            <hr>
+            <div class="card-body">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Shipping Address</h5>
+                        <div class="border rounded p-3">
+                            <p class="mb-1"><strong><%= order_details.shipping_address.name %></strong></p>
+                            <p class="mb-1"><%= order_details.shipping_address.address %></p>
+                            <p class="mb-1"><%= order_details.shipping_address.city %>, <%= order_details.shipping_address.state %> <%= order_details.shipping_address.postal_code %></p>
+                            <p class="mb-1"><%= order_details.shipping_address.landmark %></p>
+                            <p class="mb-0"><strong>Mobile:</strong> <%= order_details.shipping_address.mobile %></p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h5 class="mb-3">Order Summary</h5>
+                        <div class="border rounded p-3">
+                            <p class="mb-1"><strong>Order ID:</strong> #<%= order_details._id.toString().slice(-6) %></p>
+                            <p class="mb-1"><strong>Order Date:</strong> <%= new Date(order_details.createdAt).toLocaleDateString() %></p>
+                            <p class="mb-1"><strong>Payment Method:</strong> <%= order_details.payment_method %></p>
+                            <p class="mb-0">
+                                 
+                                <strong>Order Status:
+                                    <span id="order-status-badge" class="badge rounded-pill 
+                                        <%= order_details.order_status === "Pending" ? "alert-warning" : "" %>
+                                        <%= order_details.order_status === "Cancelled" ? "alert-danger" : "" %>
+                                        <%= order_details.order_status === "Confirmed" ? "alert-success" : "" %>
+                                        <%= order_details.order_status === "Shipped" ? "alert-success" : "" %>
+                                        <%= order_details.order_status === "Delivered" ? "alert-success" : "" %>">
+                                        <%= order_details.order_status %>
+                                    </span>
+                                </strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <hr>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% order_details.items.forEach(function(item) { %>
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <img src="<%= item.product.product_card_image %>" alt="<%= item.product.name %>" class="img-thumbnail me-3" style="width: 60px; height: 60px; object-fit: cover;">
+                                            <div>
+                                                <h6 class="mb-0"><%= item.product.name %></h6>
+                                                <small class="text-muted"><%= item.product.brand.brandName %></small>   
+                                                <small class="text-muted"><%= item.product.category.name %></small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><%= item.quantity %></td>
+                                    <td>₹<%= item.price.toFixed(2) %></td>
+                                    <td>₹<%= (item.quantity * item.price).toFixed(2) %></td>
+                                </tr>
+                            <% }); %>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="row justify-content-end mt-4">
+                    <div class="col-md-4">
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Subtotal:</td>
+                                <td class="text-end">₹<%= order_details.sub_total %></td>
+                            </tr>
+                            <tr>
+                                <td>Tax:</td>
+                                <td class="text-end">₹<%= order_details.tax %></td>
+                            </tr>
+                            <tr class="fw-bold">
+                                <td>Total:</td>
+                                <td class="text-end">₹<%= order_details.total %></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+</main>
+
+<%- include('../layouts/admin/footer.ejs') %>
+
+<script>
+    
+    document.getElementById('save-status-btn').addEventListener('click', function(e) {
+        e.preventDefault(); 
+        const newStatus = document.getElementById('order-status-dropdown').value;
+        const orderId = '<%= order_details._id %>';  
+        console.log('asdfghj:' ,orderId)
+        if(newStatus) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you want to change the order status to ${newStatus}?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, change it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('/admin/update_order_status', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ orderId: orderId, status: newStatus })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success) {
+                            const statusBadge = document.getElementById('order-status-badge');
+                            statusBadge.textContent = newStatus;
+                            statusBadge.className = 'badge rounded-pill';
+
+                            if (newStatus === "Pending") {
+                                statusBadge.classList.add('alert-warning');
+                            } else if (newStatus === "Cancelled") {
+                                statusBadge.classList.add('alert-danger');
+                            } else {
+                                statusBadge.classList.add('alert-success');
+                            }
+
+                            Swal.fire(
+                                'Updated!',
+                                `The order status has been updated to ${newStatus}.`,
+                                'success'
+                            );
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                'There was an issue updating the order status.',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire(
+                            'Error!',
+                            'There was an error while processing your request.',
+                            'error'
+                        );
+                        console.log ('Error:', error);
+                    });
+                }
+            });
+        } else {
+            Swal.fire(
+                'Warning!',
+                'Please select a valid status.',
+                'warning'
+            );
+        }
+    });
+</script>
