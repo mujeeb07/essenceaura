@@ -1,0 +1,235 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+
+<main class="main-wrap">
+    <%- include('../layouts/admin/navbar.ejs') %>
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Edit Coupon</h2>
+                <p class="mt-15">Edit the details of the coupon</p>
+            </div>
+        </div>
+        <div class="card col-12">
+            <div class="card-body">
+                <div class="row">
+                    <div>
+                        <form method="post" id="formCouponData" enctype="multipart/form-data">
+                            <!-- Coupon Name -->
+                            <div class="mb-4">
+                                <input type="hidden" name="id" value="<%= coupon._id %>"  class="form-control" id="id">
+                                <label for="coupon_name" class="form-label">Coupon Name</label>
+                                <input type="text" name="coupon_name" value="<%= coupon.coupon_name %>" class="form-control" id="coupon_name" />
+                            </div>
+                            
+                            <!-- Description -->
+                            <div class="mb-4">
+                                <label class="form-label">Description</label>
+                                <input placeholder="Type here" id="description" name="description" value="<%= coupon.coupon_description %>" class="form-control"/>
+                            </div>
+
+                            <!-- Coupon Code -->
+                            <div class="d-flex align-items-center">
+                                <div class="col-9 mb-4 me-2">
+                                    <label class="form-label">Coupon Code</label>
+                                    <input placeholder="click the button" id="coupon_code" name="coupon_code" value="<%= coupon.coupon_code %>" class="form-control"/>
+                                </div>
+                                <div class="col-3">
+                                    <button type="button" class="btn btn-primary btn-sm" id="generate_coupon">Generate coupon</button>
+                                </div>
+                            </div>                                    
+
+                            <!-- Discount Percentage -->
+                            <div class="mb-4">
+                                <label class="form-label">Coupon Discount <span class="text-muted">( percentage % )</span></label>
+                                <input type="number" placeholder="Type here" id="discount" name="discount" value="<%= coupon.coupon_discount %>" class="form-control"/>
+                            </div>
+
+                            <!-- Maximum Amount -->
+                            <div class="mb-4">
+                                <label class="form-label">Maximum Amount</label>
+                                <input type="number" placeholder="Enter amount here" id="max_amount" name="max_amount" value="<%= coupon.coupon_max_amount %>" class="form-control"/>
+                            </div>
+
+                            <!-- Minimum Purchase Amount -->
+                            <div class="mb-4">
+                                <label class="form-label">Minimum Purchase</label>
+                                <input type="number" placeholder="Type here" id="min_amount" name="min_amount" value="<%= coupon.coupon_min_amount %>" class="form-control"/>
+                            </div>
+
+                            <!-- Valid Upto Date -->
+                            <div class="mb-4">
+                                <label class="form-label">Valid Upto</label>
+                                <input type="date" id="valid_upto" name="valid_upto" value="<%= coupon.coupon_expires ? coupon.coupon_expires : '' %>" class="form-control"/>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="d-grid">
+                                <button class="btn btn-primary">Update Coupon</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<%- include('../layouts/admin/footer.ejs') %>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById('formCouponData');
+
+        document.getElementById('generate_coupon').addEventListener('click', function(event){
+            event.preventDefault();
+            const coupon_code = coupon_generator(8);
+            document.getElementById('coupon_code').value = coupon_code; 
+        });
+
+        function coupon_generator(length) {
+            let coupon = '';
+            const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$&'; 
+            for (let i = 0; i < length; i++) {
+                coupon += possible.charAt(Math.floor(Math.random() * possible.length));
+            }
+            return coupon;
+        }
+
+       
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            clearErrors();
+
+            const isValid = validateForm();
+            if (isValid) {
+                submitFormData();
+            }
+        });
+
+        function validateForm() {
+            let isValid = true;
+
+            const couponName = document.getElementById('coupon_name').value.trim();
+            if (!couponName) {
+                isValid = false;
+                showError('coupon_name', 'Coupon name is required.');
+            }
+
+            const couponDescription = document.getElementById('description').value.trim();
+            if (!couponDescription) {
+                isValid = false;
+                showError('description', 'Coupon description is required.');
+            }
+
+            const couponCode = document.getElementById('coupon_code').value.trim();
+            if (!couponCode) {
+                isValid = false;
+                showError('coupon_code', 'Please generate the coupon code.');
+            }
+
+            const discount = document.getElementById('discount').value.trim();
+            if (!discount) {
+                isValid = false;
+                showError('discount', 'Please enter a discount percentage.');
+            }
+
+            const maxAmount = document.getElementById('max_amount').value.trim();
+            if (!maxAmount) {
+                isValid = false;
+                showError('max_amount', 'Please enter the maximum amount.');
+            } else if (maxAmount >= 1250) {
+                isValid = false;
+                showError('max_amount', 'Max amount is ₹1250. Enter a valid amount.');
+            }
+
+            const minAmount = document.getElementById('min_amount').value.trim();
+            if (!minAmount) {
+                isValid = false;
+                showError('min_amount', 'Please enter the minimum purchase amount.');
+            } else if (minAmount < 599) {
+                isValid = false;
+                showError('min_amount', 'Please enter a valid amount greater than ₹599.');
+            }
+
+            const validUpto = document.getElementById('valid_upto').value;
+            const currentDate = new Date().toISOString().split('T')[0];
+            if (!validUpto || validUpto < currentDate) {
+                isValid = false;
+                showError('valid_upto', 'Please select a valid date.');
+            }
+
+            return isValid;
+        }
+
+        
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.color = 'red';
+                errorDiv.textContent = message;
+                element.parentNode.insertBefore(errorDiv, element.nextSibling);
+            }
+        }
+
+        
+        function clearErrors() {
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach((error) => error.remove());
+        }
+
+        async function submitFormData() {
+            const coupon_data = {
+                id:document.getElementById('id').value,
+                coupon_name: document.getElementById('coupon_name').value.trim(),
+                description: document.getElementById('description').value.trim(),
+                coupon_code: document.getElementById('coupon_code').value.trim(),
+                discount: document.getElementById('discount').value.trim(),
+                max_amount: document.getElementById('max_amount').value.trim(),
+                min_amount: document.getElementById('min_amount').value.trim(),
+                valid_upto: document.getElementById('valid_upto').value.trim()
+            };
+
+            try {
+                const response = await fetch("/admin/edit_coupon", {
+                    method: 'POST',
+                    headers:{
+                        'Content-Type':'application/json'
+                    },
+                    body: JSON.stringify(coupon_data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        text: 'Coupon Updated successfully.',
+                        toast: true,
+                        position: 'top-right',
+                        showConfirmButton: false,
+                        timerProgressBar: true,
+                        timer: 3000
+                    });
+                    setTimeout(function(){
+                        window.location.href="/admin/coupon_management"
+                    },2000)
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        text: 'Failed to update coupon. Please try again.',
+                    });
+                }
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    text: 'An error occurred while updating the coupon.',
+                });
+            }
+        }
+    });
+</script>

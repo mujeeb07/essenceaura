@@ -1,9 +1,11 @@
 const Cart = require("../../models/cart_model");
-const  Product = require("../../models/product_model");
+const Product = require("../../models/product_model");
 const mongoose = require("mongoose");
 const Address = require("../../models/address_model");
 const Order_model = require("../../models/order_model");
-const { get_estimated_date } = require("../../utils/estimate_date")
+const Coupons = require('../../models/coupon_model');
+const { get_estimated_date } = require("../../utils/estimate_date");
+
 
 
 const checkout = async (req, res) => {
@@ -11,16 +13,18 @@ const checkout = async (req, res) => {
   try {
 
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
-
+    const { appliedCoupon } = req.session
+    // console.log('session coupon:', appliedCoupon)
     const cartItems = await Cart.findOne({ user: user_id }).populate("item.product").exec();
-
     const addresses = await Address.find({ user: user_id });
+    const sub_total = cartItems.item.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const coupons = await Coupons.find({ coupon_status: true });
 
     if (!cartItems || cartItems.item.length === 0) {
       return res.status(200).render("user/check_out", {cartItems: [],addresses,message: "Your cart is empty!"});
     }
 
-    return res.status(200).render("user/check_out", { cartItems: cartItems.item, addresses });
+    return res.status(200).render("user/check_out", { cartItems: cartItems.item, addresses, coupons, sub_total, appliedCoupon });
 
   } catch (error) {
 
@@ -130,9 +134,9 @@ const post_checkout = async (req, res) => {
 const order_confirmation = async (req, res) => {
 
   try {
-
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const order = await Order_model.findOne({ user: user }).sort({ _id: -1 });
+    console.log("Ordered Items")
     const estimated_delivery = get_estimated_date();
   
     return res.status(200).render('user/order_confirmation', { order, estimated_delivery, cartItems: order.items });
@@ -142,8 +146,31 @@ const order_confirmation = async (req, res) => {
 };
 
 
+const apply_coupon = async(req, res) => {
+
+  const { selectedCoupon } = req.body
+  // console.log('applied coupon from the body: ', selectedCoupon);
+  try {
+
+    if (selectedCoupon && selectedCoupon.coupon_status && new Date(selectedCoupon.coupon_expires) > new Date()) {
+
+        req.session.appliedCoupon = selectedCoupon;
+
+        return res.status(200).json({ success: true });
+    } 
+    
+  } catch (error) {
+
+    console.error('error while applaying the coupon', error);
+    return res.status(500).json({ success: false, message: 'Invalid coupon' });
+
+  }
+}
+
+
 module.exports = {
   checkout,
   post_checkout,
-  order_confirmation
+  order_confirmation,
+  apply_coupon
 };

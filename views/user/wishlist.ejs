@@ -1,0 +1,103 @@
+<%- include('../layouts/user/header.ejs') %>
+
+<section class="mt-50 mb-50">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="table-responsive">
+                    <table class="table shopping-summery text-center">
+                        <thead>
+                            <tr class="main-heading">
+                                <th scope="col" colspan="2">Product</th>
+                                <th scope="col">Action</th>
+                                <th scope="col">Remove</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (product_data && product_data.length > 0) { %>
+                                <% product_data.forEach(function(product) { %>
+                                    <tr>
+                                        <td class="image product-thumbnail">
+                                            <img src="<%= product.product_card_image %>" alt="product image">
+                                        </td>
+                                        <td class="product-des product-name">
+                                            <h5 class="product-name">
+                                                <a href="/product/<%= product._id %>"><%= product.name %></a>
+                                            </h5>
+                                            <p class="font-xs"><%= product.description || 'No description available' %></p>
+                                        </td>
+                                        <td class="text-right" data-title="Cart">
+                                            <a href="/product"><button class="btn btn-sm"><i class="fi-rs-shopping-bag mr-5"></i>View Product</button></a>
+                                        </td>
+                                        <td class="action" data-title="Remove">
+                                            <a class="remove-product" data-product-id="<%= product._id %>"><i class="fi-rs-trash"></i></a>
+                                        </td>
+                                        
+                                    </tr>
+                                <% }); %>
+                            <% } else { %>
+                                <tr>
+                                    <td colspan="4">No products in your wishlist.</td>
+                                </tr>
+                            <% } %>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('../layouts/user/footer.ejs') %>
+
+<script>
+    // const productId = document.getElementById('product_id').getAttribute('value');
+    // console.log("sdfgh", productId )
+
+    document.querySelectorAll('.remove-product').forEach(button => {
+        button.addEventListener('click', async function (event) {
+            event.preventDefault();
+            const productId = this.getAttribute('data-product-id');
+            console.log("Product ID to remove: ", productId);
+
+            try {
+                const response = await fetch('/wishlist/remove', {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ productId })
+                });
+                if (response.ok) {
+                    console.log('Product successfully removed from wishlist.');
+                    Swal.fire({
+                    icon: 'success',
+                    text: 'Product successfully removed from wishlist',
+                    toast: true,
+                    position: 'top-right',
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    timer: 2000
+                });
+                setTimeout(function(){
+                    window.location.reload()
+                },2000)
+                } else {
+                    console.error('Failed to remove the product from wishlist.');
+                    Swal.fire({
+                    icon: 'error',
+                    text: 'Failed to remove the product from wishlist.',
+                    toast: true,
+                    position: 'top-right',
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    timer: 2000
+                });
+                }
+            } catch (error) {
+                console.error('Error while removing product from wishlist:', error);
+            }
+        });
+    });
+
+</script>

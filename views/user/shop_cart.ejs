@@ -129,114 +129,114 @@
     </section>
   </main>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", function () {
-  const qtyUpButtons = document.querySelectorAll(".qty-up");
-  const qtyDownButtons = document.querySelectorAll(".qty-down");
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+      const qtyUpButtons = document.querySelectorAll(".qty-up");
+      const qtyDownButtons = document.querySelectorAll(".qty-down");
 
-  qtyUpButtons.forEach((button) => {
-    button.addEventListener("click", function (e) {
-      e.preventDefault();
-      const productId = this.getAttribute("data-product-id");
-      const productSize = this.getAttribute("data-product-size");
-      updateQuantity(productId, productSize, 1);
+    qtyUpButtons.forEach((button) => {
+      button.addEventListener("click", function (e) {
+        e.preventDefault();
+        const productId = this.getAttribute("data-product-id");
+        const productSize = this.getAttribute("data-product-size");
+        updateQuantity(productId, productSize, 1);
+      });
     });
-  });
 
-  qtyDownButtons.forEach((button) => {
-    button.addEventListener("click", function (e) {
-      e.preventDefault();
-      const productId = this.getAttribute("data-product-id");
-      const productSize = this.getAttribute("data-product-size");
-      updateQuantity(productId, productSize, -1);
+    qtyDownButtons.forEach((button) => {
+      button.addEventListener("click", function (e) {
+        e.preventDefault();
+        const productId = this.getAttribute("data-product-id");
+        const productSize = this.getAttribute("data-product-size");
+        updateQuantity(productId, productSize, -1);
+      });
     });
-  });
 
-  function updateQuantity(productId, productSize, change) {
-    const qtyElement = document.getElementById(
-      `qty-${productId}-${productSize}`
-    );
-    let currentQty = parseInt(qtyElement.innerText);
-    const maxQty = 5;
+    function updateQuantity(productId, productSize, change) {
+      const qtyElement = document.getElementById(
+        `qty-${productId}-${productSize}`
+      );
+      let currentQty = parseInt(qtyElement.innerText);
+      const maxQty = 5;
 
-    if (currentQty + change > 0 && currentQty + change <= maxQty) {
-      const newQty = currentQty + change;
+      if (currentQty + change > 0 && currentQty + change <= maxQty) {
+        const newQty = currentQty + change;
 
-      fetch("/cart/update-quantity", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          productId: productId,
-          productSize: productSize,
-          quantity: newQty,
-        }),
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            qtyElement.innerText = newQty;
-            const productPrice = data.price;
-            const newSubtotal = productPrice * newQty;
-            document.getElementById(
-              `subtotal-${productId}-${productSize}`
-            ).innerText = `₹${newSubtotal}`;
-
-            updateTotal();
-          }
+        fetch("/cart/update-quantity", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: productId,
+            productSize: productSize,
+            quantity: newQty,
+          }),
         })
-        .catch((error) => {
-          console.error("Error updating quantity:", error);
-        });
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              qtyElement.innerText = newQty;
+              const productPrice = data.price;
+              const newSubtotal = productPrice * newQty;
+              document.getElementById(
+                `subtotal-${productId}-${productSize}`
+              ).innerText = `₹${newSubtotal}`;
+
+              updateTotal();
+            }
+          })
+          .catch((error) => {
+            console.error("Error updating quantity:", error);
+          });
+      }
     }
-  }
 
-  function updateTotal() {
-    let total = 0;
-    document.querySelectorAll('[id^="subtotal-"]').forEach((subtotalElement) => {
-      const subtotal = parseFloat(subtotalElement.innerText.replace("₹", ""));
-      total += subtotal;
-    });
-    document.getElementById("cart-total").innerText = `₹${total}`;
-  }
+    function updateTotal() {
+      let total = 0;
+      document.querySelectorAll('[id^="subtotal-"]').forEach((subtotalElement) => {
+        const subtotal = parseFloat(subtotalElement.innerText.replace("₹", ""));
+        total += subtotal;
+      });
+      document.getElementById("cart-total").innerText = `₹${total}`;
+    }
 
-  document.querySelectorAll(".action a").forEach((removeButton) => {
-    removeButton.addEventListener("click", function (e) {
-      e.preventDefault();
-      const itemId = this.getAttribute("href").split("/").pop();
+    document.querySelectorAll(".action a").forEach((removeButton) => {
+      removeButton.addEventListener("click", function (e) {
+        e.preventDefault();
+        const itemId = this.getAttribute("href").split("/").pop();
 
-      fetch(`/cart/remove/${itemId}`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-        .then(response => response.json())
-        .then((data) => {
-          if (data.success) {
-            this.closest("tr").remove();
-            updateTotal();
-          }
+        fetch(`/cart/remove/${itemId}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
         })
-        .catch((error) => {
-          console.error("Error removing item:", error);
-        });
+          .then(response => response.json())
+          .then((data) => {
+            if (data.success) {
+              this.closest("tr").remove();
+              updateTotal();
+            }
+          })
+          window.location.reload()
+          .catch((error) => {
+            console.error("Error removing item:", error);
+          });
+      });
     });
-  });
 
   calculateInitialTotal();
 
-  function calculateInitialTotal() {
-    let total = 0;
-    document.querySelectorAll('[id^="subtotal-"]').forEach((subtotalElement) => {
-      const subtotal = parseFloat(subtotalElement.innerText.replace("₹", ""));
-      total += subtotal;
-    });
-    document.getElementById("cart-total").innerText = `₹${total}`;
-  }
-});
+    function calculateInitialTotal() {
+      let total = 0;
+      document.querySelectorAll('[id^="subtotal-"]').forEach((subtotalElement) => {
+        const subtotal = parseFloat(subtotalElement.innerText.replace("₹", ""));
+        total += subtotal;
+      });
+      document.getElementById("cart-total").innerText = `₹${total}`;
+    }
+  });
+</script>
 
-  </script>
-
-  <%- include('../layouts/user/footer.ejs') %>
+<%- include('../layouts/user/footer.ejs') %>

@@ -74,14 +74,12 @@
         <!-- modal for shipping address -->
         <div class="col-lg-7 mb-4">
           <h3 class="section-title mb-4">Checkout</h3>
-            <!-- Button to Open Modal -->
-            <button type="button" class="btn btn-block mt-4 mb-15" data-bs-toggle="modal" data-bs-target="#shippingModal">
-                Add Shipping Address
-            </button>
-            <div class="col-lg-6">
+            <div class="">
                 <% if (!addresses || addresses.length === 0) { %>
                     <p>Please add an address.</p>
                 <% } else { %>    
+                    <p>Showing available addresses.</p>
+                    <br>
                     <% addresses.forEach((address, index) => { %>
                         <div class="card mb-15 mb-sm-0">
                             <div class="card-header">
@@ -111,6 +109,12 @@
 
             <div id="addressError" class="error-message" style="display: none;">Please select an address.</div>
 
+            <button type="button" class="btn btn-block mt-4 mb-15" data-bs-toggle="modal" data-bs-target="#shippingModal">
+                Add Shipping Address
+            </button>
+
+            
+
                 <!-- Modal Structure -->
                 <div class="modal fade" id="shippingModal" tabindex="-1" aria-labelledby="shippingModalLabel" aria-hidden="true">
                     <div class="modal-dialog modal-lg">
@@ -122,7 +126,6 @@
                             <div class="modal-body">
                                 <form action="/user_address" method="post" >
                                     <div class="row">
-                                        <!-- Left side of the form -->
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="full-name" class="form-label">Full name (First and Last name)</label>
@@ -140,7 +143,7 @@
                                                 <div class="invalid-feedback" id="pincodeError">Please enter a valid 6-digit PIN code.</div>
                                             </div>
                                         </div>
-                                        <!-- Right side of the form -->
+                                    
                                         <div class="col-md-6">
                                             <div class="mb-3">
                                                 <label for="address" class="form-label">Address</label>
@@ -161,7 +164,6 @@
                                     </div>
                                     <input type="hidden" name="sourcePage" value="checkout">
                                     <div class="row">
-                                        <!-- Left side -->
                                         <div class="col-md-6 mb-3">
                                             <label for="state" class="form-label">State</label>
                                             <select class="form-select" id="state" name="state">
@@ -219,61 +221,66 @@
                 </div>                            
         </div>
 
+        <div class="col-lg-5">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h4 class="mb-4">Order Summary</h4>
+                    <table class="table">
+                        <tbody>
+                            <% let subtotal = 0; %>
+                            <% cartItems.forEach(function(item) { %>
+                                <% subtotal += item.price * item.quantity; %>
+                            <% }); %>
         
-      <div class="col-lg-5">
-        <div class="card shadow-sm mb-4">
-            <div class="card-body">
-              <h4 class="mb-4">Order Summary</h4>
-              <table class="table">
-                <tbody>
-                  
-                  <% let subtotal = 0; %>
-                  <% cartItems.forEach(function(item) { %>
-                    
-                    <% subtotal += item.price * item.quantity; %>  <!-- Directly calculate subtotal -->
-                  
-                  <% }); %>
-          
-                  <% let gst = subtotal * 0.18; %> <!-- Calculate GST as 18% of subtotal -->
-                  
-                  <tr>
-                    <td>Subtotal (Excluding Tax)</td>
-                    <td class="text-right">₹ <%= subtotal.toFixed(2) %></td>
-                  </tr>
-                  <tr>
-                    <td>Taxes <span class="text-muted">( GST 18%)</span></td>
-                    <td class="text-right">₹ <%= gst.toFixed(2) %></td>
-                  </tr>
-                  <tr>
-                    <td>Shipping (<%= cartItems.length %> Items)</td>
-                    <td class="text-right">Free</td>
-                  </tr>                  
-                  <tr>
-                    <td><strong>Total</strong></td>
-                    <td class="text-right"><strong>₹ <%= (subtotal + gst).toFixed(2) %></strong></td>
-                  </tr>
-                </tbody>
-              </table>
-          
-              <div class="mt-10">
-                <h5 class="mt-10 mb-10">Bag Summary (<%= cartItems.length %>)</h5>
-                <% cartItems.forEach(function(item) { %>
-                  <div class="d-flex mb-3">
-                    <img src="<%= item.product.product_card_image %>" class="d-block h-25 w-25" alt="Product Image" width="60">
-                    <div class="ml-3">
-                      <p class="mb-0"><%= item.product.name %> x <%= item.quantity %></p>
-                      <small>Volume: <%= item.volume %> ml</small><br>
-                      <strong>₹ <%= item.price %></strong>
+                            <% let gst = subtotal * 0.18; %>
+                            <% let couponDiscount = appliedCoupon ? Math.min(appliedCoupon.coupon_discount / 100 * subtotal, appliedCoupon.coupon_max_amount) : 0; %>
+                            <% let total = subtotal + gst - couponDiscount; %>
+        
+                            <tr>
+                                <td>Subtotal (Excluding Tax)</td>
+                                <td class="text-right">₹ <%= subtotal.toFixed(2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Taxes <span class="text-muted">( GST 18%)</span></td>
+                                <td class="text-right">₹ <%= gst.toFixed(2) %></td>
+                            </tr>
+                            <tr>
+                                <td>Shipping (<%= cartItems.length %> Items)</td>
+                                <td class="text-right">Free</td>
+                            </tr>
+        
+                            <% if (couponDiscount > 0) { %>
+                                <tr>
+                                    <td>Coupon Discount (<%= appliedCoupon.coupon_name %>)</td>
+                                    <td class="text-right text-success">- ₹ <%= couponDiscount.toFixed(2) %></td>
+                                </tr>
+                            <% } %>
+        
+                            <tr>
+                                <td><strong>Total</strong></td>
+                                <td class="text-right"><strong>₹ <%= total.toFixed(2) %></strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+        
+                    <div class="mt-10">
+                        <h5 class="mt-10 mb-10">Bag Summary (<%= cartItems.length %>)</h5>
+                        <% cartItems.forEach(function(item) { %>
+                            <div class="d-flex mb-3">
+                                <img src="<%= item.product.product_card_image %>" class="d-block h-25 w-25" alt="Product Image" width="60">
+                                <div class="ml-3">
+                                    <p class="mb-0"><%= item.product.name %> x <%= item.quantity %></p>
+                                    <small>Volume: <%= item.volume %> ml</small><br>
+                                    <strong>₹ <%= item.price %></strong>
+                                </div>
+                            </div>
+                        <% }); %>
+                        <button id="addCoupon" class="btn btn-block mt-4 mb-15">Add Coupon</button>
                     </div>
-                  </div>
-                <% }); %>
-              </div>
-          
+                </div>
             </div>
-          </div>          
-    
             <div>
-                <div class=" form-check">
+                <div class="form-check">
                     <input class="form-check-input" type="radio" name="paymentMethod" id="codOption" value="COD">
                     <label class="form-check-label" for="codOption">
                         <span>Cash on Delivery (COD)</span>
@@ -291,7 +298,6 @@
         </div>
     </div>
 </div>
-  
 
 <%- include('../layouts/user/footer.ejs') %>
 <script>
@@ -363,7 +369,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
 
             const result = await response.json();
-
             form.reset();
 
             if (response.ok) {
@@ -375,7 +380,6 @@ document.addEventListener("DOMContentLoaded", function () {
                     showConfirmButton: false,
                     timer: 3000
                 });
-                
                 const modalElement = document.getElementById("shippingModal");
                 const modal = bootstrap.Modal.getInstance(modalElement);
                 modal.hide();
@@ -390,9 +394,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             }
         } catch (error) {
-
             console.error("Error submitting form data:", error);
-          
             Swal.fire({
                     icon: 'error',
                     text: 'Error submitting form data.!',
@@ -479,7 +481,6 @@ document.addEventListener("DOMContentLoaded", function () {
     validateForm();
 });
 
-
 document.addEventListener("DOMContentLoaded", function() {
         document.querySelectorAll("[id^='delete_btn_']").forEach(button => {
             button.addEventListener("click", async function (e) {
@@ -506,10 +507,13 @@ document.addEventListener("DOMContentLoaded", function() {
                         const result = await response.json();
                         if(result.success) {
                             Swal.fire({
-                                text: 'Address deleted successfully',
-                                title: 'Deleted',
                                 icon: 'success',
-                                confirmButtonText: 'OK',
+                                text: 'Address deleted successfully',
+                                toast: true,
+                                position: 'top-right',
+                                showConfirmButton: false,
+                                timerProgressBar: true,
+                                timer: 2000
                             });
                             e.target.closest('.card').remove();
                         }else{
@@ -521,7 +525,6 @@ document.addEventListener("DOMContentLoaded", function() {
                             });
                         }
                     }else{
-                        
                         Swal.fire({
                             icon: 'success',
                             text: 'Declined delete address',
@@ -530,9 +533,8 @@ document.addEventListener("DOMContentLoaded", function() {
                             showConfirmButton: false,
                             timerProgressBar: true,
                             timer: 2000
-                        })
+                        });
                     }
-
                 } catch (error){
                     console.log('Error deleting address', error)
                 }
@@ -540,7 +542,129 @@ document.addEventListener("DOMContentLoaded", function() {
         })
 })
 
+//Coupon section..
+
+const coupons = '<%- JSON.stringify(coupons) %>';
+
+let couponsArray;
+try {
+    couponsArray = JSON.parse(coupons);
+} catch (error) {
+    console.error('Failed to parse coupons:', error);
+    couponsArray = [];  
+}
 
 
+  document.getElementById("addCoupon").addEventListener("click", function() {
+
+    const couponOptions = couponsArray.map((coupon, index) => {
+      return `
+        <div style="width: 48%; border: 2px dashed #ffa500; border-radius: 10px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; background: #f9f9f9; position: relative; box-sizing: border-box;">
+          <div style="display: flex; align-items: center; margin-bottom: 5px;">
+            <input type="radio" id="coupon${index}" name="selectedCoupon" value="${index}" style="margin-right: 10px; width: 16px; height: 16px;">
+            <label for="coupon${index}" style="font-weight: bold; color: #ff6b00; font-size: 16px; margin: 0;">
+              ${coupon.coupon_name}
+            </label>
+          </div>
+          <p style="font-size: 13px; margin: 4px 0; color: #666; text-align: left;">${coupon.coupon_description}</p>
+          <div style="text-align: center; margin-bottom: 5px;">
+            <span style="font-weight: bold; color: #333; font-size: 13px;">Code: ${coupon.coupon_code}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <div>
+              <span style="color: #008000; font-weight: bold; font-size: 14px;">${coupon.coupon_discount}% OFF</span><br>
+              <small style="font-size: 11px;">(Max ₹${coupon.coupon_max_amount})</small>
+            </div>
+            <div>
+              <span style="color: #555; font-size: 13px;">Min Purchase: ₹${coupon.coupon_min_amount}</span><br>
+              <span style="color: #555; font-size: 13px;">Expires: ${coupon.coupon_expires}</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    Swal.fire({
+      title: 'Select a Coupon',
+      html: `<div style="display: flex; flex-wrap: wrap; gap: 5px;">${couponOptions}</div>`,
+      showCancelButton: true,
+      confirmButtonText: 'Apply Coupon',
+      preConfirm: () => {
+        const selectedCouponIndex = document.querySelector('input[name="selectedCoupon"]:checked');
+        if (!selectedCouponIndex) {
+          Swal.showValidationMessage('Please select a coupon to apply');
+          return false;
+        }
+        return couponsArray[selectedCouponIndex.value];
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const selectedCoupon = result.value;
+
+        fetch('/apply_coupon', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ selectedCoupon })
+        })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            Swal.fire({
+              icon: 'success',
+              text: 'Coupon Applied Successfully!',
+              toast: true,
+              position: 'top-right',
+              showConfirmButton: false,
+              timer: 3000
+            });
+
+            window.location.reload();
+            renderOrderSummary(selectedCoupon);
+          } else {
+            Swal.fire({
+              icon: 'error',
+              text: 'Coupon could not be applied.',
+            });
+          }
+        });
+      }
+    });
+  });
+
+  function renderOrderSummary(appliedCoupon) {
+    const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const gst = subtotal * 0.18;
+
+    let discountAmount = 0;
+    if (appliedCoupon && subtotal >= appliedCoupon.coupon_min_amount) {
+      discountAmount = Math.min(
+        (subtotal * appliedCoupon.coupon_discount) / 100,
+        appliedCoupon.coupon_max_amount
+      );
+    }
+
+    const total = subtotal + gst - discountAmount;
+
+    document.getElementById("orderSummary").innerHTML = `
+      <tr>
+        <td>Subtotal (Excluding Tax)</td>
+        <td class="text-right">₹${subtotal.toFixed(2)}</td>
+      </tr>
+      <tr>
+        <td>Taxes <span class="text-muted">(GST 18%)</span></td>
+        <td class="text-right">₹${gst.toFixed(2)}</td>
+      </tr>
+      ${discountAmount > 0
+        ? `<tr>
+            <td>Coupon Discount (${appliedCoupon.coupon_name})</td>
+            <td class="text-right">-₹${discountAmount.toFixed(2)}</td>
+          </tr>`
+        : ""}
+      <tr>
+        <td><strong>Total</strong></td>
+        <td class="text-right"><strong>₹${total.toFixed(2)}</strong></td>
+      </tr>
+    `;
+  }
 </script>
                                               

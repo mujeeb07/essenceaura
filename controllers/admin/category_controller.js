@@ -45,15 +45,6 @@ const add_category = async (req, res) => {
   }
 };
 
-const get_category_by_id = async (req, res) => {
-  try {
-    const category = await Category.findById(req.params.id);
-    return res.status(200).json(category);
-  } catch (error) {
-    return res.status(500).json({ error: "server error" });
-  }
-};
-
 const update_category = async (req, res) => {
   try {
     const { name, description, gender } = req.body;
@@ -79,6 +70,17 @@ const update_category = async (req, res) => {
     return res.status(500).json({ error: "Error updating category" });
   }
 };
+
+const get_category_by_id = async (req, res) => {
+  try {
+    const category = await Category.findById(req.params.id);
+    return res.status(200).json(category);
+  } catch (error) {
+    return res.status(500).json({ error: "server error" });
+  }
+};
+
+
 
 const soft_delete_category = async (req, res) => {
   try {

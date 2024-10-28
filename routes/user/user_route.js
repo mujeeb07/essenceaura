@@ -9,6 +9,7 @@ const shop_page_controller = require("../../controllers/user/shop_page_controlle
 const checkout_controller = require("../../controllers/user/checkout_controller");
 const forgot_password_controller = require("../../controllers/user/forgot_password_controller");
 const user_details = require("../../controllers/user/user_details_controller");
+const wishlist_controller = require("../../controllers/user/wishlist_controller");
 
 //middleware
 const is_authenticated = require("../../middleware/auth");
@@ -54,6 +55,11 @@ user_route.post("/shop_cart", user_blocked, is_authenticated, cart_controller.sh
 user_route.post("/cart/update-quantity", user_blocked, is_authenticated, cart_controller.update_quantity);
 user_route.delete("/cart/remove/:id", user_blocked, is_authenticated, cart_controller.remove_item);
 
+//wishlist
+user_route.get('/wishlist', user_blocked, is_authenticated, wishlist_controller.load_wishlist);
+user_route.post('/wishlist/add', user_blocked, is_authenticated, wishlist_controller.add_to_wishlist)
+user_route.delete('/wishlist/remove', user_blocked, is_authenticated, wishlist_controller.wishlist_remove_item)
+
 //shoping page
 user_route.get("/shoping_page", shop_page_controller.load_shop_page);
 user_route.post("/filter_products", shop_page_controller.filter_items);
@@ -62,6 +68,7 @@ user_route.post("/filter_products", shop_page_controller.filter_items);
 user_route.get("/checkout", user_blocked, is_authenticated, checkout_controller.checkout);
 user_route.post("/checkout", user_blocked, is_authenticated, checkout_controller.post_checkout);
 user_route.get('/order_confirmation', user_blocked, is_authenticated, checkout_controller.order_confirmation);
+user_route.post('/apply_coupon', user_blocked, is_authenticated, checkout_controller.apply_coupon)
 
 //order
 user_route.get('/my_orders', user_blocked, is_authenticated, user_controller.load_my_orders)

@@ -5,13 +5,14 @@ const brand_controller = require("../../controllers/admin/brand_controller");
 const product_controller = require('../../controllers/admin/product_controller');
 const category_controller = require("../../controllers/admin/category_controller");
 const user_controller = require("../../controllers/admin/user_controller");
-const admin_auth = require("../../middleware/admin_auth")
+const coupon_controller = require('../../controllers/admin/coupon_controller');
+const admin_auth = require("../../middleware/admin_auth");
 
 // Admin.
 admin_route.get("/", admin_controller.load_admin_login);
 admin_route.post("/", admin_controller.admin_login);
 admin_route.get('/dashboard', admin_auth, admin_controller.admin_dashboard);
-admin_route.get("/logout", admin_controller.admin_logout)
+admin_route.get("/logout", admin_controller.admin_logout);
 
 //users
 admin_route.get('/users', admin_auth, user_controller.users_list);
@@ -42,6 +43,11 @@ admin_route.get('/get_category/:id', admin_auth, category_controller.get_categor
 admin_route.put('/update_category/:id', admin_auth, category_controller.update_category);
 admin_route.put('/soft_delete_category/:id', admin_auth, category_controller.soft_delete_category);
 
-
-
+// Coupon
+admin_route.get('/coupon_management', admin_auth, coupon_controller.load_coupon_management);
+admin_route.get('/create_coupon', admin_auth, coupon_controller.load_coupon_create_page);
+admin_route.post('/activation', admin_auth, coupon_controller.activation_coupon);
+admin_route.post('/create_coupon', admin_auth, coupon_controller.coupon_create_page);
+admin_route.get('/edit_coupon', admin_auth, coupon_controller.edit_coupon);
+admin_route.post('/edit_coupon', admin_auth, coupon_controller.update_coupon)
 module.exports = admin_route;

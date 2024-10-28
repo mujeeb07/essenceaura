@@ -3,12 +3,12 @@ const mongoose = require('mongoose');
 
 const user_blocked = async (req, res, next) => {
     try { 
-        console.log("Session User:", req.session.user);
-        console.log("Request User:", req.session.passport ? req.session.passport.user : "Passport user not found");
-        console.log("Complete session object:", req.session);
+        // console.log("Session User:", req.session.user);
+        // console.log("Request User:", req.session.passport ? req.session.passport.user : "Passport user not found");
+        // console.log("Complete session object:", req.session);
         const user = req.session.user || (req.session.passport && req.session.passport.user);
         if (!user) {
-            console.log("No user found in session.");
+            // console.log("No user found in session.");
             return res.redirect('/login');
         }
         
@@ -19,12 +19,9 @@ const user_blocked = async (req, res, next) => {
         }else{
             userId = user
         }
-         
-        console.log("User ID for query:", userId);
-
+        // console.log("User ID for query:", userId);
         const user_data = await User.findOne({ _id: userId });
-        console.log("Fetched user data:", user_data);
-
+        // console.log("Fetched user data:", user_data);
         if (!user_data || !user_data.is_active) {
             console.log("User is either not found or is blocked.");
             return res.redirect('/login');

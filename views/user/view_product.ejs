@@ -88,9 +88,7 @@
                                     </h2>
                                     <div class="product-detail-rating">
                                         <div class="pro-details-brand">
-                                            <span>
-                                                 Brand: <a href="shop-grid-right.html"><%= product.brand.brandName %></a>
-                                            </span>
+                                            <span> Brand : <%= product.brand.brandName %></span>
                                         </div>
                                         <div class="product-rate-cover text-end">
                                             <div class="product-rate d-inline-block">
@@ -159,8 +157,7 @@
                                     <div class="detail-extralink">
                                         <div class="product-extra-link2">
                                             <button id="shop_cart" class="button button-add-to-cart" >Add to cart</button>
-                                            <a aria-label="Add To Wishlist" class="action-btn hover-up"
-                                                href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                            <a aria-label="Add To Wishlist" id="product-<%= product._id %>" name="productId" value="<%= product._id %>" class="action-btn hover-up"><i class="fi-rs-heart"></i></a>
                                             <a aria-label="Compare" class="action-btn hover-up"
                                                 href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                         </div>
@@ -210,10 +207,6 @@ function updateQuantity(change) {
   value = Math.max(1, Math.min(value, 5));
   input.value = value;
 }
-
-
-
-
 
 document.getElementById("shop_cart").addEventListener("click", async (event) => {
     event.preventDefault();
@@ -273,6 +266,58 @@ document.getElementById("shop_cart").addEventListener("click", async (event) => 
             confirmButtonText: 'OK'
         });
     }
+});
+
+    document.querySelectorAll('a[aria-label="Add To Wishlist"]').forEach(button => {
+    button.addEventListener('click', async function (event) {
+        event.preventDefault();
+        try {
+            const productId = this.getAttribute('value');
+            console.log("Product id: ", productId);
+            const response = await fetch('/wishlist/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ productId: productId })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                Swal.fire({
+                    icon: 'success',
+                    text: 'Product added to wishlist',
+                    toast: true,
+                    position: 'top-right',
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    timer: 2000
+                });
+            } else {
+                const errorData = await response.json();
+                Swal.fire({
+                icon: 'error',
+                text: 'Something went wrong adding to wishlist',
+                toast: true,
+                position: 'top-right',
+                showConfirmButton: false,
+                timerProgressBar: true,
+                timer: 2000
+            });
+            }
+        } catch (error) {
+            console.error('Error adding product to wishlist.', error);
+            Swal.fire({
+                icon: 'error',
+                text: 'Error while adding to wishlist',
+                toast: true,
+                position: 'top-right',
+                showConfirmButton: false,
+                timerProgressBar: true,
+                timer: 2000
+            });
+        }
+    });
 });
 
 

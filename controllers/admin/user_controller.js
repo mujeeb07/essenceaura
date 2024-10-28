@@ -39,7 +39,7 @@ const users_list = async (req, res) => {
 const orders = async (req, res) => {
 
     try {
-      const orders = await Orders.find().populate('user')
+      const orders = await Orders.find().populate('user').sort({_id:-1});
       // console.log(orders);
       
         return res.status(200).render("admin/orders",  {orders}  );
@@ -61,7 +61,7 @@ const load_order_details = async (req, res) => {
 }
 
 const order_details = async(req, res) => {
-  console.log('...................Hello...................');
+  // console.log('...................Hello...................');
   const { orderId, status } = req.body
   console.log("status body: ", orderId, status);
   try {

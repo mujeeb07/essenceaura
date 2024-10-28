@@ -58,6 +58,10 @@ const order_schema = new mongoose.Schema({
     type: String,
     required: true
   },
+  coupon_amount: {
+    type: Number,
+    default: 0
+  },
   total: {
     type: String,
     reqwiured: true

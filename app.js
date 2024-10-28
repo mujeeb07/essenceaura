@@ -15,8 +15,6 @@ connect_db();
 
 app.use(session_config);
 
-
-
 const PORT = process.env.PORT;
 app.set('view engine', 'ejs');
 app.use(express.json());

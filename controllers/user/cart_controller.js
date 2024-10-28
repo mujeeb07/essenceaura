@@ -6,12 +6,8 @@ const load_shop_cart = async (req, res) => {
   try {
     
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user)
-
-    console.log("load shop cart:", user);
-
-
+    // console.log("load shop cart:", user);
     const cart = await Cart.findOne({ user: user }).populate("item.product");
-
 
     return res.render("user/shop_cart", { cart });
 
@@ -110,9 +106,7 @@ const update_quantity = async (req, res) => {
 
 const remove_item = async (req, res) => {
   try {
-
     const cartItem = req.params.id;
-
     const updatedCart = await Cart.findOneAndUpdate(
       { "item._id": cartItem },
       { $pull: { item: { _id: cartItem } } },

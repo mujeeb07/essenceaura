@@ -501,7 +501,7 @@ const load_my_orders = async(req, res) => {
   try {
     
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
-    const my_orders = await orders.find({ user: user });
+    const my_orders = await orders.find({ user: user }).sort({_id:-1})
     // console.log("MY ORDERS DATA: ", my_orders)
 
     return res.status(200).render('user/my_orders', { my_orders } );
@@ -515,15 +515,14 @@ const load_my_orders = async(req, res) => {
 const cancel_order = async (req, res) => {
   const { id } = req.params;
   try {
-
     const order_data = await orders.findByIdAndUpdate({ _id:id },
       {$set: { order_status:'Cancelled' }}
     );
-    order_data.save()
-
-    
+    order_data.save();
+    return res.status(200).json({ message:"Order Cancelled Successfully",success:true });
   } catch (error) {
-    
+    console.log("Something went wrong while cancel order", error);
+    return res.status.status(500).json({ message:"Something went wrong while cancel order",error })
   }
 }
 
