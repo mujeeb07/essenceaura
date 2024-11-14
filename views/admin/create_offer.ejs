@@ -1,0 +1,180 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+
+    <main class="main-wrap">
+        <%- include('../layouts/admin/navbar.ejs') %>
+            <section class="content-main">
+                <div class="content-header">
+                    <div>
+                        <h2 class="content-title card-title">Create new offer</h2>
+                        <p class="mt-15">Add the details following for create new offer</p>
+                    </div>
+                </div>
+                <div class="card col-12">
+                    <div class="card-body">
+                        <div class="row">
+                            <div>
+                                <form method="post" id="formOfferData"  enctype="multipart/form-data">
+                                    <div class="mb-4">
+                                        <label for="offer_name" class="form-label">Offer Name</label>
+                                        <input type="text" name="offer_name" placeholder="offer name" class="form-control" id="offer_name" />
+                                    </div>
+                                    <div class="mb-4">
+                                        <label class="form-label">Product</label>
+                                         <select class="form-select" name="product" id="product">
+                                            <option value="">Select a product</option>
+                                            <% if( offer_products.length > 0 ) { %>
+                                                <% offer_products.forEach(product =>{ %>
+                                                    <option value="<%= product._id %>"><%= product.name %></option>
+                                                <% }) %>
+                                            <% } else { %>
+                                                <option>No prodcut found</option>
+                                            <% } %>
+                                         </select>
+                                    </div>
+                                    <div class="row d-flex align-items-center">
+                                        <div class="col-md-4 col-lg-4 mb-4">
+                                            <label class="form-label">Discount percentage</label>
+                                            <input type="text" placeholder="Enter the percentage of discount" id="discount_percentage" name="discount_percentage" class="form-control" />
+                                        </div>
+                                    
+                                        <div class="col-md-4 col-lg-4 mb-4">
+                                            <label class="form-label">Start Date</label>
+                                            <input type="date" placeholder="Select the start date" id="start_date" name="start_date" class="form-control" />
+                                        </div>
+                                    
+                                        <div class="col-md-4 col-lg-4 mb-4">
+                                            <label class="form-label">Expiry Date</label>
+                                            <input type="date" placeholder="Type here" id="expiry_date" name="expiry_date" class="form-control" />
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="d-grid">
+                                        <button class="btn btn-primary">Create New Offer</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div> <!-- .row // -->
+                    </div> <!-- card body .// -->
+                </div> <!-- card .// -->
+            </section> <!-- content-main end// -->
+    </main>
+    
+<%- include('../layouts/admin/footer.ejs') %>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("formOfferData");
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            clearErrors();
+
+            const isValid = validateForm();
+            if (isValid) {
+                submitFormData();
+            }
+        });
+
+        function validateForm() {
+            let isValid = true;
+
+            const offerName = document.getElementById('offer_name').value.trim();
+            if (!offerName) {
+                isValid = false;
+                showError('offer_name', 'Offer name is required.');
+            }
+
+            const product = document.getElementById('product').value;
+            if (!product) {
+                isValid = false;
+                showError('product', 'Please select a product.');
+            }
+
+            const discount = document.getElementById('discount_percentage').value.trim();
+            if (!discount || isNaN(discount) || discount <= 0) {
+                isValid = false;
+                showError('discount_percentage', 'Please enter a valid discount percentage.');
+            }
+
+            const startDate = document.getElementById('start_date').value;
+            if (!startDate) {
+                isValid = false;
+                showError('start_date', 'Please select a start date.');
+            }
+
+            const expiryDate = document.getElementById('expiry_date').value;
+            if (!expiryDate) {
+                isValid = false;
+                showError('expiry_date', 'Please select an expiry date.');
+            } else if (expiryDate <= startDate) {
+                isValid = false;
+                showError('expiry_date', 'Expiry date must be after the start date.');
+            }
+
+            return isValid;
+        }
+
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.style.color = 'red';
+                errorDiv.textContent = message;
+                element.parentNode.insertBefore(errorDiv, element.nextSibling);
+            }
+        }
+
+        function clearErrors() {
+            const errorMessages = document.querySelectorAll('.error-message');
+            errorMessages.forEach((error) => error.remove());
+        }
+
+        async function submitFormData() {
+            const offerData = {
+                offer_name: document.getElementById('offer_name').value.trim(),
+                product: document.getElementById('product').value,
+                discount_percentage: document.getElementById('discount_percentage').value.trim(),
+                start_date: document.getElementById('start_date').value.trim(),
+                expiry_date: document.getElementById('expiry_date').value.trim()
+            };
+
+            try {
+                const response = await fetch("/admin/create_offer", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(offerData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        text: 'Offer created successfully.',
+                        toast: true,
+                        position: 'top-right',
+                        showConfirmButton: false,
+                        timerProgressBar: true,
+                        timer: 3000
+                    });
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        text: 'Failed to create offer. Please try again.',
+                    });
+                }
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    text: 'An error occurred while creating the offer.',
+                });
+            }
+        }
+    });
+</script>

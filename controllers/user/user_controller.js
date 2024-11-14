@@ -125,7 +125,7 @@ const register_user = async (req, res) => {
 
   } catch (error) {
 
-    res.status(500).json({ message: "error while sending email", error });
+    return res.status(500).json({ message: "error while sending email", error });
 
   }
 
@@ -271,7 +271,7 @@ const load_home_page = async (req, res) => {
 
   } catch (error) {
 
-    console.log("error while rendering home page.");
+    console.log("error while rendering home page.", error);
 
   }
 };
@@ -330,7 +330,7 @@ const user_logout = async (req, res) => {
     return res.status(204).redirect("/login");
 
   } catch (error) {
-    res.status(500).json({ message: "error while login out", error });
+    return res.status(500).json({ message: "error while login out", error });
   }
 
 };
@@ -347,9 +347,14 @@ const view_product = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    return res.status(200).render("user/view_product", { product });
+    const hasOffer = product.product_offer && product.product_offer.offer_status && new Date(product.product_offer.offer_expire_date) > new Date();
+    const actualPrice = product.variants[0].price;
+    const offerPrice = hasOffer ? (actualPrice - (actualPrice * product.product_offer.offer_discount_percentage / 100)).toFixed(2) : null;
+    // console.log('Product data:', product)
+    return res.status(200).render("user/view_product", { product, actualPrice, offerPrice });
 
   } catch (error) {
+    console.log("Error while rendering the product view page", error);
     return res.status(500).json({ message: "Error while view product", error });
   }
 };

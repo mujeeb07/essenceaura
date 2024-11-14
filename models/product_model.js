@@ -1,4 +1,35 @@
 const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const ObjectId = mongoose.ObjectId;
+
+const offer_schema = new Schema({
+    offer_name: {
+        type: String,
+        required: true
+    },
+    offer_discount_percentage: {
+        type: Number,
+        required: true,
+        min: 0,
+        max: 100
+    },
+    offer_discount_amount: {
+        type: Number
+    },
+    offer_start_date: {
+        type: Date,
+        required: true
+    },
+    offer_expire_date: {
+        type: Date,
+        required: true
+    },
+    offer_status: {
+        type: Boolean,
+        default: true
+    }
+}, { timestamps:true } )
+
 
 const product_schema = new mongoose.Schema({
     category: {
@@ -36,6 +67,12 @@ const product_schema = new mongoose.Schema({
                 type: Number,
                 required: true,
                 min: 0
+            },
+            sale_price_after_discount: {
+                type: Number
+            },
+            offer_discount_amount: {
+                type: Number
             }
         }
     ],
@@ -52,7 +89,8 @@ const product_schema = new mongoose.Schema({
     is_blocked: {
         type: Boolean,
         default: false
-    }
+    },
+    product_offer: offer_schema
 }, { timestamps: true });
 
 module.exports = mongoose.model('product', product_schema);

@@ -1,6 +1,30 @@
 <%- include('../layouts/admin/header.ejs') %>
   <%- include('../layouts/admin/sidebar.ejs') %>
 
+  <style>
+    .pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.pagination a {
+  padding: 5px 10px;
+  margin: 0 3px;
+  text-decoration: none;
+}
+
+.pagination .btn-outline-secondary {
+  border: 1px solid #ccc;
+  background-color: #f8f9fa;
+}
+
+.pagination .btn-sm {
+  font-size: 14px;
+}
+
+  </style>
+
     <main class="main-wrap">
       <%- include('../layouts/admin/navbar.ejs') %>
         <section class="content-main">
@@ -95,6 +119,24 @@
                 </article>
                 <!-- itemlist  .// -->
                 <% }) %>
+
+                <div class="pagination">
+                  <% if (current_page > 1) { %>
+                    <a href="?page=<%= current_page - 1 %>" class="btn btn-sm btn-outline-secondary">Previous</a>
+                  <% } %>
+                
+                  <% for (let i = 1; i <= total_pages; i++) { %>
+                    <a href="?page=<%= i %>" class="btn btn-sm <%= i === current_page ? 'btn-primary' : 'btn-outline-secondary' %>">
+                      <%= i %>
+                    </a>
+                  <% } %>
+                
+                  <% if (current_page < total_pages) { %>
+                    <a href="?page=<%= current_page + 1 %>" class="btn btn-sm btn-outline-secondary">Next</a>
+                  <% } %>
+                </div>
+                
+
             </div>
 
           </div>

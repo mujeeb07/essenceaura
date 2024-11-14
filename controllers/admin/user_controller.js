@@ -3,8 +3,14 @@ const Orders = require("../../models/order_model");
 
 const users_list = async (req, res) => {
     try {
-      const users = await user.find({ is_admin: false });
-      return res.status(200).render("admin/users", { user_data: users });
+      const page = parseInt(req.query.page) || 1 ;
+      const users_per_page = 5;
+      const total_users = await user.countDocuments();
+      const total_pages = Math.ceil(total_users / users_per_page);
+
+      const users = await user.find({ is_admin: false }).skip((page - 1) * users_per_page).limit(users_per_page);
+
+      return res.status(200).render("admin/users", { user_data: users, current_page: page, total_pages: total_pages });
     } catch (error) {
       return res.status(500).json({ message: "Internal server side error." });
     }

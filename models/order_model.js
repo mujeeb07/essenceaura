@@ -51,14 +51,15 @@ const order_schema = new mongoose.Schema({
     }
   ],
   sub_total: {
-    type: String,
+    type: Number,
     required: true
   },
   tax: {
-    type: String,
+    type: Number,
     required: true
   },
-  coupon_amount: {
+
+  discount_amount: {
     type: Number,
     default: 0
   },
@@ -68,7 +69,7 @@ const order_schema = new mongoose.Schema({
   },
   payment_method: {
     type: String,
-    enum: ['COD', 'Online'],
+    enum: ['COD', 'online'],
     required: true
   },
   order_status: {

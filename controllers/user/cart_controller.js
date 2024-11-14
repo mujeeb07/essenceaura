@@ -1,23 +1,21 @@
 const Cart = require("../../models/cart_model");
 const mongoose = require("mongoose");
-
+const Product = require("../../models/product_model")
 
 const load_shop_cart = async (req, res) => {
   try {
     
-    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user)
-    // console.log("load shop cart:", user);
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
     const cart = await Cart.findOne({ user: user }).populate("item.product");
+    // console.log("Cartasdf:",cart);
 
     return res.render("user/shop_cart", { cart });
 
   } catch (error) {
-    console.log("load shop cart catch block.");
     console.error("Error fetching cart:", error);
     return res.status(500).json({ message: "Unable to fetch cart details" });
   }
 };
-
 
 const shop_cart = async (req, res) => {
   try {
@@ -25,31 +23,34 @@ const shop_cart = async (req, res) => {
 
     const { product_id, price, volume, quantity } = req.body;
 
+    const productData = await Product.findById(product_id)
+    const sale_price_after_discount = productData.variants.find((variant) => variant.volume.toString() === volume)?.sale_price_after_discount || null;
+
+    // console.log("shop cart product price:", price)
+
     if (!user) {
       return res.status(401).json({ message: "User not authenticated" });
     }
 
     let cart = await Cart.findOne({ user: user });
 
-    if (cart) {
-      const existingItem = cart.item.find(
-        (i) => i.product.toString() == product_id && i.volume == volume
-      );
+      if (cart) {
+          const existingItem = cart.item.find( (i) => i.product.toString() == product_id && i.volume == volume );
 
-      if (existingItem) {
-        existingItem.quantity += quantity;
+          if (existingItem) {
+              existingItem.quantity += quantity;
+          } else {
+              cart.item.push({ product: product_id, price,offer_price:sale_price_after_discount, volume, quantity });
+          } 
+
+        cart = await cart.save();
+
       } else {
-        cart.item.push({ product: product_id, price, volume, quantity });
+        cart = new Cart({ user: user, item: [{ product: product_id, price,offer_price:sale_price_after_discount, volume, quantity }] });
+        await cart.save();
       }
 
-      cart = await cart.save();
-    } else {
-      cart = new Cart({
-        user: user,
-        item: [{ product: product_id, price, volume, quantity }],
-      });
-      await cart.save();
-    }
+    console.log("Cart Data:", cart );
 
     return res.status(200).json({ message: "Product added to cart successfully", cart });
   } catch (error) {
@@ -57,52 +58,99 @@ const shop_cart = async (req, res) => {
   }
 };
 
+
+
 const update_quantity = async (req, res) => {
   try {
+    const user = req.session.user || req.session.passport.user;
 
-    const { productId, productSize, quantity } = req.body;
+    const productId = String(req.body.productId);
+    const productSize = Number(req.body.productSize);
+    const quantity = Number(req.body.quantity);
 
-    const updatedCart = await Cart.findOneAndUpdate(
-      {
-        user: req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user),
-        "item.product": productId,
-        "item.volume": productSize,
-      },
-      { $set: { "item.$.quantity": quantity } },
-      { new: true }
-    );
+    console.log("User ID:", user);
+    console.log("Data from the body:", productId, productSize, quantity);
+
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({ message: "Invalid productId format", success: false });
+    }
+
+    // const updatedCart = await Cart.findOneAndUpdate(
+    //   {
+    //     user: new mongoose.Types.ObjectId(user),
+    //     "item.product": new mongoose.Types.ObjectId(productId),
+    //     "item.volume": productSize,
+    //   },
+    //   { $set: { "item.$.quantity": quantity } },
+    //   { new: true }
+    // );
+    // console.log("123456",updatedCart)
+
+    const updatedCart = await Cart.findOne({ user: user })
+    for(let item of updatedCart.item){
+      if( item.volume == productSize && item.product == productId ){
+        item.quantity = quantity
+      }
+    }
+
+    await updatedCart.save();
+
+    console.log("UPDATED CART:",updatedCart)
 
     if (!updatedCart) {
-      return res.status(400).json({ message: "Cart or product not found", success: false });
+      return res.status(404).json({ message: "Cart not found", success: false });
     }
 
     const cartItem = updatedCart.item.find(
-      (i) =>
-        i.product.toString() === productId &&
-        i.volume.toString() === productSize
+      (i) => i.product.toString() === productId && i.volume === productSize
     );
 
     if (!cartItem) {
-      return res.status(400).json({ message: "Product not found in cart", success: false });
+      return res.status(404).json({ message: "Cart item not found", success: false });
     }
 
-    const subtotal = cartItem.price * quantity;
-    const total = updatedCart.item.reduce((acc, item) => 
-      acc + item.price * item.quantity,
-    0);
+    // console.log("Cart Item:", cartItem);
+
+    let subtotal;
+    if(cartItem.offer_price){
+      subtotal = cartItem.offer_price * quantity;
+    }else{
+      subtotal = cartItem.price * quantity;
+    }
+
+    // console.log("Subtotal:", subtotal)
+  
 
     return res.status(200).json({
+      subtotal,
       message: "Quantity updated successfully",
       success: true,
-      price: cartItem.price,
-      subtotal,
-      total,
     });
   } catch (error) {
     console.error("Error updating quantity:", error);
     return res.status(500).json({ message: "An error occurred", success: false });
   }
 };
+
+const get_stock = async(req, res) => {
+  try {
+    const { productId, volume } = req.params;
+    const product = await Product.findById(productId);
+    console.log("Product data get stock:", product)
+    const variant = product.variants.find((v) => v.volume === parseInt(volume));
+
+    if(!variant || variant === 0){
+      return res.status(404).json({ success: false, message:"Product variant not found."});
+    }
+
+    return res.status(200).json({ success: true, stock: variant.stock })
+
+  } catch (error) {
+    console.log("Error fetching stock:", error);
+    return res.status(500).json({ success: false, message: "Unable to fetch stock." });
+  }
+
+}
 
 const remove_item = async (req, res) => {
   try {
@@ -127,4 +175,5 @@ module.exports = {
   load_shop_cart,
   update_quantity,
   remove_item,
+  get_stock
 };

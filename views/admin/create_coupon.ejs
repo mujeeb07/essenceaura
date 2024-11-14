@@ -199,7 +199,6 @@
                         timerProgressBar: true,
                         timer: 3000
                     });
-                    
                     form.reset();
                 } else {
                     Swal.fire({
@@ -207,11 +206,11 @@
                         text: 'Failed to create coupon. Please try again.',
                     });
                 }
-
             } catch (error) {
                 Swal.fire({
                     icon: 'error',
-                    text: 'An error occurred while creating the coupon.',
+                    title: 'An error occurred while creating the coupon.',
+                    text: error
                 });
             }
         }

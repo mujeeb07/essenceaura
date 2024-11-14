@@ -42,9 +42,18 @@
                                                 <span>70%</span>
                                             </span>
                                         </div>
+                                        <% 
+                                            const hasOffer = product.product_offer && product.product_offer.offer_status && new Date(product.product_offer.offer_expire_date) > new Date();
+                                            const actualPrice = product.variants[0].price;
+                                            const offerPrice = hasOffer ? (actualPrice - (actualPrice * product.product_offer.offer_discount_percentage / 100)).toFixed(2) : null;
+                                        %>                                                                                              
                                         <div class="product-price">
-                                            <span>₹<%= product.variants[0].price %> </span>
-                                            <span class="old-price">₹<%= product.variants[0].price + 4000 %></span>
+                                            <% if (hasOffer) { %>
+                                                <span>₹<%= offerPrice %></span>
+                                                <span class="old-price">₹<%= actualPrice %></span>
+                                            <% } else { %>
+                                                <span>₹<%= actualPrice %></span>
+                                            <% } %>
                                         </div>
                                         <div class="product-action-1 show">
                                             <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html">
@@ -67,7 +76,6 @@
     document.addEventListener('DOMContentLoaded', () => {
         let success_message = '<%= success_message %>';
 
-       
         if(success_message){
             Swal.fire({
                 icon: 'success',
@@ -76,7 +84,7 @@
                 position: 'top-right',
                 showConfirmButton: false,
                 timerProgressBar: true,
-                timer: 3000
+                timer: 1500
                 });
         }
     })

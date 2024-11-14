@@ -1,138 +1,167 @@
 <%- include('../layouts/user/header.ejs') %>
 
-  <link rel="stylesheet" href="/user_asset/css/main.css?v=3.4" />
-  <main class="main">
-    <section class="mt-50 mb-50">
-      <div class="container">
-        <div class="row">
-          <div class="col-12">
-            <% if (!cart || !cart.item || cart.item.length===0) { %>
-              <div class="cart-empty text-center" style="padding: 50px 0">
-                <h6 class="display-4" style="color: #555">Your Cart is Empty</h6>
-                <p class="text-muted" style="font-size: 18px; margin-bottom: 30px">
-                  Looks like you haven't added anything to your cart yet.
-                </p>
-                <a class="btn btn-primary btn-lg" href="/" style="padding: 12px 30px; font-size: 18px">
-                  <i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping
-                </a>
-              </div>  
-              <% } else { %>
+<link rel="stylesheet" href="/user_asset/css/main.css?v=3.4" />
+
+<main class="main">
+  <section class="mt-50 mb-50">
+    <div class="container">
+      <div class="row">
+        <div class="col-12">
+          <% if (!cart || !cart.item || cart.item.length===0) { %>
+          <div class="cart-empty text-center" style="padding: 50px 0">
+            <h6 class="display-4" style="color: #555">Your Cart is Empty</h6>
+            <p class="text-muted" style="font-size: 18px; margin-bottom: 30px">
+              Looks like you haven't added anything to your cart yet.
+            </p>
+            <a
+              class="btn btn-primary btn-lg"
+              href="/"
+              style="padding: 12px 30px; font-size: 18px"
+            >
+              <i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping
+            </a>
+          </div>
+          <% } else { %>
+          <h1 class="text-center text-align mb-50">Cart</h1>
+          <div class="table-responsive">
+            <table class="table shopping-summery text-center clean">
+              <thead>
+                <tr class="main-heading">
+                  <th scope="col">Image</th>
+                  <th scope="col">Name</th>
+                  <th scope="col">Size</th>
+                  <th scope="col">Price</th>
+                  <th scope="col">Quantity</th>
+                  <th scope="col">Subtotal</th>
+                  <th scope="col">Remove</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% cart.item.forEach(function(cartItem) { %>
+                <tr>
+                  <td class="image product-thumbnail">
+                    <img
+                      src="<%= cartItem.product.product_card_image %>"
+                      alt="<%= cartItem.product.name %>"
+                    />
+                  </td>
+                  <td class="product-des product-name">
+                    <h5 class="product-name">
+                      <a href="/product/<%= cartItem.product._id %>">
+                        <%= cartItem.product.name %>
+                      </a>
+                    </h5>
+                    <p class="font-xs"><%= cartItem.product.description %></p>
+                  </td>
+                  <td>
+                    <span> <%= cartItem.volume %> ML </span>
+                  </td>
+                  <td class="price" data-title="Price">
+                    <% const productOffer = cartItem.product.product_offer;
+                    const today = new Date(); const offerIsValid =
+                    productOffer?.offer_status && new Date(productOffer.offer_start_date) <= today && today <= new Date(productOffer.offer_expire_date);
+                    const variant = cartItem.product.variants.find(v => v.volume === cartItem.volume); 
+                    const displayPrice = offerIsValid && variant?.sale_price_after_discount ? variant.sale_price_after_discount : variant?.price; %>
+                    <span>₹<%= displayPrice.toFixed(2) %></span>
+                  </td>
+
+                  <td class="text-center" data-title="Quantity">
+                    <div class="detail-qty border radius m-auto">
+                      <a
+                        href="#"
+                        class="qty-down"
+                        data-product-id="<%= cartItem.product._id %>"
+                        data-product-size="<%= cartItem.volume %>"
+                        ><i class="fi-rs-angle-small-down"></i
+                      ></a>
+                      <span
+                        class="qty-val"
+                        id="qty-<%= cartItem.product._id %>-<%= cartItem.volume %>"
+                      >
+                        <%= cartItem.quantity %>
+                      </span>
+                      <a
+                        href="#"
+                        class="qty-up"
+                        data-product-id="<%= cartItem.product._id %>"
+                        data-product-size="<%= cartItem.volume %>"
+                        ><i class="fi-rs-angle-small-up"></i
+                      ></a>
+                    </div>
+                  </td>
+
+                  <td data-title="Subtotal">
+                    <% const subtotal = displayPrice * cartItem.quantity; %>
+                    <span id="subtotal-<%= cartItem.product._id %>-<%= cartItem.volume %>">₹<%= subtotal.toFixed(2) %></span>
+                  </td>
+
+                  <td class="action" data-title="Remove">
+                    <a
+                      href="/cart/remove/<%= cartItem._id %>"
+                      id="remove_item"
+                      class="text-muted"
+                    >
+                      <i class="fi-rs-trash"></i>
+                    </a>
+                  </td>
+                </tr>
+                <% }); %>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="cart-action text-end">
+            <a href="/checkout" class="btn mr-10 mb-sm-15"><i class="fi-rs-shuffle mr-10"></i>CheckOut</a>
+            <a class="btn" href="/shoping_page"><i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping</a>
+          </div>
+
+          <div class="divider center_icon mt-50 mb-50">
+            <i class="fi-rs-fingerprint"></i>
+          </div>
+
+          <div class="row mb-50">
+            <div class="col-lg-6 col-md-12">
+              <div class="border p-md-4 p-30 border-radius cart-totals">
+                <div class="heading_s1 mb-3">
+                  <h4>Cart Totals</h4>
+                </div>
                 <div class="table-responsive">
-                  <table class="table shopping-summery text-center clean">
-                    <thead>
-                      <tr class="main-heading">
-                        <th scope="col">Image</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Size</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Quantity</th>
-                        <th scope="col">Subtotal</th>
-                        <th scope="col">Remove</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <% cart.item.forEach(function(cartItem) { %>
-                        <tr>
-                          <td class="image product-thumbnail">
-                            <img src="<%= cartItem.product.product_card_image %>" alt="<%= cartItem.product.name %>" />
-                          </td>
-                          <td class="product-des product-name">
-                            <h5 class="product-name">
-                              <a href="/product/<%= cartItem.product._id %>">
-                                <%= cartItem.product.name %>
-                              </a>
-                            </h5>
-                            <p class="font-xs">
-                              <%= cartItem.product.description %>
-                            </p>
-                          </td>
-                          <td class="text-right">
-                            <span>
-                              <%= cartItem.volume %> ML
-                            </span>
-                          </td>
-                          <td class="price" data-title="Price">
-                            <span>₹<%= cartItem.price %></span>
-                          </td>
-
-                          <td class="text-center" data-title="Quantity">
-                            <div class="detail-qty border radius m-auto">
-                              <a href="#" class="qty-down" data-product-id="<%= cartItem.product._id %>"
-                                data-product-size="<%= cartItem.volume %>"><i class="fi-rs-angle-small-down"></i></a>
-                              <span class="qty-val" id="qty-<%= cartItem.product._id %>-<%= cartItem.volume %>">
-                                <%= cartItem.quantity %>
-                              </span>
-                              <a href="#" class="qty-up" data-product-id="<%= cartItem.product._id %>"
-                                data-product-size="<%= cartItem.volume %>"><i class="fi-rs-angle-small-up"></i></a>
-                            </div>
-                          </td>
-
-                          <td class="text-right" data-title="Subtotal">
-                            <span id="subtotal-<%= cartItem.product._id %>-<%= cartItem.volume %>">
-                              ₹<%= cartItem.price * cartItem.quantity %>
-                            </span>
-                          </td>
-
-                          <td class="action" data-title="Remove">
-                            <a href="/cart/remove/<%= cartItem._id %>" id="remove_item" class="text-muted">
-                              <i class="fi-rs-trash"></i>
-                            </a>
-                          </td>
-                        </tr>
-                        <% }); %>
-                    </tbody>
+                  <table class="table">
+                    <tr>
+                      <td class="cart_total_label">Shipping</td>
+                      <td class="cart_total_amount">
+                        <i class="ti-gift mr-5"></i> Free Shipping
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="cart_total_label">Total</td>
+                      <td class="cart_total_amount">
+                        <strong
+                          ><span
+                            id="cart-total"
+                            class="font-xl fw-900 text-brand"
+                          ></span
+                        ></strong>
+                      </td>
+                    </tr>
                   </table>
                 </div>
-
-                <div class="cart-action text-end">
-                  <a href="/checkout" class="btn mr-10 mb-sm-15"><i class="fi-rs-shuffle mr-10"></i>CheckOut</a>
-                  <a class="btn" href="/shoping_page"><i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping</a>
-                </div>
-
-                <div class="divider center_icon mt-50 mb-50">
-                  <i class="fi-rs-fingerprint"></i>
-                </div>
-
-                <div class="row mb-50">
-                  <div class="col-lg-6 col-md-12">
-                    <div class="border p-md-4 p-30 border-radius cart-totals">
-                      <div class="heading_s1 mb-3">
-                        <h4>Cart Totals</h4>
-                      </div>
-                      <div class="table-responsive">
-                        <table class="table">
-                          
-                          <tr>
-                            <td class="cart_total_label">Shipping</td>
-                            <td class="cart_total_amount">
-                              <i class="ti-gift mr-5"></i> Free Shipping
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class="cart_total_label">Total</td>
-                            <td class="cart_total_amount">
-                              <strong><span id="cart-total" class="font-xl fw-900 text-brand"></span></strong>
-                            </td>
-                          </tr>
-                        </table>
-                      </div>
-                      <a href="/checkout" class="btn">
-                        <i class="fi-rs-box-alt mr-10"></i> Proceed To CheckOut</a>
-                    </div>
-                  </div>
-                </div>
-                <% } %>
-                  <!-- End of the if-else block -->
+                <a href="/checkout"class="btn mr-10 mb-sm-15"><i class="fi-rs-shuffle mr-10"></i>Proceed To CheckOut</a>
+              </div>
+            </div>
           </div>
+          <% } %>
+          <!-- End of the if-else block -->
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
+</main>
 
 <script>
   document.addEventListener("DOMContentLoaded", function () {
-      const qtyUpButtons = document.querySelectorAll(".qty-up");
-      const qtyDownButtons = document.querySelectorAll(".qty-down");
+    const qtyUpButtons = document.querySelectorAll(".qty-up");
+    const qtyDownButtons = document.querySelectorAll(".qty-down");
 
     qtyUpButtons.forEach((button) => {
       button.addEventListener("click", function (e) {
@@ -153,52 +182,98 @@
     });
 
     function updateQuantity(productId, productSize, change) {
-      const qtyElement = document.getElementById(
-        `qty-${productId}-${productSize}`
-      );
+      const qtyElement = document.getElementById(`qty-${productId}-${productSize}`);
       let currentQty = parseInt(qtyElement.innerText);
+      console.log("FGHJKKKK ",currentQty)
       const maxQty = 5;
 
       if (currentQty + change > 0 && currentQty + change <= maxQty) {
-        const newQty = currentQty + change;
-
-        fetch("/cart/update-quantity", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            productId: productId,
-            productSize: productSize,
-            quantity: newQty,
-          }),
-        })
-          .then(response => response.json())
-          .then(data => {
+        console.log(`Fetching stock for Product ID: ${productId}, Volume: ${productSize}`);
+        fetch(`/cart/get-stock/${productId}/${productSize}`)
+          .then((response) => response.json())
+          .then((data) => {
             if (data.success) {
-              qtyElement.innerText = newQty;
-              const productPrice = data.price;
-              const newSubtotal = productPrice * newQty;
-              document.getElementById(
-                `subtotal-${productId}-${productSize}`
-              ).innerText = `₹${newSubtotal}`;
+              const availableStock = data.stock;
+              console.log("Available Stock:",availableStock)
+              if (currentQty + change > availableStock) {
+                Swal.fire({
+                  title: "Out of stock",
+                  text: `Only ${availableStock} items are in stock.`,
+                  icon: "warning",
+                  confirmButtonText: "OK",
+                });
+                return;
+              }
 
-              updateTotal();
+              const newQty = currentQty + change;
+              fetch("/cart/update-quantity", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  productId,
+                  productSize,
+                  quantity: newQty,
+                }),
+              })
+                .then((response) => response.json())
+                .then((data) => {
+                  console.log("Response Data:", data)
+                  if (data.success) {
+                    qtyElement.innerText = newQty;
+                    document.getElementById(
+                      `subtotal-${productId}-${productSize}`
+                    ).innerText = `₹${data.subtotal.toFixed(2)}`;
+                    updateTotal();
+                  }else{
+                    Swal.fire({
+                      title: "Error",
+                      text: data.message,
+                      icon: "error",
+                      confirmButtonText: "OK",
+                    });
+                  }
+                })
+                .catch((error) => console.error("Error updating quantity:", error));
+            }else{
+              Swal.fire({
+                title: "Error",
+                text: data.message,
+                icon: "error",
+                confirmButtonText: "OK",
+              });
             }
           })
-          .catch((error) => {
-            console.error("Error updating quantity:", error);
-          });
+          .catch((err) => console.error("Error fetching stock:", err))
       }
     }
 
     function updateTotal() {
       let total = 0;
       document.querySelectorAll('[id^="subtotal-"]').forEach((subtotalElement) => {
-        const subtotal = parseFloat(subtotalElement.innerText.replace("₹", ""));
-        total += subtotal;
-      });
-      document.getElementById("cart-total").innerText = `₹${total}`;
+      const subtotal = parseFloat(subtotalElement.innerText.replace("₹", "")) || 0;
+      total += subtotal;
+    });
+  document.getElementById("cart-total").innerText = `₹${total.toFixed(2)}`;
+}
+    document.addEventListener("DOMContentLoaded", calculateInitialTotal());
+
+    function calculateInitialTotal() {
+      const cartTotalElement = document.getElementById("cart-total");
+      if (cartTotalElement) {
+        let total = 0;
+        console.log(document.querySelectorAll('[id^="subtotal-"]'));
+        document
+          .querySelectorAll('[id^="subtotal-"]')
+          .forEach((subtotalElement) => {
+            console.log("subtotoal: ", subtotalElement);
+            const subtotal =
+              parseFloat(subtotalElement.innerText.replace("₹", "")) || 0;
+            total += subtotal;
+          });
+        cartTotalElement.innerText = `${total.toFixed(2)}`;
+      } else {
+        console.error("Element with ID 'cart-total' not found.");
+      }
     }
 
     document.querySelectorAll(".action a").forEach((removeButton) => {
@@ -212,31 +287,23 @@
             "Content-Type": "application/json",
           },
         })
-          .then(response => response.json())
+          .then((response) => response.json())
           .then((data) => {
             if (data.success) {
               this.closest("tr").remove();
               updateTotal();
+              window.location.reload();
             }
           })
-          window.location.reload()
           .catch((error) => {
             console.error("Error removing item:", error);
           });
       });
     });
-
-  calculateInitialTotal();
-
-    function calculateInitialTotal() {
-      let total = 0;
-      document.querySelectorAll('[id^="subtotal-"]').forEach((subtotalElement) => {
-        const subtotal = parseFloat(subtotalElement.innerText.replace("₹", ""));
-        total += subtotal;
-      });
-      document.getElementById("cart-total").innerText = `₹${total}`;
-    }
   });
+
+  
+
 </script>
 
 <%- include('../layouts/user/footer.ejs') %>

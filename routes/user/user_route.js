@@ -1,6 +1,7 @@
 const express = require("express");
 const user_route = express.Router();
-const passport = require("passport")
+const passport = require("passport");
+
 
 //controllers
 const user_controller = require("../../controllers/user/user_controller");
@@ -10,6 +11,8 @@ const checkout_controller = require("../../controllers/user/checkout_controller"
 const forgot_password_controller = require("../../controllers/user/forgot_password_controller");
 const user_details = require("../../controllers/user/user_details_controller");
 const wishlist_controller = require("../../controllers/user/wishlist_controller");
+const razorpay_controller = require("../../controllers/user/razorpay_controller");
+const wallet_controller = require("../../controllers/user/wallet_controller");
 
 //middleware
 const is_authenticated = require("../../middleware/auth");
@@ -30,6 +33,7 @@ user_route.post("/resend-otp", user_controller.resend_otp);
 user_route.get("/logout", user_controller.user_logout);
 user_route.get("/product/:product_id", user_controller.view_product);
 
+
 //profile- address
 user_route.post("/user_address", user_blocked, is_authenticated, user_controller.user_address);
 user_route.delete('/delete_address/:id', user_blocked, is_authenticated, user_controller.delete_address);
@@ -41,6 +45,7 @@ user_route.get("/user_profile", user_blocked, is_authenticated, user_controller.
 user_route.post("/user_profile", user_blocked, is_authenticated, user_controller.user_profile);
 user_route.get('/edit_profile_detials/:id', user_blocked, is_authenticated, user_details.edit_details);
 user_route.post('/edit_profile_detials/:id', user_blocked, is_authenticated, user_details.post_edit_details);
+user_route.get("/wallet", user_blocked, is_authenticated, wallet_controller.load_wallet);
 
 //forgot password
 user_route.get("/forgot_password", forgot_password_controller.load_forgot_password);
@@ -51,6 +56,7 @@ user_route.post("/reset_password", forgot_password_controller.reset_password)
 
 //cart
 user_route.get("/shop_cart", user_blocked, is_authenticated,  cart_controller.load_shop_cart);
+user_route.get("/cart/get-stock/:productId/:volume", user_blocked, is_authenticated, cart_controller.get_stock);
 user_route.post("/shop_cart", user_blocked, is_authenticated, cart_controller.shop_cart); 
 user_route.post("/cart/update-quantity", user_blocked, is_authenticated, cart_controller.update_quantity);
 user_route.delete("/cart/remove/:id", user_blocked, is_authenticated, cart_controller.remove_item);
@@ -68,10 +74,14 @@ user_route.post("/filter_products", shop_page_controller.filter_items);
 user_route.get("/checkout", user_blocked, is_authenticated, checkout_controller.checkout);
 user_route.post("/checkout", user_blocked, is_authenticated, checkout_controller.post_checkout);
 user_route.get('/order_confirmation', user_blocked, is_authenticated, checkout_controller.order_confirmation);
-user_route.post('/apply_coupon', user_blocked, is_authenticated, checkout_controller.apply_coupon)
+user_route.post('/apply_coupon', user_blocked, is_authenticated, checkout_controller.apply_coupon);
+
+user_route.get("/verify_razorpay_payment", user_blocked, is_authenticated, razorpay_controller.verify_online_payment);
 
 //order
-user_route.get('/my_orders', user_blocked, is_authenticated, user_controller.load_my_orders)
-user_route.post("/cancel_order/:id", user_blocked, is_authenticated, user_controller.cancel_order)
+user_route.get('/my_orders', user_blocked, is_authenticated, user_controller.load_my_orders);
+user_route.post("/cancel_order/:id", user_blocked, is_authenticated, user_controller.cancel_order);
+
+
 
 module.exports = user_route;

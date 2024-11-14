@@ -125,10 +125,9 @@
 <%- include('../layouts/admin/footer.ejs') %>
 
 <script>
-    document.getElementById('submitButton').addEventListener('click', function(event) {
+document.getElementById('submitButton').addEventListener('click', async function(event) {
   event.preventDefault();
   
-
   const variants = {};
   document.querySelectorAll('[id^="size"]').forEach(input => {
     if (input.checked) {
@@ -139,8 +138,7 @@
     }
     const product_name = document.getElementById("product_name").value;
     const product_description = document.getElementById("product_description").value;
-
-    console.log(product_name,product_description)
+    // console.log(product_name,product_description)
   });
 
   const form = document.getElementById('editProductForm');
@@ -151,8 +149,8 @@
   const product_name = document.getElementById("product_name").value;
   const product_description = document.getElementById("product_description").value;
   form.appendChild(variantsInput);
-
   form.submit();
+
 });
 
 </script>

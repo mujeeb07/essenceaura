@@ -6,6 +6,7 @@ const product_controller = require('../../controllers/admin/product_controller')
 const category_controller = require("../../controllers/admin/category_controller");
 const user_controller = require("../../controllers/admin/user_controller");
 const coupon_controller = require('../../controllers/admin/coupon_controller');
+const offer_controller = require("../../controllers/admin/offer_controller");
 const admin_auth = require("../../middleware/admin_auth");
 
 // Admin.
@@ -49,5 +50,13 @@ admin_route.get('/create_coupon', admin_auth, coupon_controller.load_coupon_crea
 admin_route.post('/activation', admin_auth, coupon_controller.activation_coupon);
 admin_route.post('/create_coupon', admin_auth, coupon_controller.coupon_create_page);
 admin_route.get('/edit_coupon', admin_auth, coupon_controller.edit_coupon);
-admin_route.post('/edit_coupon', admin_auth, coupon_controller.update_coupon)
+admin_route.post('/edit_coupon', admin_auth, coupon_controller.update_coupon);
+
+// Offer management
+admin_route.get('/offer_management',  admin_auth, offer_controller.load_offer_management);
+admin_route.get('/create_offer', admin_auth, offer_controller.load_create_offer);
+admin_route.post('/create_offer', admin_auth, offer_controller.create_offer);
+admin_route.get('/edit_offer/:id', admin_auth, offer_controller.load_edit_offer);
+admin_route.post('/edit_offer', admin_auth, offer_controller.update_offer);
+
 module.exports = admin_route;

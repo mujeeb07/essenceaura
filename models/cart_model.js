@@ -19,14 +19,16 @@ const cart_items_schema = new mongoose.Schema({
         type:Number,
         required: true
     },
+    offer_price: {
+        type: Number,
+        default: 0
+    },
     volume: {
         type: Number,
         require: true
     }
 },{timestamps: true});
 
- 
-// Cart schema
 const cart_schema = new mongoose.Schema({
     user: {
         type: ObjectId,

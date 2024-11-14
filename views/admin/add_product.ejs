@@ -1,431 +1,449 @@
 <%- include('../layouts/admin/header.ejs') %>
-<%- include('../layouts/admin/sidebar.ejs') %>
+    <%- include('../layouts/admin/sidebar.ejs') %>
 
-<main class="main-wrap">
-    <%- include('../layouts/admin/navbar.ejs') %>
+        <main class="main-wrap">
+            <%- include('../layouts/admin/navbar.ejs') %>
 
-    <section class="content-main">
-        <div class="row">
-            <div class="col-9">
-                <div class="content-header">
-                    <h2 class="content-title">Add New Product</h2>
-                    <div>
-                        <button class="btn btn-md rounded hover-up" id="submitButton">Add product</button>
+                <section class="content-main">
+                    <div class="row">
+                        <div class="col-9">
+                            <div class="content-header">
+                                <h2 class="content-title">Add New Product</h2>
+                                <div>
+                                    <button class="btn btn-md rounded hover-up" id="submitButton">Add product</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Product Form Start -->
+                        <div class="col-lg-12">
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h4>Basic Information</h4>
+                                </div>
+                                <div class="card-body">
+                                    <form id="addProductForm" enctype="multipart/form-data">
+                                        <!-- Product Name and Description -->
+                                        <div class="row">
+                                            <div class="col-lg-6 mb-4">
+                                                <label for="product_name" class="form-label">Product Title</label>
+                                                <input type="text" placeholder="Type here" class="form-control"
+                                                    id="product_name" name="product_name">
+                                            </div>
+
+                                            <div class="col-lg-6 mb-4">
+                                                <label class="form-label">Full Description</label>
+                                                <textarea placeholder="Type here" class="form-control"
+                                                    id="product_description" name="product_description"
+                                                    rows="4"></textarea>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="mb-4">
+                                            <label for="product_card_image" class="form-label">Product Card
+                                                Image</label>
+                                            <input id="product_card_image" name="product_card_image"
+                                                class="form-control" type="file" accept="image/*">
+                                            <img id="product_card_image_preview" src="" alt="Product Card Image Preview"
+                                                style="display: none; max-width: 200px;">
+                                            <button type="button" id="remove_card_image" class="btn btn-danger btn-sm"
+                                                style="display: none;">Remove</button>
+                                        </div>
+
+                                        <div class="mb-4">
+                                            <label for="product_details_images" class="form-label">Product Detail
+                                                Images</label>
+                                            <input id="product_details_images" name="product_details_images"
+                                                class="form-control" type="file" accept="image/*" multiple>
+                                            <div id="product_details_images_preview" class="row"></div>
+                                            <small class="form-text text-muted">You can select multiple images. Click on
+                                                an image to remove it.</small>
+                                        </div>
+
+
+                                        <div class="row">
+                                            <div class="col-lg-4 mb-4">
+                                                <h5>Brand</h5>
+                                                <select class="form-select" id="brand">
+                                                    <option value="" selected disabled>Select</option>
+                                                    <% for(i=0; i < brand.length; i++) { %>
+                                                        <option value="<%= brand[i]._id %>">
+                                                            <%= brand[i].brandName %>
+                                                        </option>
+                                                        <% } %>
+                                                </select>
+                                            </div>
+
+                                            <div class="col-lg-4 mb-4">
+                                                <h5>Category</h5>
+                                                <select class="form-select" id="category">
+                                                    <option value="" selected disabled>Select</option>
+                                                    <% for(let i=0; i < category.length; i++) { %>
+                                                        <option value="<%= category[i]._id %>">
+                                                            <%= category[i].name %>
+                                                        </option>
+                                                        <% } %>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <h5>Variants</h5>
+                                        <div class="row">
+                                            <div class="col-lg-4 mb-3">
+                                                <input type="checkbox" id="size100ml"
+                                                    onchange="toggleVariant('100ml')" />
+                                                <label for="size100ml">100 ML</label>
+                                                <div id="variant100ml" class="row gx-2 mt-2" style="display: none;">
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Price for 100 ML</label>
+                                                        <input id="price100ml" name="price100ml" placeholder="₹"
+                                                            type="number" class="form-control" min="0" disabled>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Stock for 100 ML</label>
+                                                        <input id="stock100ml" name="stock100ml" placeholder="Stock"
+                                                            type="number" class="form-control" min="0" disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-4 mb-3">
+                                                <input type="checkbox" id="size75ml" onchange="toggleVariant('75ml')" />
+                                                <label for="size75ml">75 ML</label>
+                                                <div id="variant75ml" class="row gx-2 mt-2" style="display: none;">
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Price for 75 ML</label>
+                                                        <input id="price75ml" name="price75ml" placeholder="₹"
+                                                            type="number" class="form-control" min="0" disabled>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Stock for 75 ML</label>
+                                                        <input id="stock75ml" name="stock75ml" placeholder="Stock"
+                                                            type="number" class="form-control" min="0" disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-lg-4 mb-3">
+                                                <input type="checkbox" id="size50ml" onchange="toggleVariant('50ml')" />
+                                                <label for="size50ml">50 ML</label>
+                                                <div id="variant50ml" class="row gx-2 mt-2" style="display: none;">
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Price for 50 ML</label>
+                                                        <input id="price50ml" name="price50ml" placeholder="₹"
+                                                            type="number" class="form-control" min="0" disabled>
+                                                    </div>
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label">Stock for 50 ML</label>
+                                                        <input id="stock50ml" name="stock50ml" placeholder="Stock"
+                                                            type="number" class="form-control" min="0" disabled>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Product Form End -->
                     </div>
-                </div>
-            </div>
+                </section>
+        </main>
 
-            <!-- Product Form Start -->
-            <div class="col-lg-12">
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h4>Basic Information</h4>
-                    </div>
-                    <div class="card-body">
-                        <form id="addProductForm" enctype="multipart/form-data">
-                            <!-- Product Name and Description -->
-                            <div class="row">
-                                <div class="col-lg-6 mb-4">
-                                    <label for="product_name" class="form-label">Product Title</label>
-                                    <input type="text" placeholder="Type here" class="form-control" id="product_name" name="product_name">
-                                </div>
-
-                                <div class="col-lg-6 mb-4">
-                                    <label class="form-label">Full Description</label>
-                                    <textarea placeholder="Type here" class="form-control" id="product_description" name="product_description" rows="4" ></textarea>
-                                </div>
-                            </div>
-
-                
-                            <div class="mb-4">
-                                <label for="product_card_image" class="form-label">Product Card Image</label>
-                                <input id="product_card_image" name="product_card_image" class="form-control" type="file" accept="image/*">
-                                <img id="product_card_image_preview" src="" alt="Product Card Image Preview" style="display: none; max-width: 200px;">
-                                <button type="button" id="remove_card_image" class="btn btn-danger btn-sm" style="display: none;">Remove</button>
-                            </div>
-                            
-                            <div class="mb-4">
-                                <label for="product_details_images" class="form-label">Product Detail Images</label>
-                                <input id="product_details_images" name="product_details_images" class="form-control" type="file" accept="image/*" multiple>
-                                <div id="product_details_images_preview" class="row"></div>
-                                <small class="form-text text-muted">You can select multiple images. Click on an image to remove it.</small>
-                            </div>
-                            
-
-                            <div class="row">
-                                <div class="col-lg-4 mb-4">
-                                    <h5>Brand</h5>
-                                    <select class="form-select" id="brand">
-                                        <option value="" selected disabled>Select</option>
-                                        <% for(i = 0; i < brand.length; i++) { %>
-                                        <option value="<%= brand[i]._id %>"><%= brand[i].brandName %></option>
-                                        <% } %>
-                                    </select>
-                                </div>
-                                
-                                <div class="col-lg-4 mb-4">
-                                    <h5>Category</h5>
-                                    <select class="form-select" id="category">
-                                        <option value="" selected disabled>Select</option>
-                                        <% for(let i = 0; i < category.length; i++) { %>
-                                        <option value="<%= category[i]._id %>"><%= category[i].name %></option>
-                                        <% } %>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <h5>Variants</h5>
-                            <div class="row">
-                                <div class="col-lg-4 mb-3">
-                                    <input type="checkbox" id="size100ml" onchange="toggleVariant('100ml')" />
-                                    <label for="size100ml">100 ML</label>
-                                    <div id="variant100ml" class="row gx-2 mt-2" style="display: none;">
-                                        <div class="col-lg-6">
-                                            <label class="form-label">Price for 100 ML</label>
-                                            <input id="price100ml" name="price100ml" placeholder="₹" type="number" class="form-control" min="0" disabled >
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <label class="form-label">Stock for 100 ML</label>
-                                            <input id="stock100ml" name="stock100ml" placeholder="Stock" type="number" class="form-control" min="0" disabled >
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-4 mb-3">
-                                    <input type="checkbox" id="size75ml" onchange="toggleVariant('75ml')" />
-                                    <label for="size75ml">75 ML</label>
-                                    <div id="variant75ml" class="row gx-2 mt-2" style="display: none;">
-                                        <div class="col-lg-6">
-                                            <label class="form-label">Price for 75 ML</label>
-                                            <input id="price75ml" name="price75ml" placeholder="₹" type="number" class="form-control" min="0" disabled >
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <label class="form-label">Stock for 75 ML</label>
-                                            <input id="stock75ml" name="stock75ml" placeholder="Stock" type="number" class="form-control" min="0" disabled >
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-4 mb-3">
-                                    <input type="checkbox" id="size50ml" onchange="toggleVariant('50ml')" />
-                                    <label for="size50ml">50 ML</label>
-                                    <div id="variant50ml" class="row gx-2 mt-2" style="display: none;">
-                                        <div class="col-lg-6">
-                                            <label class="form-label">Price for 50 ML</label>
-                                            <input id="price50ml" name="price50ml" placeholder="₹" type="number" class="form-control" min="0" disabled >
-                                        </div>
-                                        <div class="col-lg-6">
-                                            <label class="form-label">Stock for 50 ML</label>
-                                            <input id="stock50ml" name="stock50ml" placeholder="Stock" type="number" class="form-control" min="0" disabled >
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            </div>
-            <!-- Product Form End -->
-        </div>
-    </section>
-</main>
-
+<%- include('../layouts/admin/footer.ejs') %>
 
 <script>
 
-document.getElementById('submitButton').addEventListener('click', async (e) => {
-    e.preventDefault();
+    document.getElementById('submitButton').addEventListener('click', async (e) => {
+        e.preventDefault();
+        clearErrors();
+        if (!validateForm()) {
+            return;
+        }
 
-    clearErrors();
+        const form = document.getElementById('addProductForm');
+        const formData = new FormData(form);
 
-    if (!validateForm()) { 
-        return;
+        const volumeVariants = [];
+        const priceVariants = [];
+        const stockVariants = [];
+
+
+        if (document.getElementById('size100ml').checked) {
+            const price100ml = document.getElementById('price100ml').value;
+            const stock100ml = document.getElementById('stock100ml').value;
+
+            volumeVariants.push('100ml');
+            priceVariants.push(price100ml ? price100ml : '0');
+            stockVariants.push(stock100ml ? stock100ml : '0');
+        } else {
+            volumeVariants.push('100ml');
+            priceVariants.push('0');
+            stockVariants.push('0');
+        }
+
+
+        if (document.getElementById('size75ml').checked) {
+            const price75ml = document.getElementById('price75ml').value;
+            const stock75ml = document.getElementById('stock75ml').value;
+
+            volumeVariants.push('75ml');
+            priceVariants.push(price75ml ? price75ml : '0');
+            stockVariants.push(stock75ml ? stock75ml : '0');
+        } else {
+            volumeVariants.push('75ml');
+            priceVariants.push('0');
+            stockVariants.push('0');
+        }
+
+
+        if (document.getElementById('size50ml').checked) {
+            const price50ml = document.getElementById('price50ml').value;
+            const stock50ml = document.getElementById('stock50ml').value;
+
+            volumeVariants.push('50ml');
+            priceVariants.push(price50ml ? price50ml : '0');
+            stockVariants.push(stock50ml ? stock50ml : '0');
+        } else {
+            volumeVariants.push('50ml');
+            priceVariants.push('0');
+            stockVariants.push('0');
+        }
+
+        formData.append('volumeVariants', JSON.stringify(volumeVariants));
+        formData.append('priceVariants', JSON.stringify(priceVariants));
+        formData.append('stockVariants', JSON.stringify(stockVariants));
+
+
+        formData.append('brand', document.getElementById('brand').value);
+        formData.append('category', document.getElementById('category').value);
+
+        const productCardImage = document.getElementById('product_card_image').files[0];
+        if (productCardImage) {
+            formData.append('product_card_image', productCardImage);
+        }
+
+        const productDetailImages = document.getElementById('product_details_images').files;
+        for (let i = 0; i < productDetailImages.length; i++) {
+            formData.append('product_details_images', productDetailImages[i]);
+        }
+
+        try {
+            const response = await fetch('/admin/add_product', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                showSuccess('Product added successfully!');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } else {
+                showError('submitButton', result.error || 'Failed to add product.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            showError('submitButton', 'An error occurred while adding the product.');
+        }
+    });
+
+    function validateForm() {
+
+        let isValid = true;
+
+        const productName = document.getElementById('product_name').value;
+        if (!productName.trim()) {
+            isValid = false;
+            showError('product_name', 'Product name is required.');
+        }
+
+        const productDescription = document.getElementById('product_description').value;
+        if (!productDescription.trim()) {
+            isValid = false;
+            showError('product_description', 'Product description is required.');
+        }
+
+        const productDetailsImages = document.getElementById('product_details_images').files;
+        if (productDetailsImages.length === 0) {
+            isValid = false;
+            showError('product_details_images', 'Please select at least one product detail image.');
+        }
+
+        const productCardImage = document.getElementById('product_card_image').files;
+        if (productCardImage.length === 0) {
+            isValid = false;
+            showError('product_card_image', 'Product card image is required.');
+        }
+
+        const brand = document.getElementById('brand').value;
+        if (!brand) {
+            isValid = false;
+            showError('brand', 'Please select a brand.');
+        }
+
+        const category = document.getElementById('category').value;
+        if (!category) {
+            isValid = false;
+            showError('category', 'Please select a category.');
+        }
+
+        if (document.getElementById('size100ml').checked) {
+            const price100ml = document.getElementById('price100ml').value;
+            const stock100ml = document.getElementById('stock100ml').value;
+            if (!price100ml || !stock100ml) {
+                isValid = false;
+                showError('price100ml', 'Price and stock for 100ml are required.');
+            }
+        }
+
+        if (document.getElementById('size75ml').checked) {
+            const price75ml = document.getElementById('price75ml').value;
+            const stock75ml = document.getElementById('stock75ml').value;
+            if (!price75ml || !stock75ml) {
+                isValid = false;
+                showError('price75ml', 'Price and stock for 75ml are required.');
+            }
+        }
+
+        if (document.getElementById('size50ml').checked) {
+            const price50ml = document.getElementById('price50ml').value;
+            const stock50ml = document.getElementById('stock50ml').value;
+            if (!price50ml || !stock50ml) {
+                isValid = false;
+                showError('price50ml', 'Price and stock for 50ml are required.');
+            }
+        }
+
+        return isValid;
     }
 
-    const form = document.getElementById('addProductForm');
-    const formData = new FormData(form);
-
-    const volumeVariants = [];
-    const priceVariants = [];
-    const stockVariants = [];
-
-    
-    if (document.getElementById('size100ml').checked) {
-        const price100ml = document.getElementById('price100ml').value;
-        const stock100ml = document.getElementById('stock100ml').value;
-
-        volumeVariants.push('100ml');
-        priceVariants.push(price100ml ? price100ml : '0');
-        stockVariants.push(stock100ml ? stock100ml : '0');
-    } else {
-        volumeVariants.push('100ml');
-        priceVariants.push('0');
-        stockVariants.push('0');
+    function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.style.color = 'red';
+            errorDiv.textContent = message;
+            element.parentNode.insertBefore(errorDiv, element.nextSibling);
+        }
     }
 
-    
-    if (document.getElementById('size75ml').checked) {
-        const price75ml = document.getElementById('price75ml').value;
-        const stock75ml = document.getElementById('stock75ml').value;
-
-        volumeVariants.push('75ml');
-        priceVariants.push(price75ml ? price75ml : '0');
-        stockVariants.push(stock75ml ? stock75ml : '0');
-    } else {
-        volumeVariants.push('75ml');
-        priceVariants.push('0');
-        stockVariants.push('0');
+    function clearErrors() {
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach((error) => error.remove());
     }
 
-    
-    if (document.getElementById('size50ml').checked) {
-        const price50ml = document.getElementById('price50ml').value;
-        const stock50ml = document.getElementById('stock50ml').value;
-
-        volumeVariants.push('50ml');
-        priceVariants.push(price50ml ? price50ml : '0');
-        stockVariants.push(stock50ml ? stock50ml : '0');
-    } else {
-        volumeVariants.push('50ml');
-        priceVariants.push('0');
-        stockVariants.push('0');
+    function showError(elementId, message) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-message';
+            errorDiv.style.color = 'red';
+            errorDiv.textContent = message;
+            element.parentNode.insertBefore(errorDiv, element.nextSibling);
+        }
     }
 
-    formData.append('volumeVariants', JSON.stringify(volumeVariants));
-    formData.append('priceVariants', JSON.stringify(priceVariants));
-    formData.append('stockVariants', JSON.stringify(stockVariants));
-
-    
-    formData.append('brand', document.getElementById('brand').value);
-    formData.append('category', document.getElementById('category').value);
-
-    const productCardImage = document.getElementById('product_card_image').files[0];
-    if (productCardImage) {
-        formData.append('product_card_image', productCardImage);
+    function showSuccess(message) {
+        const successDiv = document.createElement('div');
+        successDiv.className = 'success-message';
+        successDiv.style.color = 'green';
+        successDiv.textContent = message;
+        document.getElementById('submitButton').parentNode.appendChild(successDiv);
     }
 
-    const productDetailImages = document.getElementById('product_details_images').files;
-    for (let i = 0; i < productDetailImages.length; i++) {
-        formData.append('product_details_images', productDetailImages[i]);
+    function clearErrors() {
+        const errorMessages = document.querySelectorAll('.error-message');
+        errorMessages.forEach((error) => error.remove());
     }
 
-    try {
-        const response = await fetch('/admin/add_product', {
-            method: 'POST',
-            body: formData
+    document.getElementById('product_card_image').addEventListener('change', function () {
+        const productCardImage = this.files[0];
+        const preview = document.getElementById('product_card_image_preview');
+        const removeButton = document.getElementById('remove_card_image');
+
+        if (productCardImage) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                preview.style.display = 'block';
+                removeButton.style.display = 'block';
+            };
+            reader.readAsDataURL(productCardImage);
+        } else {
+            preview.style.display = 'none';
+            removeButton.style.display = 'none';
+        }
+    });
+
+    document.getElementById('remove_card_image').addEventListener('click', function () {
+        const input = document.getElementById('product_card_image');
+        input.value = '';
+        document.getElementById('product_card_image_preview').style.display = 'none';
+        this.style.display = 'none';
+    });
+
+    document.getElementById('product_details_images').addEventListener('change', function () {
+        const files = Array.from(this.files);
+        const previewContainer = document.getElementById('product_details_images_preview');
+        previewContainer.innerHTML = '';
+
+        files.forEach((file, index) => {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const imageElement = document.createElement('div');
+                imageElement.classList.add('col-lg-3', 'mb-3', 'position-relative');
+                imageElement.innerHTML = `
+    <img src="${e.target.result}" alt="Detail Image Preview" style="max-width: 100%;" class="img-thumbnail">
+    <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="removeDetailImage(${index})">Remove</button>
+`;
+                previewContainer.appendChild(imageElement);
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    function removeDetailImage(index) {
+        const productDetailsImages = document.getElementById('product_details_images');
+        const dataTransfer = new DataTransfer();
+
+        Array.from(productDetailsImages.files).forEach((file, i) => {
+            if (i !== index) {
+                dataTransfer.items.add(file);
+            }
         });
 
-        const result = await response.json();
-        if (response.ok) {
-            showSuccess('Product added successfully!');
-            setTimeout(() => {
-                window.location.reload();
-            }, 2000);
+        productDetailsImages.files = dataTransfer.files;
+        document.getElementById('product_details_images').dispatchEvent(new Event('change'));
+    }
+
+    function toggleVariant(size) {
+        const checkbox = document.getElementById(`size${size}`);
+        const variantFields = document.getElementById(`variant${size}`);
+        const priceInput = document.getElementById(`price${size}`);
+        const stockInput = document.getElementById(`stock${size}`);
+
+        if (checkbox.checked) {
+            variantFields.style.display = 'flex';
+            priceInput.disabled = false;
+            stockInput.disabled = false;
         } else {
-            showError('submitButton', result.error || 'Failed to add product.');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        showError('submitButton', 'An error occurred while adding the product.');
-    }
-});
-
-function validateForm() {
-
-    let isValid = true;
-
-    const productName = document.getElementById('product_name').value;
-    if (!productName.trim()) {
-        isValid = false;
-        showError('product_name', 'Product name is required.');
-    }
-
-    const productDescription = document.getElementById('product_description').value;
-    if (!productDescription.trim()) {
-        isValid = false;
-        showError('product_description', 'Product description is required.');
-    }
-
-    const productDetailsImages = document.getElementById('product_details_images').files;
-    if (productDetailsImages.length === 0) {
-        isValid = false;
-        showError('product_details_images', 'Please select at least one product detail image.');
-    }
-
-    const productCardImage = document.getElementById('product_card_image').file;
-    if (productCardImage.length === 0) {
-        isValid = false;
-        showError('product_card_image', 'Product card image is required.');
-    }
-
-    const brand = document.getElementById('brand').value;
-    if (!brand) {
-        isValid = false;
-        showError('brand', 'Please select a brand.');
-    }
-
-    const category = document.getElementById('category').value;
-    if (!category) {
-        isValid = false;
-        showError('category', 'Please select a category.');
-    }
-
-    if (document.getElementById('size100ml').checked) {
-        const price100ml = document.getElementById('price100ml').value;
-        const stock100ml = document.getElementById('stock100ml').value;
-        if (!price100ml || !stock100ml) {
-            isValid = false;
-            showError('price100ml', 'Price and stock for 100ml are required.');
+            variantFields.style.display = 'none';
+            priceInput.disabled = true;
+            stockInput.disabled = true;
         }
     }
-
-    if (document.getElementById('size75ml').checked) {
-        const price75ml = document.getElementById('price75ml').value;
-        const stock75ml = document.getElementById('stock75ml').value;
-        if (!price75ml || !stock75ml) {
-            isValid = false;
-            showError('price75ml', 'Price and stock for 75ml are required.');
-        }
-    }
-
-    if (document.getElementById('size50ml').checked) {
-        const price50ml = document.getElementById('price50ml').value;
-        const stock50ml = document.getElementById('stock50ml').value;
-        if (!price50ml || !stock50ml) {
-            isValid = false;
-            showError('price50ml', 'Price and stock for 50ml are required.');
-        }
-    }
-
-    return isValid;
-}
-
-function showError(elementId, message) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.style.color = 'red';
-        errorDiv.textContent = message;
-        element.parentNode.insertBefore(errorDiv, element.nextSibling);
-    }
-}
-
-function clearErrors() {
-    const errorMessages = document.querySelectorAll('.error-message');
-    errorMessages.forEach((error) => error.remove());
-}
-
-function showError(elementId, message) {
-    const element = document.getElementById(elementId);
-    if (element) {
-        const errorDiv = document.createElement('div');
-        errorDiv.className = 'error-message';
-        errorDiv.style.color = 'red';
-        errorDiv.textContent = message;
-        element.parentNode.insertBefore(errorDiv, element.nextSibling);
-    }
-}
-
-function showSuccess(message) {
-    const successDiv = document.createElement('div');
-    successDiv.className = 'success-message';
-    successDiv.style.color = 'green';
-    successDiv.textContent = message;
-    document.getElementById('submitButton').parentNode.appendChild(successDiv);
-}
-
-function clearErrors() {
-    const errorMessages = document.querySelectorAll('.error-message');
-    errorMessages.forEach((error) => error.remove());
-}
-
-document.getElementById('product_card_image').addEventListener('change', function() {
-    const productCardImage = this.files[0];
-    const preview = document.getElementById('product_card_image_preview');
-    const removeButton = document.getElementById('remove_card_image');
-
-    if (productCardImage) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            preview.src = e.target.result;
-            preview.style.display = 'block';
-            removeButton.style.display = 'block';
-        };
-        reader.readAsDataURL(productCardImage);
-    } else {
-        preview.style.display = 'none';
-        removeButton.style.display = 'none';
-    }
-});
-
-document.getElementById('remove_card_image').addEventListener('click', function() {
-    const input = document.getElementById('product_card_image');
-    input.value = ''; 
-    document.getElementById('product_card_image_preview').style.display = 'none';
-    this.style.display = 'none';
-});
-
-document.getElementById('product_details_images').addEventListener('change', function() {
-    const files = Array.from(this.files);
-    const previewContainer = document.getElementById('product_details_images_preview');
-    previewContainer.innerHTML = ''; 
-
-    files.forEach((file, index) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const imageElement = document.createElement('div');
-            imageElement.classList.add('col-lg-3', 'mb-3', 'position-relative');
-            imageElement.innerHTML = `
-                <img src="${e.target.result}" alt="Detail Image Preview" style="max-width: 100%;" class="img-thumbnail">
-                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="removeDetailImage(${index})">Remove</button>
-            `;
-            previewContainer.appendChild(imageElement);
-        };
-        reader.readAsDataURL(file);
-    });
-});
-
-function removeDetailImage(index) {
-    const productDetailsImages = document.getElementById('product_details_images');
-    const dataTransfer = new DataTransfer();
-
-    Array.from(productDetailsImages.files).forEach((file, i) => {
-        if (i !== index) {
-            dataTransfer.items.add(file);
-        }
-    });
-
-    productDetailsImages.files = dataTransfer.files; 
-    document.getElementById('product_details_images').dispatchEvent(new Event('change')); 
-}
-
-function toggleVariant(size) {
-    const checkbox = document.getElementById(`size${size}`);
-    const variantFields = document.getElementById(`variant${size}`);
-    const priceInput = document.getElementById(`price${size}`);
-    const stockInput = document.getElementById(`stock${size}`);
-
-    if (checkbox.checked) {
-        variantFields.style.display = 'flex'; 
-        priceInput.disabled = false;
-        stockInput.disabled = false;
-    } else {
-        variantFields.style.display = 'none'; 
-        priceInput.disabled = true;
-        stockInput.disabled = true;
-    }
-}
 
     ['100ml', '75ml', '50ml'].forEach(size => {
         const variantFields = document.getElementById(`variant${size}`);
         const priceInput = document.getElementById(`price${size}`);
         const stockInput = document.getElementById(`stock${size}`);
-        variantFields.style.display = 'none';  
-        priceInput.disabled = true;            
-        stockInput.disabled = true;           
+        variantFields.style.display = 'none';
+        priceInput.disabled = true;
+        stockInput.disabled = true;
     });
 
 </script>
-
-<%- include('../layouts/admin/footer.ejs') %>

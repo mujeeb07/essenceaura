@@ -17,7 +17,7 @@
                                         <a class="nav-link" href="/my_orders" aria-selected="false"><i class="fi-rs-shopping-bag mr-10"></i>Orders</a>
                                     </li>
                                     <li class="nav-item">
-                                        <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Track Your Order</a>
+                                        <a class="nav-link" id="track-orders-tab" data-bs-toggle="tab" href="#track-orders" role="tab" aria-controls="track-orders" aria-selected="false"><i class="fi-rs-shopping-cart-check mr-10"></i>Wallet</a>
                                     </li>
                                     <li class="nav-item">
                                         <a class="nav-link" id="address-tab" data-bs-toggle="tab" href="#address" role="tab" aria-controls="address" aria-selected="true"><i class="fi-rs-marker mr-10"></i>My Address</a>
@@ -45,26 +45,42 @@
                                 </div>
                                                            
                                 <div class="tab-pane fade" id="track-orders" role="tabpanel" aria-labelledby="track-orders-tab">
+                                    <h3>₹1234</h3>
+                                    <p>Wallet Acount Balance</p>
                                     <div class="card">
                                         <div class="card-header">
-                                            <h5 class="mb-0">Orders tracking</h5>
+                                            <h5>Wallet Transaction Details</h5>
                                         </div>
-                                        <div class="card-body contact-from-area">
-                                            <p>To track your order please enter your OrderID in the box below and press "Track" button. This was given to you on your receipt and in the confirmation email you should have received.</p>
-                                            <div class="row">
-                                                <div class="col-lg-8">
-                                                    <form class="contact-form-style mt-30 mb-50" action="#" method="post">
-                                                        <div class="input-style mb-20">
-                                                            <label>Order ID</label>
-                                                            <input name="order-id" placeholder="Found in your order confirmation email" type="text" class="square">
-                                                        </div>
-                                                        <div class="input-style mb-20">
-                                                            <label>Billing email</label>
-                                                            <input name="billing-email" placeholder="Email you used during checkout" type="email" class="square">
-                                                        </div>
-                                                        <button class="submit submit-auto-width" type="submit">Track</button>
-                                                    </form>
-                                                </div>
+                                        <div class="card-body">
+                                            <div class="table-responsive">
+                                                <table class="table table-hover">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Transaction ID</th>
+                                                            <th>Amount</th>
+                                                            <th>Date</th>
+                                                            <th>Type</th>
+                                                            <th>Status</th>
+                                                        </tr>
+                                                    </thead>
+
+                                                    <tbody>
+                                                        <tr>
+                                                            <td>1234567890</td>
+                                                            <td>₹500</td>
+                                                            <td>2024-11-01</td>
+                                                            <td>Credit</td>
+                                                            <td>Completed</td>
+                                                        </tr>
+                                                        <tr>
+                                                            <td>0987654321</td>
+                                                            <td>₹300</td>
+                                                            <td>2024-10-25</td>
+                                                            <td>Debit</td>
+                                                            <td>Pending</td>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
                                         </div>
                                     </div>
@@ -389,18 +405,22 @@ function handleDetailsUpdate(event) {
         if(data.message){
             Swal.fire({
                 icon: 'success',
-                title: 'Success!',
-                text: 'User details updated',
-                confirmButtonText: 'OK'
+                    text: 'User details updated',
+                    toast: true,
+                    position: 'top-right',
+                    showConfirmButton: false,
+                    timer: 3000
             }).then(() => {
                 window.location.href="/user_profile"
             });
         }else{
             Swal.fire({
-                title: 'Error!',
                 text: 'Failed to update. Please try again.',
                 icon: 'error',
-                confirmButtonText: 'OK'
+                toast: true,
+                position: 'top-right',
+                showConfirmButton: false,
+                timer: 3000
             });
         }
     })
@@ -409,7 +429,9 @@ function handleDetailsUpdate(event) {
             title: 'Error!',
             text: 'An error occurred while updating user profile.',
             icon: 'error',
-            confirmButtonText: 'OK'
+            position: 'top-right',
+            showConfirmButton: false,
+            timer: 3000
         });
     });
     

@@ -21,7 +21,7 @@ const coupon_schema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    coupon_discount: {
+    discount_percentage: {
         type: Number,
         required: true
     },

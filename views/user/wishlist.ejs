@@ -2,10 +2,11 @@
 
 <section class="mt-50 mb-50">
     <div class="container">
+        <h1 class="text-align text-center mb-50">Wishlist</h1>
         <div class="row">
             <div class="col-12">
                 <div class="table-responsive">
-                    <table class="table shopping-summery text-center">
+                    <table class=" align-items-center shopping-summery text-center">
                         <thead>
                             <tr class="main-heading">
                                 <th scope="col" colspan="2">Product</th>
@@ -21,13 +22,13 @@
                                             <img src="<%= product.product_card_image %>" alt="product image">
                                         </td>
                                         <td class="product-des product-name">
-                                            <h5 class="product-name">
+                                            <h6 class="product-name">
                                                 <a href="/product/<%= product._id %>"><%= product.name %></a>
-                                            </h5>
+                                            </h6>
                                             <p class="font-xs"><%= product.description || 'No description available' %></p>
                                         </td>
-                                        <td class="text-right" data-title="Cart">
-                                            <a href="/product"><button class="btn btn-sm"><i class="fi-rs-shopping-bag mr-5"></i>View Product</button></a>
+                                        <td data-title="Cart" class="align-items-center">
+                                            <a href="/product/<%= product._id %>" class="btn"><i class="fi-rs-eye mr-3"></i>View Product</a>
                                         </td>
                                         <td class="action" data-title="Remove">
                                             <a class="remove-product" data-product-id="<%= product._id %>"><i class="fi-rs-trash"></i></a>
@@ -51,14 +52,12 @@
 <%- include('../layouts/user/footer.ejs') %>
 
 <script>
-    // const productId = document.getElementById('product_id').getAttribute('value');
-    // console.log("sdfgh", productId )
 
     document.querySelectorAll('.remove-product').forEach(button => {
         button.addEventListener('click', async function (event) {
             event.preventDefault();
             const productId = this.getAttribute('data-product-id');
-            console.log("Product ID to remove: ", productId);
+            // console.log("Product ID to remove: ", productId);
 
             try {
                 const response = await fetch('/wishlist/remove', {

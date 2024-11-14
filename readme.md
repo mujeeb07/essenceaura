@@ -1,1 +1,0 @@
-<%= payment_method === "COD" ? "Cash on Delivery" : "Razorpay" %>
