@@ -113,8 +113,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
 //PAYMENT_OPTIONS
 
-
-
 //Place Order with COD
 let total = '<%- grand_total %>';
 let coupon_id = '<%- appliedCoupon %>'

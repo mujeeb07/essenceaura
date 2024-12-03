@@ -64,7 +64,7 @@ const create_offer = async (req, res) => {
 
         await product_data.save();
 
-        return res.status(200).json({ success: true, message: "Offer applied successfully" });
+        return res.status(200).json({ success: true, message: "Offer created successfully" });
     } catch (error) {
         console.error("Error creating offer:", error);
         return res.status(500).json({ message: "Error while creating the offer", success: false });
@@ -96,20 +96,28 @@ const update_offer = async (req, res) => {
         const {product_id, offer_name, discount_percentage, start_date, expiry_date } = req.body;
         
         console.log(product_id);
-     const productIdstr = ObjectId.createFromHexString(product_id);
-     console.log(productIdstr);
-     
+        const productIdstr = ObjectId.createFromHexString(product_id);
         const updated_product = await Products.findByIdAndUpdate(product_id,
-            {   product_offer: {
+            {   
+                product_offer: {
                     offer_name,
                     offer_discount_percentage: discount_percentage,
                     offer_start_date: new Date(start_date),
                     offer_expire_date: new Date(expiry_date),
-                    offer_status: true
-                }
+                    offer_status: true,
+                },
+                       
             },
             { new: true }
         );
+        updated_product.variants.forEach(variant => {
+            const discountAmount = (variant.price * Number(discount_percentage)) / 100;
+            variant.sale_price_after_discount = variant.price - discountAmount;
+            variant.offer_discount_amount = discountAmount
+        })
+
+        await updated_product.save();
+        console.log("Updated offer details:", updated_product )
 
         if(!updated_product){
             return res.status(400).json({ message: "Product not found", success: false });

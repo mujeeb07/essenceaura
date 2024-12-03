@@ -1,5 +1,10 @@
+const mongoose = require('mongoose');
+const ObjectId =  mongoose.Types.ObjectId;
 const user = require("../../models/user_model");
 const Orders = require("../../models/order_model");
+const Product = require("../../models/product_model");
+const Wallet = require("../../models/wallet")
+const Wallet_txns = require('../../models/wallet_transactions');
 
 const users_list = async (req, res) => {
     try {
@@ -42,36 +47,50 @@ const users_list = async (req, res) => {
     }
   };
 
-const orders = async (req, res) => {
-
+  const orders = async (req, res) => {
     try {
-      const orders = await Orders.find().populate('user').sort({_id:-1});
-      // console.log(orders);
-      
-        return res.status(200).render("admin/orders",  {orders}  );
+        const perPage = 6;
+        const page = parseInt(req.query.page) || 1;
+
+        const totalOrders = await Orders.countDocuments();
+        const totalPages = Math.ceil(totalOrders / perPage); 
+
+        const orders = await Orders.find().populate('user').sort({ _id: -1 }).skip((page - 1) * perPage).limit(perPage);
+
+        return res.status(200).render("admin/orders", {
+            orders,
+            currentPage: page,
+            totalPages,
+        });
     } catch (error) {
-        return res.status(500).json({message: error});
+        return res.status(500).json({ message: error });
     }
-}
+};
+
 
 const load_order_details = async (req, res) => {
   const { id } = req.params;
   console.log("Order Id: ",id);
   try {
     const order_details = await Orders.findOne({_id:id}).populate('user')
-    // console.log("fguyfvuyfvuy",order_details);
+    
     return res.status(200).render('admin/order_details', { order_details })
   } catch (error) {
+    console.log("Error while getting the orders details.", error);
+    return res.status(500).json({ message: "Error while getting the orders details.", success: false });
     
   }
 }
 
 const order_details = async(req, res) => {
-  // console.log('...................Hello...................');
   const { orderId, status } = req.body
   console.log("status body: ", orderId, status);
   try {
-    await Orders.findByIdAndUpdate(orderId, {order_status: status});
+    let order_data = await Orders.findByIdAndUpdate(orderId, {order_status: status});
+    order_data.items.forEach((i) => {
+      i.product.return_request = status;
+    })
+    await order_data.save();
 
     return res.status(200).json({success: true});
   } catch (error) {
@@ -80,10 +99,125 @@ const order_details = async(req, res) => {
   }
 }
 
+const returns = async (req, res) => {
+  try {
+    const perPage = 6;
+    const page = parseInt(req.query.page) || 1; 
+
+    const totalReturns = await Orders.countDocuments({ "items.product.return_request": "Return Initiated" }); 
+    const totalPages = Math.ceil(totalReturns / perPage); 
+
+    const orders = await Orders.find({ $or : {"items.product.return_request" : ["Return Initiated", "Return Approved", "Return Rejected"] }}).populate('user').sort({ _id: -1 }).skip((page - 1) * perPage).limit(perPage);   
+
+    orders.forEach((order) => {
+      order.items.forEach(async (i) => {
+        i.price = (i.price * 0.18 + i.price) * order.discount_amount / order.total;
+        // await order.save(); 
+      })
+    });
+    return res.status(200).render("admin/return_management", { orders, currentPage: page, totalPages });
+  } catch (error) {
+    console.log("Error while rendering the return management page.", error);
+    return res.status(500).json({ message: "Error while getting the return management page.", success: false });
+  }
+};
+
+const return_action = async(req, res) => {
+  try {
+
+    const { orderId, itemId, variant, status, quantity, reason } = req.body;
+    console.log("Order ID: ", orderId,",", "Item ID: ", itemId,",", "Variant: ", variant,",", "Status: ", status,",", "Quantity: ", quantity,",", "Reason: ", reason,".");
+    let order_data = await Orders.findById( new ObjectId(orderId) );
+    let price = 0;
+    let product_name = '';
+    if(status === 'Approve'){
+      for (let item of order_data.items) {
+          console.log('zzz:', item.product.variants.price)
+          console.log('zzz:', item.product.return_request)
+        if(String(order_data._id) === orderId){
+          price = item.product.variants.price * item.quantity;
+          product_name = item.product.name;
+          price += price * 0.18;
+          let discount = (price * order_data.discount_amount) / order_data.total + order_data.discount_amount
+          price -= discount;
+          console.log(price);
+          item.product.return_request = "Return Approved";
+        }
+      }
+      await order_data.save();
+      // console.log(order_data);
+      const wallet = await Wallet.findOne({ user_id : order_data.user });
+      console.log(wallet)
+      if(!wallet){
+        const new_wallet = new Wallet({ user_id: order_data.user });
+        wallet = await new_wallet.save();
+      }
+
+      wallet.balance += price;
+      await wallet.save();
+
+      const new_wallet_txn = new Wallet_txns({
+        wallet_id: wallet._id,
+        txn_amount: Number(price),
+        txn_description: `Refunded for the item returned "${product_name}." `,
+        txn_type: "Credit",
+        wallet_transaction_status: "Refunded"
+      });
+
+      await new_wallet_txn.save();
+      console.log("Transaction for return item saved successfully. :)");
+    } 
+    
+    if(status === 'Reject'){
+      for (let item of order_data.items) {
+        if(String(order_data._id) === orderId){
+          item.product.return_request = "Return Rejected";
+        }
+      }
+    }
+    await order_data.save();
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.log('Error while updating return action.', error);
+    return res.status(500).json({ success: false });
+  }
+}
+
+const return_qty_update = async (req, res) => {
+  try {
+    const { itemId, variant, quantity } = req.body;
+
+    console.log("Data for update stock: ", itemId, variant, quantity );
+    let product_to_update = await Product.findById( new ObjectId(itemId) );
+    let price;
+    // console.log("PRODUCT DATA TO UPDATE:", product_to_update);
+    product_to_update.variants.forEach((i) => {
+      if(i.volume === Number(variant)){
+        i.stock += Number(quantity)
+      }
+    });
+
+    await product_to_update.save();
+    console.log("Returned item quantity updated with stock. :)");
+
+
+
+
+    return res.status(200).json({ success:true })
+  } catch (error) {
+    console.log('Error while updating returned item quantity.', error);
+    return res.status(200).json({ success: false });
+  }
+}
+
   module.exports = {
   users_list,
   block_user,
   orders,
   load_order_details,
-  order_details
+  order_details,
+  returns,
+  return_action,
+  return_qty_update
 }

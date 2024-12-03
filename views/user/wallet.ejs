@@ -1,0 +1,169 @@
+<%- include('../layouts/user/header.ejs') %>
+
+<style>
+  .wallet-container {
+    margin: 20px auto;
+    max-width: 900px;
+  }
+
+  .wallet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .wallet-balance {
+    font-size: 18px;
+    font-weight: bold;
+  }
+
+  .wallet-balance.low {
+    color: red;
+  }
+
+  .wallet-balance.high {
+    color: green;
+  }
+
+  .go-back {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #088178;
+    color: #fff;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.2s;
+  }
+
+  .go-back:hover {
+    background-color: #066b5e;
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+
+  th, td {
+    text-align: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+  }
+
+  th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+  }
+
+  td.credit {
+    color: green;
+  }
+
+  td.debit {
+    color: red;
+  }
+
+  .pagination {
+    text-align: center;
+    margin-top: 20px;
+  }
+
+  .pagination .btn {
+    display: inline-block;
+    padding: 8px 12px;
+    margin: 0 5px;
+    background-color: #088178;
+    color: white;
+    border: 1px solid #088178;
+    border-radius: 4px;
+    text-decoration: none;
+  }
+
+  .pagination .btn:hover {
+    background-color: white;
+    color: #088178;
+    border: 1px solid #088178;
+  }
+
+  .pagination .active {
+    background-color: #088178;
+    color: white;
+    pointer-events: none;
+  }
+</style>
+
+<div class="wallet-container">
+  <!-- Wallet Balance and Go Back Button -->
+  <div class="wallet-header">
+    <% if (Number(wallet_balance) < 1) { %>
+      <span class="wallet-balance low">Wallet Balance: ₹<%= Number(wallet_balance).toFixed(2) %></span>
+    <% } else { %>
+      <span class="wallet-balance high">Wallet Balance: ₹<%= Number(wallet_balance).toFixed(2) %></span>
+    <% } %>
+    <a href="/user_profile" class="go-back">Go Back</a>
+  </div>
+
+  <br>
+
+  <!-- Transactions Table -->
+  <table>
+    <thead>
+      <tr>
+        <th>Transaction ID</th>
+        <th>Date</th>
+        <th>Description</th>
+        <th>Amount</th>
+        <th>Transaction Type</th>
+      </tr>
+    </thead>
+    <tbody>
+        <% if (wallet_txns.length > 0) { %>
+          <% wallet_txns.forEach(txn => { %>
+            <tr>
+              <td> <strong>#<%= txn._id.toString().toUpperCase().slice(-10) %></strong></td>
+              <td><%= new Date(txn.createdAt).toLocaleDateString() %></td>
+              <td><%= txn.txn_description %></td>
+              <% if (txn.txn_type === 'Credit') { %>
+                <td class="credit"><strong>₹<%= txn.txn_amount.toFixed(2) %></strong></td>
+                <td class="credit"><strong>Credit</strong></td>
+              <% } else { %>
+                <td class="debit"><strong>₹<%= txn.txn_amount.toFixed(2) %></strong></td>
+                <td class="debit"><strong>Debit</strong></td>
+              <% } %>
+            </tr>
+          <% }) %>
+        <% } else { %>
+          <tr>
+            <td colspan="5">No transactions found.</td>
+          </tr>
+        <% } %>
+      </tbody>      
+  </table>
+
+  <!-- Pagination -->
+  <div class="pagination d-flex justify-content-center">
+    <% if (total_pages > 1) { %>
+      <% if (current_page > 1) { %>
+        <a href="?page=<%= current_page - 1 %>" class="btn">Previous</a>
+      <% } %>
+
+      <% for (let i = 1; i <= total_pages; i++) { %>
+        <a href="?page=<%= i %>" class="btn <%= i === current_page ? 'active' : '' %>"><%= i %></a>
+      <% } %>
+
+      <% if (current_page < total_pages) { %>
+        <a href="?page=<%= current_page + 1 %>" class="btn">Next</a>
+      <% } %>
+    <% } %>
+  </div>
+</div>
+
+<%- include('../layouts/user/footer.ejs') %>

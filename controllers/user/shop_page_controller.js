@@ -1,6 +1,7 @@
 const Product = require("../../models/product_model");
 const Category = require("../../models/category_model");
 const Brand = require("../../models/brand_model");
+const { options } = require("../../routes/user/user_route");
 
 const load_shop_page = async (req, res) => {
   try {
@@ -81,13 +82,25 @@ const filter_items = async (req, res) => {
     return res.status(200).json({ success: true, products: filtered_products });
   } catch (error) {
     console.error("Error filtering products:", error);
-    return res
-      .status(500)
-      .json({ success: false, error: "Failed to filter products" });
+    return res.status(500).json({ success: false, error: "Failed to filter products" });
   }
 };
+
+const search_filter =  async (req, res) => {
+  try {
+    const serach_query = req.query.q || "";
+    const products =  await Product.find({
+      name: { $regex: serach_query, $options: "i" }
+    }).populate("brand").populate("category");
+    return res.status(200).json({ success: true, products: products });
+  } catch (error) {
+    console.log("Error while search products.", error);
+    return res.status(500).json({ success: false, error: "Error while search products"});
+  }
+}
 
 module.exports = {
   load_shop_page,
   filter_items,
+  search_filter
 };

@@ -10,44 +10,11 @@
                             <div class="totall-product">
                                 <p> Here is the items for you!</p>
                             </div>
-                            <div class="sort-by-product-area">
-                                <div class="sort-by-cover mr-10">
-                                    <div class="sort-by-product-wrap">
-                                        <div class="sort-by">
-                                            <span><i class="fi-rs-apps"></i>Show:</span>
-                                        </div>
-                                        <div class="sort-by-dropdown-wrap">
-                                            <span> 50 <i class="fi-rs-angle-small-down"></i></span>
-                                        </div>
-                                    </div>
-                                    <div class="sort-by-dropdown">
-                                        <ul>
-                                            <li><a class="active" href="#">50</a></li>
-                                            <li><a href="#">100</a></li>
-                                            <li><a href="#">150</a></li>
-                                            <li><a href="#">200</a></li>
-                                            <li><a href="#">All</a></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="sort-by-cover">
-                                    <div class="sort-by-product-wrap">
-                                        <div class="sort-by">
-                                            <span><i class="fi-rs-apps-sort"></i>Sort by:</span>
-                                        </div>
-                                        <div class="sort-by-dropdown-wrap">
-                                            <span> Featured <i class="fi-rs-angle-small-down"></i></span>
-                                        </div>
-                                    </div>
-                                    <div class="sort-by-dropdown">
-                                        <ul>
-                                            <li><a class="active" href="#">Featured</a></li>
-                                            <li><a href="#">Price: Low to High</a></li>
-                                            <li><a href="#">Price: High to Low</a></li>
-                                            <li><a href="#">Release Date</a></li>
-                                            <li><a href="#">Avg. Rating</a></li>
-                                        </ul>
-                                    </div>
+                            <div class="sort-by-product-area col-4"> 
+                                <div class="search-style-2">
+                                    <form action="#">
+                                        <input type="text" id="productSearch" placeholder="Search for items…" oninput="debouncedSearch(event)">
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -131,7 +98,7 @@
                         <div class="widget-category mb-30">
                             <h5 class="section-title style-1 mb-10 wow fadeIn animated">Category</h5>
                             <ul class="categories">
-                                <li><a href="/shoping_page">All Categories</a></li> <!-- Link for showing all products -->
+                                <li><a href="/shoping_page">All Categories</a></li>
                                 <% categories.forEach((cat) => { %>
                                     <div class="custome-checkbox">
                                         <input class="form-check-input" type="checkbox" name="categoryCheckbox" id="<%= cat._id %>" value="">
@@ -190,6 +157,82 @@
 <%- include('../layouts/user/footer.ejs') %>
 
 <script>
+    let debounceTimer ;
+
+    function debounce(func, delay) {
+        return (...args) => {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => func.apply(this, args), delay)
+        };
+    }
+
+    const searchProducts = async (event) => {
+        const searchQuery = event.target.value.trim();
+
+        try {
+            const response = await fetch(`/search-products?q=${searchQuery}`);
+            const data = await response.json();
+
+            const productGrid = document.querySelector(".product-grid-3");
+            productGrid.innerHTML = "";
+
+            if (data.products && data.products.length) {
+            data.products.forEach((product) => {
+                const hasOfferPrice = product.variants[0].offer_price;
+                const productHTML = `
+                <div class="col-lg-4 col-md-4 col-12 col-sm-6">
+                    <div class="product-cart-wrap mb-10">
+                        <div class="product-img-action-wrap">
+                            <div class="product-img product-img-zoom">
+                                <a href="/product/${product._id}">
+                                    <img class="default-img" src="${product.product_card_image}" alt="${product.name}">
+                                </a>
+                            </div>
+                            <div class="product-action-1">
+                                <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal"><i class="fi-rs-search"></i></a>
+                                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
+                                <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
+                            </div>
+                            <div class="product-badges product-badges-position product-badges-mrg">
+                                <span class="hot">${product.category.gender}</span>
+                            </div>
+                        </div>
+                        <div class="product-content-wrap">
+                            <div class="product-category">
+                                <a href="shop-grid-right.html">${product.category.name}</a>
+                            </div>
+                            <h2><a href="shop-product-right.html">${product.name}</a></h2>
+                            <div class="rating-result" title="90%">
+                                <span>
+                                    <span>90%</span>
+                                </span>
+                            </div>
+                            <div class="product-price">
+                                <span>₹${hasOfferPrice ? product.variants[0].offer_price : product.variants[0].price}</span>
+                                ${hasOfferPrice ? `<span class="old-price">₹${product.variants[0].price}</span>` : ""}
+                            </div>
+                            <div class="product-action-1 show">
+                                <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                `;
+                productGrid.innerHTML += productHTML;
+            });
+            } else {
+                productGrid.innerHTML = `<div class="col-12"><p>No items found for "${searchQuery}"</p></div>`;
+            }
+        } catch (error) {
+            console.error("Error while fetching products:", error);
+        }
+    };
+
+// Use debounce for the search input
+const debouncedSearch = debounce(searchProducts, 300);
+
+
+
     document.querySelector('.btn-default').addEventListener('click', function() {
 
         const selectedCategories = [];

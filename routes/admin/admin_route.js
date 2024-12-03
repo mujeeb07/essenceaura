@@ -18,9 +18,16 @@ admin_route.get("/logout", admin_controller.admin_logout);
 //users
 admin_route.get('/users', admin_auth, user_controller.users_list);
 admin_route.post("/block_user", admin_auth, user_controller.block_user);
+
+//Order
 admin_route.get("/orders", admin_auth, user_controller.orders);
 admin_route.get("/order_details/:id", admin_auth, user_controller.load_order_details);
 admin_route.post("/update_order_status", admin_auth, user_controller.order_details);
+
+//Return Management
+admin_route.get("/return_management", admin_auth, user_controller.returns);
+admin_route.post("/returns/update", admin_auth, user_controller.return_action);
+admin_route.post("/return_qty_update", admin_auth, user_controller.return_qty_update);
 
 // Brand
 admin_route.get('/brands', admin_auth, brand_controller.load_brands);
@@ -58,5 +65,14 @@ admin_route.get('/create_offer', admin_auth, offer_controller.load_create_offer)
 admin_route.post('/create_offer', admin_auth, offer_controller.create_offer);
 admin_route.get('/edit_offer/:id', admin_auth, offer_controller.load_edit_offer);
 admin_route.post('/edit_offer', admin_auth, offer_controller.update_offer);
+
+//Sales report
+admin_route.get('/create_sales_report', admin_auth, admin_controller.load_create_sales_report);
+
+//Diagram 
+admin_route.get('/daily_sales', admin_auth, admin_controller.daily_sales_data)
+admin_route.get('/weekly_sales', admin_auth, admin_controller.weekly_sales_data)
+admin_route.get('/monthly_sales', admin_auth, admin_controller.monthly_sales_data)
+admin_route.get('/yearly_sales', admin_auth, admin_controller.yearly_sales_data)
 
 module.exports = admin_route;

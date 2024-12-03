@@ -105,60 +105,37 @@ const register_user = async (req, res) => {
     };
 
     const sendMail = async () => {
-
       try {
-
-        await transporter.sendMail(mailOptions);
-
+        transporter.sendMail(mailOptions);
         console.log("Email has been sent!");
 
       } catch (error) {
-
         console.log(error.message);
-
       }
     };
 
     await sendMail();
-
     return res.render("user/user_send_otp", { message: "OTP send to your Email" });
-
   } catch (error) {
-
     return res.status(500).json({ message: "error while sending email", error });
-
   }
-
 };
 
 const user_send_otp = async (req, res) => {
-
   try {
-
     return res.status(200).render("user/user_send_otp");
-
   } catch (error) {
-
     console.log("Error with OTP:", error.message);
-
     return res.status(400).send("Error while sending the OTP");
-
   }
-
 };
 
 const secure_password = async (password) => {
-
   try {
-
     const password_hash = await bcrypt.hash(password, 10);
-
     return password_hash;
-
   } catch (error) {
-
     console.log(error.message);
-
   }
 };
 
@@ -182,19 +159,14 @@ const verify_otp = async (req, res) => {
     });
 
     await user_data.save();
-
     await user_otp.deleteOne({ email });
 
     console.log("User data saved to the database");
-
     return res.status(200).json({ message: "OTP verified successfully", success: true });
 
   } catch (err) {
-
-    console.log("Error from verify OTP function:", err.message);
-
-    return res.status(500).json({
-      message: "Verification failed. Please try again.", success: false });
+    console.log("Error from verify OTP function:", err);
+    return res.status(500).json({ message: "Verification failed. Please try again.", success: false });
   }
 
 };
@@ -244,16 +216,12 @@ const resend_otp = async (req, res) => {
       text: `Hello, your new OTP code is ${otp}. It will expire in 1 minute.`,
     };
 
-    await transporter.sendMail(mailOptions);
+    transporter.sendMail(mailOptions);
 
     console.log("OTP email has been sent");
-
     return res.status(200).json({ message: "OTP has been sent to your email.", success: true });
-
   } catch (error) {
-
     console.log(`Error resending OTP: ${error.message}`);
-
     return res.status(500).json({ message: "Failed to resend OTP.", success: false })
   }
 };
@@ -263,23 +231,19 @@ const load_home_page = async (req, res) => {
   try {
 
     let success_message = req.session.success_message;
-
     req.session.success_message = null;
     const products_list = await Product.find({ is_blocked: false }).populate("brand").populate("category");
 
     return res.render("user/user_landing", { products_list,success_message });
-
   } catch (error) {
-
     console.log("error while rendering home page.", error);
-
+    return res.status(500).json({ message:"Error while rendering home page." })
   }
 };
 
 const login_user = async (req, res) => {
-  try {
 
-    // console.log("req.body:", req.body);
+  try {
 
     const { email, password } = req.body;
 
@@ -301,78 +265,66 @@ const login_user = async (req, res) => {
       return res.status(400).render("user/user_login", { message:"Admin can't login here.", show_message: true });
     }
 
-    const password_match = await bcrypt.compare(password.trim(), user_data.password);
+    const password_match = bcrypt.compare(password.trim(), user_data.password);
 
     if (!password_match) {
       return res.status(400).render("user/user_login", { message: "Invalid email or password.", show_message: "false" });
     }
+
     req.session.success_message = `welcome back ${user_data.name}`
     req.session.user = user_data._id;
 
-    // console.log("user:", req.session.user);
-
     return res.status(200).redirect("/");
-
   } catch (error) {
-
     console.error("Error while logging in:", error.message);
-
     return res.status(500).render("user/user_login", { message: "Something went wrong. Please try again later.", show_message: true });
   }
 };
 
 const user_logout = async (req, res) => {
-
   try {
-
     req.session.destroy() || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user).destroy();
-
     return res.status(204).redirect("/login");
-
   } catch (error) {
+    console.log("Error while Logout.", error)
     return res.status(500).json({ message: "error while login out", error });
   }
-
 };
 
 const view_product = async (req, res) => {
-
   try {
-
     const productId = req.params.product_id;
-
     const product = await Product.findById(productId).populate("category").populate("brand");
 
     if (!product) {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    const hasOffer = product.product_offer && product.product_offer.offer_status && new Date(product.product_offer.offer_expire_date) > new Date();
-    const actualPrice = product.variants[0].price;
-    const offerPrice = hasOffer ? (actualPrice - (actualPrice * product.product_offer.offer_discount_percentage / 100)).toFixed(2) : null;
-    // console.log('Product data:', product)
-    return res.status(200).render("user/view_product", { product, actualPrice, offerPrice });
+    const default_variant = product.variants[0];
+    const actualPrice = default_variant.price;
 
+    const hasOffer =
+    product.product_offer &&
+    product.product_offer.offer_status &&
+    new Date(product.product_offer.offer_expire_date) > new Date();
+
+    let offerPrice = null;
+
+    if (hasOffer) {
+      offerPrice = default_variant.sale_price_after_discount
+    }
+    // console.log("Has Offer:", hasOffer, "Actual Price:", actualPrice, "Offer Price:", offerPrice);
+    return res.status(200).render("user/view_product", { product, actualPrice, offerPrice });
   } catch (error) {
-    console.log("Error while rendering the product view page", error);
-    return res.status(500).json({ message: "Error while view product", error });
+    console.error("Error while rendering the product view page", error);
+    return res.status(500).json({ message: "Error while viewing product", error });
   }
 };
 
+
 const user_address = async (req, res) => {
-
-  // console.log("hello ba", req.body)
-
   try {
-    const {
-      full_name,
-      mobile_number,
-      pincode,
-      address,
-      landmark,
-      town_city,
-      state,
-    } = req.body;
+    const { full_name, mobile_number, pincode, address, landmark, town_city, state } = req.body;
     
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const address_data = new Address({
@@ -387,104 +339,60 @@ const user_address = async (req, res) => {
     });
 
     await address_data.save();
-
     const current_user = await user.findById(user_id);
-
     current_user.address_id.push(address_data._id);
 
     await current_user.save();
-
-    // console.log("address added successfully.", address_data);
-
     const sourcePage = req.body.sourcePage;
-
     if (sourcePage === "checkout") {
       return res.redirect("/checkout");
     }
-
     return res.status(200).redirect("/user_profile");
-
   } catch (error) {
     console.log("error for adding address", error);
+    return res.status(500).json({ message: "Error add address.", success: false });
   }
 };
 
 const delete_address = async (req, res) => {
-
   const addressId = req.params.id;
-
   const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
-
   try {
-
     await Address.findByIdAndDelete(addressId);
-
-    await user.updateOne(
-      { _id: user_id },
-      { $pull: {address_id: addressId} }
-    );
-
+    await user.updateOne({ _id: user_id }, { $pull: {address_id: addressId} });
     return res.status(200).json({ success: true, message: 'Address deleted successfully' });
-
   } catch (error) {
-
+    console.log("Error while delete address.", error);
     return res.status(500).json({ success: false, message: 'Failed to delete address' })
   }
 }
 
 const user_profile = async (req, res) => {
-
   try {
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
-
-    // console.log("profile controller");
-
     const id = await user.findById({ _id: user_id });
-
-    const order = await orders.find();
-
-    // console.log("user :", id);
-
+    const order = await orders.find({ user: user_id });
     const addresses = await Address.find({ user: user_id });
-
-    // console.log("data from the body address:",req.body)
-
     return res.render("user/user_profile", { addresses: addresses, id, orders: order });
-
   } catch (error) {
-
     console.log("error while in user profile", error.message);
-
     return res.status(500).json({ message: "error whith user profile", error });
   }
-
 };
 
-
 const load_edit_address = async (req, res) => {
-
   const address_id = req.params.id;
-  // console.log("address id:", address_id)
   try {
-
     const address = await Address.findOne({_id:address_id});
-
-    // console.log('address data:', address)
-
     return res.status(200).render('user/edit_address', {address});
-
   } catch (error) {
-    
     return res.status(500).json({ message:'error while rendering edit page', error });
-
   }
-
 }
 
 const edit_address = async (req, res) => {
   const {id, name, mobile, address, city, state, postal_code, landmark} = req.body
   try {
-    // console.log("data from body:",id, name, mobile, address, city, state, postal_code, landmark)
     await Address.findByIdAndUpdate({_id:id},{
       name:name,
       address:address,
@@ -498,39 +406,7 @@ const edit_address = async (req, res) => {
   } catch (error) {
    return res.status(500).console.log("error while updating user addres", error);
   }
-
 }
-
-const load_my_orders = async(req, res) => {
-
-  try {
-    
-    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
-    const my_orders = await orders.find({ user: user }).sort({_id:-1})
-    // console.log("MY ORDERS DATA: ", my_orders)
-
-    return res.status(200).render('user/my_orders', { my_orders } );
-
-  } catch (error) {
-    console.log("error while renders the my orders page", error);
-   return res.status(500).json({messge: "error while renders the my orders page.", error});
-  }
-}
-
-const cancel_order = async (req, res) => {
-  const { id } = req.params;
-  try {
-    const order_data = await orders.findByIdAndUpdate({ _id:id },
-      {$set: { order_status:'Cancelled' }}
-    );
-    order_data.save();
-    return res.status(200).json({ message:"Order Cancelled Successfully",success:true });
-  } catch (error) {
-    console.log("Something went wrong while cancel order", error);
-    return res.status.status(500).json({ message:"Something went wrong while cancel order",error })
-  }
-}
-
 
 module.exports = {
   load_login,
@@ -547,7 +423,5 @@ module.exports = {
   user_profile,
   delete_address,
   load_edit_address,
-  edit_address,
-  load_my_orders,
-  cancel_order
+  edit_address
 };

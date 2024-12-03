@@ -1,0 +1,256 @@
+<%- include('../layouts/admin/header.ejs') %>
+<body>
+    <div class="screen-overlay"></div>
+    <%- include('../layouts/admin/sidebar.ejs') %>
+   
+    <main class="main-wrap">
+        <%- include('../layouts/admin/navbar.ejs') %>
+        <section class="content-main">
+            <div class="content-header">
+                <div>
+                    <h2 class="content-title card-title">Create Sales Report</h2>
+                    <p>Whole data about your business here</p>
+                </div>
+                <div>
+                    <button class="btn btn-primary me-3" id="btn-pdf">
+                        <i class="text-muted material-icons md-post_add"></i>
+                        Download as PDF
+                    </button>
+                    <button class="btn btn-primary" id="btn-excel">
+                        <i class="text-muted material-icons md-post_add"></i>
+                        Download as Excel
+                    </button>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="d-flex justify-content-center m-5">
+                    <button class="btn btn-primary me-3" id="btn-daily">Daily</button>
+                    <button class="btn btn-primary me-3" id="btn-weekly">Weekly</button>
+                    <button class="btn btn-primary me-3" id="btn-monthly">Monthly</button>
+                    <button class="btn btn-primary me-3" id="btn-yearly">Yearly</button>
+                </div>
+            
+                
+                <div id="table-daily" class="sales-table align-items text-center">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-4">Daily Sales</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Total Sales</th>
+                                            <th>Order Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% daily.forEach(day => { %>
+                                        <tr>
+                                            <td><%= day._id.year %>-<%= day._id.month %>-<%= day._id.day %></td>
+                                            <td>₹<%= day.total_sales.toFixed(2) %></td>
+                                            <td><%= day.order_count %></td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            
+                <div id="table-weekly" class="sales-table text-center" style="display: none;">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-4">Weekly Sales</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Year</th>
+                                            <th>Week Range</th>
+                                            <th>Total Sales</th>
+                                            <th>Order Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% weekly.forEach(week => { %>
+                                        <tr>
+                                            <td><%= week._id.year %></td>
+                                            <td><%= week.week_range %></td>
+                                            <td>₹<%= week.total_sales.toFixed(2) %></td>
+                                            <td><%= week.order_count %></td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>                        
+                    </div>
+                </div>
+                
+                <div id="table-monthly" class="sales-table text-center" style="display: none;">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-4">Monthly Sales</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Year</th>
+                                            <th>Month</th>
+                                            <th>Total Sales</th>
+                                            <th>Order Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% monthly.forEach(month => { %>
+                                        <tr>
+                                            <td><%= month._id.year %></td>
+                                            <td><%= month.month_name %></td>
+                                            <td>₹<%= month.total_sales.toFixed(2) %></td>
+                                            <td><%= month.order_count %></td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>                              
+                
+                <div id="table-yearly" class="sales-table text-center" style="display: none;">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="mb-4">Yearly Sales</h4>
+                            <div class="table-responsive">
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Year</th>
+                                            <th>Total Sales</th>
+                                            <th>Order Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% yearly.forEach(year => { %>
+                                        <tr>
+                                            <td><%= year._id.year %></td>
+                                            <td>₹<%= year.total_sales.toFixed(2) %></td>
+                                            <td><%= year.order_count %></td>
+                                        </tr>
+                                        <% }) %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>            
+        </section>
+    </main>
+</body>
+</html>
+<%- include('../layouts/admin/footer.ejs') %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+
+document.getElementById('btn-excel').addEventListener('click', () => {
+    const visibleTable = document.querySelector('.sales-table:not([style*="display: none"]) table');
+
+    if (!visibleTable) {
+        alert("No table to export!");
+        return;
+    }
+
+    const wsData = [];
+    visibleTable.querySelectorAll('tr').forEach(tr => {
+        const row = [];
+        tr.querySelectorAll('th, td').forEach(td => {
+            row.push(td.innerText);
+        });
+        wsData.push(row);
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+
+    XLSX.utils.book_append_sheet(wb, ws, 'Sales Report');
+
+    XLSX.writeFile(wb, 'sales-report.xlsx');
+});
+
+
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+    const dailyBtn = document.getElementById('btn-daily');
+    const weeklyBtn = document.getElementById('btn-weekly');
+    const monthlyBtn = document.getElementById('btn-monthly');
+    const yearlyBtn = document.getElementById('btn-yearly');
+    const tables = document.querySelectorAll('.sales-table');
+
+    const showTable = (id) => {
+        tables.forEach(table => table.style.display = 'none');
+        document.getElementById(id).style.display = 'block';
+    };
+
+    dailyBtn.addEventListener('click', () => showTable('table-daily'));
+    weeklyBtn.addEventListener('click', () => showTable('table-weekly'));
+    monthlyBtn.addEventListener('click', () => showTable('table-monthly'));
+    yearlyBtn.addEventListener('click', () => showTable('table-yearly'));
+
+    document.getElementById('btn-pdf').addEventListener('click', () => {
+        const visibleTable = document.querySelector('.sales-table:not([style*="display: none"])');
+
+        if (!visibleTable) {
+            alert("No table to export!");
+            return;
+        }
+
+        const tableClone = visibleTable.cloneNode(true);
+        tableClone.style.width = '100%';
+        tableClone.style.margin = '0 auto';
+
+        const currentDate = new Date();
+        const formattedDate = currentDate.toLocaleDateString();
+        const formattedTime = currentDate.toLocaleTimeString();
+
+        const header = document.createElement('div');
+        header.style.display = 'flex';
+        header.style.justifyContent = 'space-between';
+        header.style.marginBottom = '20px';
+        header.style.fontSize = '14px';
+        header.style.fontWeight = 'bold';
+        header.innerHTML = `
+            <span>Sales Report</span>
+            <span>${formattedDate} ${formattedTime}</span>
+        `;
+
+        const pdfContainer = document.createElement('div');
+        pdfContainer.style.width = '210mm';
+        pdfContainer.style.height = '297mm'; 
+        pdfContainer.style.padding = '10mm';
+        pdfContainer.style.boxSizing = 'border-box';
+        pdfContainer.style.fontSize = '12px'; 
+        pdfContainer.appendChild(header);
+        pdfContainer.appendChild(tableClone);
+
+        const options = {
+            margin: 0,
+            filename: 'sales-report.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(options).from(pdfContainer).save();
+    });
+</script>
+

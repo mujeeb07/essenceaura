@@ -1,0 +1,274 @@
+<%- include('../layouts/user/header.ejs') %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+<div class="container mt-5 sales-report">
+  <div class="card">
+    <div class="card-header text-center">
+      <h4>Order Items</h4>
+    </div>
+    <div class="table-responsive">
+      <table class="table table-bordered text-center">
+        <thead class="thead-light">
+          <tr>
+            <th>Product Image</th>
+            <th>Product Name</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Status</th>
+            <th>Payment Method</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% order.items.forEach(item => { %>
+            <tr>
+              <td>
+                <img src="<%= item.product.product_card_image %>" alt="<%= item.product.name %>" 
+                     class="img-thumbnail" style="width: 90px; height: auto; border: none;">
+              </td>
+              <td><%= item.product.name %></td>
+              <td><%= item.quantity %></td>
+              <td>₹<%= item.product.variants.price %></td>
+              <td><%= item.product.return_request %></td>
+              <td><%= order.payment_method %></td>
+              <td>
+                <% if (item.product.return_request === 'Return Approved') { %>
+                  <button class="btn btn-sm" style="color: rgb(255, 255, 255); background-color: #088178;" disabled>Return Approved</button>
+                <% } else if (item.product.return_request === 'Return Initiated') { %>
+                  <button class="btn btn-sm btn-warning" style="color: black;" disabled>Return Initiated</button>
+                <% } else if (order.order_status === 'Delivered') { %>
+                  <button class="btn btn-sm return-product" style="background-color: orange; color: white; border: none;"
+                          data-order-id="<%= order._id %>" data-product-id="<%= item.product._id %>">
+                    Return
+                  </button>
+                <% } else if (item.product.cancel_request === 'Cancelled') { %>
+                  <button class="btn btn-sm btn-secondary" disabled>Cancelled</button>
+                <% } else { %>
+                  <button class="btn btn-sm btn-danger cancel-product" 
+                        data-product-variants="<%= item.product.variants.volume %>"  data-order-id="<%= order._id %>" data-product-id="<%= item.product._id %>">
+                    Cancel
+                  </button>
+                <% } %>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+    <div class="card-header text-center mt-10"><h5>Billing Details</h5></div>
+    <div class="card-body">
+      <div class="row">
+        
+        <div class="col-md-6">
+          <h5>Shipping Address:</h5>
+          <p>
+            <strong>Name:</strong> <%= order.shipping_address.name %><br>
+            <strong>Mobile:</strong> <%= order.shipping_address.mobile %><br>
+            <strong>Address:</strong> <%= order.shipping_address.address %>, 
+            <%= order.shipping_address.city %>, <%= order.shipping_address.state %>, 
+            <%= order.shipping_address.postal_code %><br>
+            <strong>Landmark:</strong> <%= order.shipping_address.landmark || "N/A" %>
+          </p>
+        </div>
+        
+        <div class="col-md-6">
+          <p><strong>Order ID:</strong> <strong>#<%= order._id.toString().toUpperCase().slice(-10) %></strong></p>
+          <p><strong>Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></p>
+          <p><strong>Total Amount:</strong> ₹<%= order.total %></p>
+          <p><strong>Order Status:</strong> <%= order.order_status %></p>
+        </div>
+      </div>
+    </div>
+  </div>    
+</div>
+<div class="d-flex container justify-content-between mt-5 mb-5">
+  <a href="/my_orders" class="btn btn-md" style="color: rgb(255, 255, 255); background-color: #088178;">
+    <strong>Back to Orders</strong>
+  </a>
+  <a href="javascript:void(0);" onclick="generateOrderPDF()" class="btn btn-md" style="color: rgb(255, 255, 255); background-color: #088178;">
+    <strong><i class="text-muted material-icons md-post_add"></i> Download Invoice </strong>
+</a>                 
+</div>
+<%- include('../layouts/user/footer.ejs') %>
+<script>
+  //CANCEL PRODUCT
+  document.querySelectorAll('.cancel-product').forEach(button => {
+    button.addEventListener('click', async () => {
+      const orderId = button.getAttribute('data-order-id');
+      const productId = button.getAttribute('data-product-id');
+      const productVariant = button.getAttribute('data-product-variants');
+
+      Swal.fire({
+        title: 'Are you sure?',
+        text: "Do you want to cancel this product? This action cannot be undone!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, cancel it!',
+        cancelButtonText: 'No, keep it',
+      }).then(async (result) => {
+        if (result.isConfirmed) {
+          
+          const response = await fetch(`/cancel_product`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ order_id: orderId, product_id: productId, product_variant: productVariant  }),
+          });
+
+          const data = await response.json();
+          if (data.success) {
+            Swal.fire(
+              'Cancelled!',
+              'The product has been canceled successfully.',
+              'success'
+            ).then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire(
+              'Error!',
+              'Failed to cancel the product. Please try again.',
+              'error'
+            );
+          }
+        }
+      });
+    });
+  });
+
+//RETURN PRODUCT
+  document.querySelectorAll('.return-product').forEach(button => {
+    button.addEventListener('click', async () => {
+        const orderId = button.getAttribute('data-order-id');
+        const productId = button.getAttribute('data-product-id');
+        const productVariant = button.getAttribute('data-product-variants');
+
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Do you want to return this product? This action cannot be undone!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, return it!',
+            cancelButtonText: 'No, keep it',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const { value: reason } = await Swal.fire({
+                    title: 'Reason for Return',
+                    input: 'select',
+                    inputOptions: {
+                        'Damaged Product': 'Damaged Product',
+                        'Wrong Item Delivered': 'Wrong Item Delivered',
+                        'Defective Product': 'Defective Product',
+                        'Allergic Reaction': 'Allergic Reaction',
+                        'Unsatisfactory Fragrance': 'Unsatisfactory Fragrance'
+                    },
+                    inputPlaceholder: 'Select a reason',
+                    showCancelButton: true,
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'You need to select a reason!';
+                        }
+                    }
+                });
+
+                if (reason) {
+                    const response = await fetch(`/return_product`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            order_id: orderId,
+                            product_id: productId,
+                            product_variant: productVariant,
+                            reason: reason
+                        })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        Swal.fire(
+                            'Return Initiated!',
+                            'Your return request has been submitted successfully.',
+                            'success'
+                        ).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'Failed to initiate return request. Please try again.',
+                            'error'
+                        );
+                    }
+                }
+            }
+        });
+    });
+  });
+
+//Invoice download
+  async function generateOrderPDF() {
+    try {
+        const container = document.querySelector('.sales-report');
+        const canvas = await html2canvas(container, { scale: 2 });
+        const imgData = canvas.toDataURL('image/png');
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+
+        const currentDate = new Date();
+        const formattedDate = `Date: ${currentDate.toLocaleDateString()}`;
+        const formattedTime = `Time: ${currentDate.toLocaleTimeString()}`;
+
+        const logoImgUrl = '/user_asset/imgs/theme/ea_logo.png';
+        const logoWidth = 20;
+        const logoHeight = 7;
+        const logoX = 10;
+        const logoY = 10;
+
+        pdf.addImage(logoImgUrl, 'PNG', logoX, logoY, logoWidth, logoHeight);
+
+        const dateX = pdfWidth - 50;
+        const dateY = 10;
+
+        pdf.setFontSize(10);
+        pdf.text(formattedDate, dateX, dateY);
+        pdf.text(formattedTime, dateX, dateY + 5);
+
+        const headingY = logoY + logoHeight + 10;
+        pdf.setFont('helvetica', 'bold');
+        pdf.setFontSize(16);
+        pdf.text('Tax Invoice', pdfWidth / 2, headingY, { align: 'center' });
+
+        const imgWidth = pdfWidth - 20;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const xOffset = (pdfWidth - imgWidth) / 2;
+        const yOffset = headingY + 10;
+
+        pdf.addImage(imgData, 'PNG', xOffset, yOffset, imgWidth, imgHeight);
+
+        pdf.setDrawColor(0);
+        pdf.setLineWidth(0.5);
+        pdf.line(10, pdfHeight - 30, pdfWidth - 10, pdfHeight - 30);
+
+        pdf.setFontSize(7);
+        pdf.text('© 2024, EssenceAura The Perfume Company', 10, pdfHeight - 20);
+        pdf.text('Designed by EssenceAura.com. All rights reserved', pdfWidth - 70, pdfHeight - 20);
+
+        const orderId = '<%= order._id %>';
+        pdf.save(`Order_${orderId}.pdf`);
+    } catch (error) {
+        console.error('Error generating PDF:', error);
+    }
+  }
+
+</script>
+
+
+

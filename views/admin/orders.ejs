@@ -5,8 +5,8 @@
     <section class="content-main">
         <div class="content-header">
             <div>
-                <h2 class="content-title card-title">Order List </h2>
-                <p>Detailed Order History.</p>
+                <h2 class="content-title card-title">Order Management </h2>
+                <p>Detailed Orders History.</p>
             </div>
             <div>
                 <input type="text" placeholder="Search order ID" class="form-control bg-white">
@@ -61,16 +61,31 @@
         <div class="pagination-area mt-15 mb-50">
             <nav aria-label="Page navigation example">
                 <ul class="pagination justify-content-start">
-                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                    <li class="page-item"><a class="page-link" href="#">02</a></li>
-                    <li class="page-item"><a class="page-link" href="#">03</a></li>
-                    <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                    <li class="page-item"><a class="page-link" href="#">16</a></li>
-                    <li class="page-item"><a class="page-link" href="#"><i
-                                class="material-icons md-chevron_right"></i></a></li>
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>">
+                                <i class="material-icons md-chevron_left"></i>
+                            </a>
+                        </li>
+                    <% } %>
+        
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+        
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>">
+                                <i class="material-icons md-chevron_right"></i>
+                            </a>
+                        </li>
+                    <% } %>
                 </ul>
             </nav>
         </div>
+        
     </section> <!-- content-main end// -->
 </main>
 

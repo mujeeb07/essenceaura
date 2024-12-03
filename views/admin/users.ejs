@@ -87,10 +87,8 @@
                                     <td><%= new Date(user_data[i].createdAt).toLocaleDateString() %></td>
                                     <td>
                                         <% if(user_data[i].is_active) { %>
-                                            <!-- Block User Button -->
                                             <button onclick="updateUserStatus('<%= user_data[i]._id %>', false)" class="btn btn-md btn-light font-sm hover-up">Block</button>
                                         <% } else { %>
-                                            <!-- Unblock User Button -->
                                             <button onclick="updateUserStatus('<%= user_data[i]._id %>', true)" class="btn btn-md btn-light font-sm hover-up">Unblock</button>
                                         <% } %>
                                     </td>
@@ -99,35 +97,35 @@
                             </tbody>
                         </table>
                     </div> <!-- table-responsive //end -->
-                    <div class="pagination">
-                        <% if (current_page > 1) { %>
-                            <a href="?page=<%= current_page - 1 %>" class="btn btn-sm btn-outline-secondary">Previous</a>
-                        <% } %>
-
-                        <% for(let i = 1; i <= total_pages; i++) { %>
-                            <a href="?page=<%= i %>" class="btn btn-sm <%= i === current_page ? 'btn-primary' : 'btn-outline-secondary' %>"><%= i %></a>
-                        <% } %>
-
-                        <% if (current_page < total_pages) { %>
-                            <a href="?page=<%= current_page + 1 %>" class="btn btn-sm btn-outline-secondary">Next</a>
-                        <% } %>
-
+                    <div class="pagination-area mt-15 mb-50">
+                        <nav aria-label="Page navigation example">
+                            <ul class="pagination justify-content-start">
+                                <% if (current_page > 1) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= current_page - 1 %>">
+                                            <i class="material-icons md-chevron_left"></i>
+                                        </a>
+                                    </li>
+                                <% } %>
+                    
+                                <% for (let i = 1; i <= total_pages; i++) { %>
+                                    <li class="page-item <%= i === current_page ? 'active' : '' %>">
+                                        <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                                    </li>
+                                <% } %>
+                    
+                                <% if (current_page < total_pages) { %>
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page=<%= current_page + 1 %>">
+                                            <i class="material-icons md-chevron_right"></i>
+                                        </a>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </nav>
                     </div>
                 </div> <!-- card-body end// -->
             </div> <!-- card end// -->
-            <div class="pagination-area mt-15 mb-50">
-                <nav aria-label="Page navigation example">
-                    <ul class="pagination justify-content-start">
-                        <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                        <li class="page-item"><a class="page-link" href="#">02</a></li>
-                        <li class="page-item"><a class="page-link" href="#">03</a></li>
-                        <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                        <li class="page-item"><a class="page-link" href="#">16</a></li>
-                        <li class="page-item"><a class="page-link" href="#"><i
-                                    class="material-icons md-chevron_right"></i></a></li>
-                    </ul>
-                </nav>
-            </div>
         </section>
     </main>
 

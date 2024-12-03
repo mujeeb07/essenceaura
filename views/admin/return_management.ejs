@@ -1,0 +1,182 @@
+<%- include('../layouts/admin/header.ejs') %>
+<%- include('../layouts/admin/sidebar.ejs') %>
+<main class="main-wrap">
+    <%- include('../layouts/admin/navbar.ejs') %>
+    <section class="content-main">
+        <div class="content-header">
+            <div>
+                <h2 class="content-title card-title">Return Management</h2>
+                <p>Detailed Return Request History.</p>
+            </div>
+            <div>
+                <input type="text" placeholder="Search order ID" class="form-control bg-white">
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                              <th scope="col">Order ID</th>
+                              <th scope="col">User Email</th>
+                              <th scope="col">Product Name</th>
+                              <th scope="col">Price</th>
+                              <th scope="col">Return Reason</th>
+                              <th scope="col">Status</th>
+                              <th scope="col">Date</th>
+                              <th scope="col" class="text-center">Action</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <% orders.forEach((order) => { %>
+                              <% order.items.forEach((item) => { %>
+                                <% if (item.product.return_request === "Return Initiated" || item.product.return_request === "Return Approved" || item.product.return_request === "Return Rejected") { %>
+                                  <tr>
+                                    <td><strong>#<%= order._id.toString().slice(-10).toUpperCase() %></strong></td>
+                                    <td><%= order.user.email %></td>
+                                    <td><%= item.product.name %></td>
+                                    <td>₹<%= item.product.variants.price %></td>
+                                    <td><%= item.product.return_reason %></td>
+                                    <td>
+                                      <% if (item.product.return_request === "Return Approved") { %>
+                                        <span class="badge rounded-pill alert-success">Approved</span>
+                                      <% } else if (item.product.return_request === "Return Rejected") { %>
+                                        <span class="badge rounded-pill alert-danger">Rejected</span>
+                                      <% } else { %>
+                                        <span class="badge rounded-pill alert-warning">Return Initiated</span>
+                                      <% } %>
+                                    </td>
+                                    <td><%= new Date(order.createdAt).toLocaleDateString() %></td>
+                                    <td class="text-end">
+                                      <% if (item.product.return_request === "Return Initiated") { %>
+                                        <button class="btn btn-sm me-2" style="color: white; background-color: #088178;"
+                                          onclick="updateReturnStatus('<%= order._id %>', '<%= item.product._id %>', '<%= item.product.variants.volume %>', '<%= item.quantity %>', '<%= item.product.return_reason %>', 'Approve')">Approve</button>
+                                        <button class="btn btn-sm" style="color: white; background-color: #af2121;"
+                                          onclick="updateReturnStatus('<%= order._id %>', '<%= item.product._id %>', '<%= item.product.variants.volume %>', '<%= item.quantity %>', '<%= item.product.return_reason %>', 'Reject')">Reject</button>
+                                      <% } else if (item.product.return_request === "Return Approved"){ %>
+                                        <span class="me-4" style="color: #088178;">Action Approved</span>
+                                      <% } else if (item.product.return_request === "Return Rejected"){ %>
+                                        <span class="me-4" style="color: #af2121;">Action Rejected</span>
+                                      <% } %>  
+                                    </td>
+                                  </tr>
+                                <% } %>
+                              <% }) %>
+                            <% }) %>
+                        </tbody>                          
+                    </table>
+                </div> <!-- table-responsive //end -->
+            </div> <!-- card-body end// -->
+        </div> <!-- card end// -->
+        <div class="pagination-area mt-15 mb-50">
+            <nav aria-label="Page navigation example">
+                <ul class="pagination justify-content-start">
+                    <% if (currentPage > 1) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage - 1 %>">
+                                <i class="material-icons md-chevron_left"></i>
+                            </a>
+                        </li>
+                    <% } %>
+                    <% for (let i = 1; i <= totalPages; i++) { %>
+                        <li class="page-item <%= currentPage === i ? 'active' : '' %>">
+                            <a class="page-link" href="?page=<%= i %>"><%= i %></a>
+                        </li>
+                    <% } %>
+                    <% if (currentPage < totalPages) { %>
+                        <li class="page-item">
+                            <a class="page-link" href="?page=<%= currentPage + 1 %>">
+                                <i class="material-icons md-chevron_right"></i>
+                            </a>
+                        </li>
+                    <% } %>
+                </ul>
+            </nav>
+        </div>
+    </section> <!-- content-main end// -->
+</main>
+<%- include('../layouts/admin/footer.ejs') %>
+
+<script>
+    async function updateReturnStatus(orderId, itemId, variant, quantity, reason, status) {
+        try {
+            const result = await Swal.fire({
+                title: 'Are you sure?',
+                text: `Do you really want to ${status} the return?`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: `Yes, ${status} it!`,
+                cancelButtonText: 'Cancel',
+            });
+
+            if (result.isConfirmed) {
+                const quantityUpdate = await Swal.fire({
+                    title: 'Update stock?',
+                    text: `Reason: "${reason}". Do you need to update the stock for this return?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: `Yes, update it!`,
+                    cancelButtonText: 'No, proceed without stock update',
+                });
+
+                if (quantityUpdate.isConfirmed) {
+                    const qtyResponse = await fetch(`/admin/return_qty_update`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ itemId, variant, quantity }),
+                    });
+
+                    const qtyData = await qtyResponse.json();
+                    if (qtyData.success) {
+                        await Swal.fire(
+                            'Updated!',
+                            'Stock quantity and return action updated successfully.',
+                            'success'
+                        );
+                    } else {
+                        await Swal.fire(
+                            'Stock Update Failed!',
+                            `Failed to update stock quantity. Proceeding with return action ${status}.`,
+                            'error'
+                        );
+                    }
+                }
+
+                const actionResponse = await fetch(`/admin/returns/update`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ orderId, itemId, variant, quantity, reason, status }),
+                });
+
+                const actionData = await actionResponse.json();
+                if (actionData.success) {
+                    await Swal.fire(
+                        'Action Completed!',
+                        `Return has been successfully ${status}.`,
+                        'success'
+                    );
+                    location.reload();
+                } else {
+                    Swal.fire(
+                        'Action Failed!',
+                        'Failed to update the return action. Please try again later.',
+                        'error'
+                    );
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire(
+                'Error!',
+                'An unexpected error occurred. Please try again later.',
+                'error'
+            );
+        }
+    }
+
+</script>

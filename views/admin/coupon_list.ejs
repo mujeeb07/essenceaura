@@ -57,7 +57,7 @@
                                     <td class="col-5"><%= coupon_data[i].coupon_description %></td>
                                     <td class="col-1"><%= coupon_data[i].coupon_code %></td>
                                     
-                                    <td class="col-1"><%= new Date(coupon_data[i].createdAt).toLocaleDateString() %></td>     
+                                    <td class="col-1"><%= new Date(coupon_data[i].coupon_expires).toLocaleDateString() %></td>     
 
                                     <td class="col-1" id="user-status-<%= coupon_data[i]._id %>">
                                         <% if(coupon_data[i].coupon_status) { %>

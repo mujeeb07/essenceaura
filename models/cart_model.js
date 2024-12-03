@@ -35,7 +35,11 @@ const cart_schema = new mongoose.Schema({
         ref: 'user',
         required: true
     },
+    coupon_amount: {
+        type: Number,
+    },
     item: [cart_items_schema]
+
 },{timestamps: true});
 
 

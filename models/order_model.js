@@ -37,6 +37,19 @@ const order_schema = new mongoose.Schema({
           _id: { type: ObjectId, ref: 'brand', required: true },
           brandName: { type: String, required: true },
           logo: { type: String }
+        },
+        cancel_request: {
+          type: String,
+          enum: ['Pending', 'Cancelled'],
+          default: 'Pending'
+        },
+        return_request: {
+          type: String,
+          enum: ["Pending", "Shipped", "Delivered", "Cancelled", "Return Initiated", "Return Approved", "Return Rejected"],
+          default: "Pending"
+        },
+        return_reason: {
+          type: String,
         }
       },
       quantity: {
@@ -58,23 +71,31 @@ const order_schema = new mongoose.Schema({
     type: Number,
     required: true
   },
-
   discount_amount: {
     type: Number,
     default: 0
   },
+  delivery_charge: {
+    type: Number,
+    default: 0
+  },
   total: {
-    type: String,
+    type: Number,
     reqwiured: true
   },
   payment_method: {
     type: String,
-    enum: ['COD', 'online'],
+    enum: ['COD', 'online', 'wallet'],
     required: true
+  },
+  payment_status: {
+    type: String,
+    enum: ["pending","completed"],
+    default: "pending"
   },
   order_status: {
     type: String,
-    enum: ['Pending', 'Confirmed', 'Shipped', 'Delivered', 'Cancelled'],
+    enum: ['Pending', 'Returned', 'Shipped', 'Delivered', 'Cancelled'],
     default: 'Pending'
   }
 }, { timestamps: true });

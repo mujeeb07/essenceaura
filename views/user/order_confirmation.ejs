@@ -18,7 +18,7 @@
 <div class="container mt-5">
   <div class="card shadow-lg p-4 mb-4">
     <h2 class="text-center mb-4">Order Confirmation</h2>
-    <p class="text-center text-muted pb-15">Thank you for your purchase! Your order has been placed successfully.</p>
+    <h5 class="text-center text-muted pb-15"><span style="color:rgb(2, 144, 2);">Thank you for your purchase! Your order has been placed successfully.</span></h5>
     
         <div class="row mb-4">
             <div class="col-md-6">
@@ -31,8 +31,17 @@
                     <p class="mb-1"><strong>Estimated Delivery:</strong> <%= estimated_delivery %></p>
                   </div>
                   <div>
-                    <h6>Total Amount: <strong>₹ <%= order.total %></strong></h6>
-                    <p class="mb-1"><strong>Payment Method:</strong> <%= order.payment_method === "COD" ? "Cash on Delivery" : "Razorpay" %></p>
+                    <h6>Total Amount: <strong>₹ <%= (order.total).toFixed(2) %></strong></h6>
+                    <p class="mb-1"><strong>Coupon Amount:</strong> <%= order.discount_amount %></p>
+                    <p class="mb-1"><strong>Payment Method:</strong> 
+                      <% if(order.payment_method === "COD") { %>
+                          COD
+                      <% } else if(order.payment_method === "Razorpay") {%>
+                          Razorpay
+                      <% } else { %>
+                        wallet
+                      <% } %>
+                    </p>
                   </div>                  
                 </div>
               </div>
@@ -68,31 +77,34 @@
                   <tr>
                     <td><%= item.product.name %></td>
                     <td><%= item.quantity %></td>
-                    <td>₹ <%= item.price %></td>
-                    <td>₹ <%= (item.price * item.quantity) %></td>
+                    <td>₹ <%= item.offer_price ? item.offer_price : item.price %></td>
+                    <td>₹ <%= ((item.offer_price ? item.offer_price : item.price) * item.quantity).toFixed(2) %></td>
                   </tr>
                 <% }); %>
               </tbody>
               <tfoot>
                 <tr>
                   <td colspan="3" class="text-right"><strong>Subtotal</strong></td>
-                  <td>₹ <%= order.sub_total %></td>
+                  <td>₹ <%= (order.sub_total).toFixed(2) %></td>
+                </tr>
+                <tr>
+                  <td colspan="3" class="text-right"><strong>Dellivery Charge</strong></td>
+                  <td> <%= order.delivery_charge !== 0 ? `₹ ${order.delivery_charge}` : 'Free' %></td>
                 </tr>
                 <tr>
                   <td colspan="3" class="text-right"><strong>Taxes (GST 18%)</strong></td>
-                  <td>₹ <%= order.tax %></td>
+                  <td>₹ <%= (order.tax).toFixed(2) %></td>
                 </tr>
-                <p>Coupon Discount Amount: <%= coupon_discount_amount %></p>
 
-                <% if (coupon_discount_amount) { %>
+                <% if (order.discount_amount) { %>
                   <tr>
                     <td colspan="3" class="text-right"><strong>Coupon Discount</strong></td>
-                    <td>₹ <%= coupon_discount_amount %></td>
+                    <td>₹ - <span style="color: red;"><%= order.discount_amount %></span></td>
                   </tr>
                 <% } %>
                 <tr>
                   <td colspan="3" class="text-right"><strong>Total Amount</strong></td>
-                  <td><strong>₹ <%= order.total %></strong></td>
+                  <td><strong>₹ <%= (order.total).toFixed(2) %></strong></td>
                 </tr>
               </tfoot>              
             </table>

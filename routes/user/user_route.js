@@ -13,6 +13,7 @@ const user_details = require("../../controllers/user/user_details_controller");
 const wishlist_controller = require("../../controllers/user/wishlist_controller");
 const razorpay_controller = require("../../controllers/user/razorpay_controller");
 const wallet_controller = require("../../controllers/user/wallet_controller");
+const order_controller =  require("../../controllers/user/orders_controller");
 
 //middleware
 const is_authenticated = require("../../middleware/auth");
@@ -69,19 +70,22 @@ user_route.delete('/wishlist/remove', user_blocked, is_authenticated, wishlist_c
 //shoping page
 user_route.get("/shoping_page", shop_page_controller.load_shop_page);
 user_route.post("/filter_products", shop_page_controller.filter_items);
+user_route.get("/search-products", shop_page_controller.search_filter);
 
 //checkout
 user_route.get("/checkout", user_blocked, is_authenticated, checkout_controller.checkout);
 user_route.post("/checkout", user_blocked, is_authenticated, checkout_controller.post_checkout);
 user_route.get('/order_confirmation', user_blocked, is_authenticated, checkout_controller.order_confirmation);
 user_route.post('/apply_coupon', user_blocked, is_authenticated, checkout_controller.apply_coupon);
+user_route.post('/remove_coupon', user_blocked, is_authenticated, checkout_controller.remove_coupon);
 
 user_route.get("/verify_razorpay_payment", user_blocked, is_authenticated, razorpay_controller.verify_online_payment);
 
-//order
-user_route.get('/my_orders', user_blocked, is_authenticated, user_controller.load_my_orders);
-user_route.post("/cancel_order/:id", user_blocked, is_authenticated, user_controller.cancel_order);
-
-
+//order operations
+user_route.get('/my_orders', user_blocked, is_authenticated, order_controller.load_my_orders);
+user_route.post("/cancel_order/:order_id", user_blocked, is_authenticated, order_controller.cancel_order); //cancel full items
+user_route.get("/order_details/:order_id", user_blocked, is_authenticated, order_controller.order_details);
+user_route.post("/cancel_product", user_blocked, is_authenticated, order_controller.cancel_product)
+user_route.post('/return_product', user_blocked, is_authenticated, order_controller.return_product);
 
 module.exports = user_route;

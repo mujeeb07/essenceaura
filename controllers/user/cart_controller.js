@@ -50,7 +50,7 @@ const shop_cart = async (req, res) => {
         await cart.save();
       }
 
-    console.log("Cart Data:", cart );
+    // console.log("Cart Data:", cart );
 
     return res.status(200).json({ message: "Product added to cart successfully", cart });
   } catch (error) {
@@ -95,7 +95,7 @@ const update_quantity = async (req, res) => {
 
     await updatedCart.save();
 
-    console.log("UPDATED CART:",updatedCart)
+    // console.log("UPDATED CART:",updatedCart)
 
     if (!updatedCart) {
       return res.status(404).json({ message: "Cart not found", success: false });
@@ -136,7 +136,7 @@ const get_stock = async(req, res) => {
   try {
     const { productId, volume } = req.params;
     const product = await Product.findById(productId);
-    console.log("Product data get stock:", product)
+    // console.log("Product data get stock:", product)
     const variant = product.variants.find((v) => v.volume === parseInt(volume));
 
     if(!variant || variant === 0){

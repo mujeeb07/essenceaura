@@ -1,0 +1,115 @@
+<%- include('../layouts/user/header.ejs') %>
+
+<style>
+  p {
+    color: #666;
+  }
+  .table th, .table td {
+    vertical-align: middle;
+  }
+  .table-bordered {
+    border: 1px solid #dee2e6;
+  }
+  .table-bordered th, .table-bordered td {
+    border: 1px solid #dee2e6;
+  }
+</style>
+
+<div class="container mt-5">
+  <div class="card shadow-lg p-4 mb-4">
+    <h2 class="text-center mb-4">Tax Invoice</h2>
+    
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Order Details</h5>
+            <div class="mb-3">
+              <h6>Order ID: <strong>#<%= order._id.toString().toUpperCase().slice(-10) %></strong></h6>
+              <p class="mb-1"><strong>Order Date:</strong> <%= new Date(order.createdAt).toLocaleDateString() %></p>
+              
+            </div>
+            <div>
+              <h6>Total Amount: <strong>₹ <%= (order.total).toFixed(2) %></strong></h6>
+              <p class="mb-1"><strong>Coupon Amount:</strong> <%= order.discount_amount %></p>
+              <p class="mb-1"><strong>Payment Method:</strong> 
+                <% if(order.payment_method === "COD") { %>
+                    COD
+                <% } else if(order.payment_method === "Razorpay") {%>
+                    Razorpay
+                <% } else { %>
+                    Wallet
+                <% } %>
+              </p>
+            </div>                  
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h5 class="card-title">Shipping Address</h5>
+            <p class="mb-1"><strong>Name:</strong> <%= order.shipping_address.name %></p>
+            <p class="mb-1"><strong>Address:</strong> <%= order.shipping_address.address %></p>
+            <p class="mb-1"><%= order.shipping_address.city %>, <%= order.shipping_address.state %> - <%= order.shipping_address.postal_code %></p>
+            <p class="mb-1"><strong>Mobile:</strong> <%= order.shipping_address.mobile %></p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-md-12">
+        <h5>Order Summary</h5>
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Subtotal</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% cartItems.forEach(function(item) { %>
+              <tr>
+                <td><%= item.product.name %></td>
+                <td><%= item.quantity %></td>
+                <td>₹ <%= item.offer_price ? item.offer_price : item.price %></td>
+                <td>₹ <%= ((item.offer_price ? item.offer_price : item.price) * item.quantity).toFixed(2) %></td>
+              </tr>
+            <% }); %>
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="3" class="text-right"><strong>Subtotal</strong></td>
+              <td>₹ <%= (order.sub_total).toFixed(2) %></td>
+            </tr>
+            <tr>
+              <td colspan="3" class="text-right"><strong>Taxes (GST 18%)</strong></td>
+              <td>₹ <%= (order.tax).toFixed(2) %></td>
+            </tr>
+
+            <% if (order.discount_amount) { %>
+              <tr>
+                <td colspan="3" class="text-right"><strong>Coupon Discount</strong></td>
+                <td>₹ - <span style="color: red;"><%= order.discount_amount %></span></td>
+              </tr>
+            <% } %>
+            <tr>
+              <td colspan="3" class="text-right"><strong>Total Amount</strong></td>
+              <td><strong>₹ <%= (order.total).toFixed(2) %></strong></td>
+            </tr>
+          </tfoot>              
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<%- include('../layouts/user/footer.ejs') %>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

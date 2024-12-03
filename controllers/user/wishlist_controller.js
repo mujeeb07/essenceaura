@@ -32,10 +32,9 @@ const load_wishlist = async (req, res) => {
 const add_to_wishlist = async(req, res) => {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
     const { productId }  = req.body
-    // console.log("product Id:", productId);
-    // console.log("User :", user);
+   
     let user_wishlist = await Wishlist.findOne({ user_id: user});
-    // console.log('user wishlist :', user_wishlist);
+    
     try {
         if(!user_wishlist){
             const user_wishlist = new Wishlist({
@@ -49,7 +48,7 @@ const add_to_wishlist = async(req, res) => {
                 { $push: { product_ids: productId } }
             )
         }
-        // console.log("wishListData : ", user_wishlist);
+        
         return res.status(200).json({message: "product added to wishlist", success: true})
     } catch (error) {
         return res.status(500).json({message:"Error while adding product to wishlist", error});
