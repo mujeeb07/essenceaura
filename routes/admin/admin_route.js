@@ -68,6 +68,7 @@ admin_route.post('/edit_offer', admin_auth, offer_controller.update_offer);
 
 //Sales report
 admin_route.get('/create_sales_report', admin_auth, admin_controller.load_create_sales_report);
+admin_route.get('/sales_report_table', admin_auth, admin_controller.sales_report_table)
 
 //Diagram 
 admin_route.get('/daily_sales', admin_auth, admin_controller.daily_sales_data)

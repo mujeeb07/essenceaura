@@ -20,9 +20,9 @@ const daily_sales = async () => {
     },
     { 
       $sort: { 
-        "_id.year": -1, 
-        "_id.month": -1, 
-        "_id.day": -1 
+        "_id.year": 1, 
+        "_id.month": 1, 
+        "_id.day": 1 
       } 
     }
   ]);
@@ -48,8 +48,8 @@ const weekly_sales = async () => {
     },
     { 
       $sort: { 
-        "_id.year": -1, 
-        "_id.week": -1 
+        "_id.year": 1, 
+        "_id.week": 1 
       } 
     }
   ]);
@@ -90,8 +90,8 @@ const monthly_sales = async () => {
     },
     { 
       $sort: { 
-        "_id.year": -1, 
-        "_id.month": -1 
+        "_id.year": 1, 
+        "_id.month": 1 
       } 
     }
   ]);
@@ -127,7 +127,7 @@ const yearly_sales = async () => {
       }
     },
     { 
-      $sort: { "_id.year": -1 } }
+      $sort: { "_id.year": 1 } }
   ]);
 
   const currentYear = new Date().getFullYear();

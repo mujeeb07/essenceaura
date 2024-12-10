@@ -300,7 +300,8 @@ const view_product = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    const default_variant = product.variants[0];
+    // Find the first variant with stock
+    const default_variant = product.variants.find(variant => variant.stock > 0) || product.variants[0];
     const actualPrice = default_variant.price;
 
     const hasOffer =
@@ -313,8 +314,13 @@ const view_product = async (req, res) => {
     if (hasOffer) {
       offerPrice = default_variant.sale_price_after_discount
     }
-    // console.log("Has Offer:", hasOffer, "Actual Price:", actualPrice, "Offer Price:", offerPrice);
-    return res.status(200).render("user/view_product", { product, actualPrice, offerPrice });
+
+    return res.status(200).render("user/view_product", { 
+      product, 
+      actualPrice, 
+      offerPrice,
+      user: req.session.user // Pass user session to check login status
+    });
   } catch (error) {
     console.error("Error while rendering the product view page", error);
     return res.status(500).json({ message: "Error while viewing product", error });
@@ -325,7 +331,7 @@ const view_product = async (req, res) => {
 const user_address = async (req, res) => {
   try {
     const { full_name, mobile_number, pincode, address, landmark, town_city, state } = req.body;
-    
+    console.log("address data from the body:",full_name, mobile_number, pincode, address, landmark, town_city, state)
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const address_data = new Address({
       user: user_id,
@@ -345,9 +351,10 @@ const user_address = async (req, res) => {
     await current_user.save();
     const sourcePage = req.body.sourcePage;
     if (sourcePage === "checkout") {
+      req.session.address_message = `Address added successfully`
       return res.redirect("/checkout");
     }
-    return res.status(200).redirect("/user_profile");
+    return res.status(200).json({ message:"New address added successfully.", success: true });
   } catch (error) {
     console.log("error for adding address", error);
     return res.status(500).json({ message: "Error add address.", success: false });

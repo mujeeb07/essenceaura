@@ -2,7 +2,10 @@ const user = require("../../models/user_model");
 const bcrypt = require("bcrypt");
 const total_orders = require("../../models/order_model");
 const products = require("../../models/product_model");
-const { daily_sales, weekly_sales, monthly_sales, yearly_sales } = require("../../utils/sales_report");
+const { daily_sales, weekly_sales, monthly_sales, yearly_sales } = require("../../utils/sales_report_chart");
+const {startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, startOfYear, endOfYear } = require('date-fns');
+const  generate_report  = require("../../utils/generate_report");
+
 
 
 const admin_login = async (req, res) => {
@@ -17,7 +20,7 @@ const admin_login = async (req, res) => {
       req.session.admin = admin_data._id  
       return res.status(200).redirect("/admin/dashboard")
     } else {
-      return res.status(400).render("admin/admin_login", { message: "Invalid Attempt" });
+      return res.status(400).render("admin/admin_login", { message: "Enter valid email and password" });
     }
   } catch (error) {
     console.log("admin login error", error)
@@ -39,7 +42,7 @@ const admin_logout = async (req, res) => {
     req.session.destroy();
     return res.status(204).redirect("/admin");
   } catch (error) {
-    console.log(error)
+    console.log('error admin logout.',error)
     return res.status(500).json({message:"admin logout controller error"})
   }
 }
@@ -118,36 +121,68 @@ const admin_dashboard = async (req, res) => {
   }
 };
 
+//Sales Report
 const load_create_sales_report = async (req, res) => {
   try {
-    const totals = await total_orders.find({}, { total:1, _id:0 });
-    const revenue = totals.reduce((sum, item) => sum + item.total, 0);
-    const order_count = totals.length;
-    const total_products = await products.countDocuments();
-    const toal_categories = (await products.distinct("category")).length;
+    const sales_report_data = await total_orders.find({ order_status: "Delivered" });
 
-    const daily = await daily_sales();
-    const weekly = await weekly_sales();
-    const monthly = await monthly_sales();
-    const yearly = await yearly_sales();
-
-    return res.status(200).render("admin/create_sales_report" , { 
-      daily: daily,
-      weekly: weekly, 
-      monthly: monthly, 
-      yearly: yearly,  
-      revenue ,
-      order_count, 
-      total_products, 
-      toal_categories 
-    })
+    return res.status(200).render("admin/create_sales_report",{ sales_report_data });
   } catch (error) {
     console.log("Error while rendering sales report page", error);
     return res.status(500).json({ message: "Error while rendering sales report page", success: false });
   }
 }
 
+//Sales Report Table
+const sales_report_table = async (req, res) => {
+  try {
+    const { type, startDate, endDate } = req.query;
+    console.log("Query Data:", type, startDate, endDate);
 
+    let date_start, date_end;
+
+    if(startDate && endDate){
+      console.log('Table for custome range data.');
+      date_start = new Date(startDate);
+      date_end = new Date(endDate);
+    }else{
+      const today = new Date();
+
+      switch(type){
+        case "daily":
+          date_start = new startOfDay(today);
+          date_end = new endOfDay(today);
+          break;
+        case "weekly":
+          date_start = new startOfWeek(today);
+          date_end = new endOfWeek(today);
+          break;
+        case "monthly":
+          date_start = new startOfMonth(today);
+          date_end = new endOfMonth(today);
+          break;
+        case "yearly":
+          date_start = new startOfYear(today);
+          date_end = new endOfYear(today);
+          break;
+        default:
+          return res.status(500).json({ message: "Invalid Period Selected." });
+      }
+    }
+
+   const report = await generate_report(date_start, date_end);
+
+   console.log("Report Data:",report);
+
+   return res.status(200).json({ success: true, report });
+  
+  } catch (error) {
+    return res.status(500).json({ success:false });
+  }
+}
+
+
+// For Diagram //
 const daily_sales_data = async (req, res) => {
   try {
     const data = await daily_sales();
@@ -188,7 +223,7 @@ const yearly_sales_data = async (req, res) => {
   }
 };
 
-
+// Diagram end //
 
 module.exports = {
   admin_login,
@@ -199,5 +234,6 @@ module.exports = {
   daily_sales_data,
   weekly_sales_data,
   monthly_sales_data,
-  yearly_sales_data
+  yearly_sales_data,
+  sales_report_table
 };

@@ -90,7 +90,7 @@ const load_my_orders = async(req, res) => {
     try {
         const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
         const { order_id, product_id, product_variant } = req.body;
-        console.log("DATA FROM THE BODY:", order_id, product_id, product_variant);
+        // console.log("DATA FROM THE BODY:", order_id, product_id, product_variant);
         const order_data = await Orders.findById(order_id);
         if(!order_data){
             return res.status(400).json({ message: "Order Not Found", success: false });

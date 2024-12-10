@@ -81,7 +81,7 @@ user_route.post('/remove_coupon', user_blocked, is_authenticated, checkout_contr
 
 user_route.get("/verify_razorpay_payment", user_blocked, is_authenticated, razorpay_controller.verify_online_payment);
 
-//order operations
+//order cancel or return operations 
 user_route.get('/my_orders', user_blocked, is_authenticated, order_controller.load_my_orders);
 user_route.post("/cancel_order/:order_id", user_blocked, is_authenticated, order_controller.cancel_order); //cancel full items
 user_route.get("/order_details/:order_id", user_blocked, is_authenticated, order_controller.order_details);

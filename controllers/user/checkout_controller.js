@@ -20,7 +20,9 @@ const checkout = async (req, res) => {
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const appliedCoupon = req.session.coupon;
     const razorpay_key = process.env.RAZORPAY_ID;
-
+    let address_message = req.session.address_message;
+    req.session.address_message = null;
+    // console.log("Adrress message from session:", address_message)
     const userData = await User_model.findById(user_id);
     const cartItems = await Cart.findOne({ user: user_id }).populate("item.product").exec();
     const addresses = await Address.find({ user: user_id });
@@ -46,6 +48,9 @@ const checkout = async (req, res) => {
       discount = Math.min(sub_total * (appliedCoupon.discount_percentage / 100), appliedCoupon.coupon_max_amount);
     }
 
+    
+    console.log("Address message before rendering:", address_message);
+   
     return res.status(200).render("user/check_out", {
       cartItems: cartItems.item,
       addresses,
@@ -56,8 +61,11 @@ const checkout = async (req, res) => {
       discount,
       appliedCoupon,
       userData,
-      razorpay_key
+      razorpay_key,
+      address_message
+      
     });
+    
 
   } catch (error) {
     console.error("Checkout error:", error);
@@ -213,12 +221,13 @@ const post_checkout = async (req, res) => {
     }
 
     if(order.payment_method === 'wallet'){
-      const wallet = await Wallet.findOne({ user_id: user });
+      let wallet = await Wallet.findOne({ user_id: user });
       if(!wallet){
         const new_wallet = new Wallet({ user_id: user });
         wallet = await new_wallet.save();
+        console.log("New Wallet created. Wallet Balance:", wallet.balance)
       }
-      console.log("User wallet data:", wallet)
+      // console.log("User wallet data:", wallet)
 
       if(wallet.balance < Number(final_amt)){
         return res.status(400).json({ message:"Insufficient balance. Try another payment method", success: false });

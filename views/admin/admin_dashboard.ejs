@@ -229,6 +229,11 @@
         tableCategory.classList.add('d-none');
     };
 
+    const showDefaultTable = () => {
+        hideAllTables();
+        tableProduct.classList.remove('d-none');
+    };
+
     btnProduct.addEventListener('click', () => {
         hideAllTables();
         tableProduct.classList.remove('d-none');
@@ -243,6 +248,10 @@
         hideAllTables();
         tableCategory.classList.remove('d-none');
     });
+
+    showDefaultTable();
+
+
 });
 
 
@@ -322,8 +331,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateChart('/admin/daily_sales', 'Daily Sales');
 });
-
-
-
 
 </script>

@@ -107,7 +107,10 @@ const returns = async (req, res) => {
     const totalReturns = await Orders.countDocuments({ "items.product.return_request": "Return Initiated" }); 
     const totalPages = Math.ceil(totalReturns / perPage); 
 
-    const orders = await Orders.find({ $or : {"items.product.return_request" : ["Return Initiated", "Return Approved", "Return Rejected"] }}).populate('user').sort({ _id: -1 }).skip((page - 1) * perPage).limit(perPage);   
+    const orders = await Orders.find({
+      "items.product.return_request": { $in: ["Return Initiated", "Return Approved", "Return Rejected"] }
+  }).populate('user').sort({ _id: -1 }).skip((page - 1) * perPage).limit(perPage);
+  
 
     orders.forEach((order) => {
       order.items.forEach(async (i) => {
@@ -132,15 +135,15 @@ const return_action = async(req, res) => {
     let product_name = '';
     if(status === 'Approve'){
       for (let item of order_data.items) {
-          console.log('zzz:', item.product.variants.price)
-          console.log('zzz:', item.product.return_request)
+          // console.log('zzz:', item.product.variants.price)
+          // console.log('zzz:', item.product.return_request)
         if(String(order_data._id) === orderId){
           price = item.product.variants.price * item.quantity;
           product_name = item.product.name;
           price += price * 0.18;
           let discount = (price * order_data.discount_amount) / order_data.total + order_data.discount_amount
           price -= discount;
-          console.log(price);
+          // console.log(price);
           item.product.return_request = "Return Approved";
         }
       }

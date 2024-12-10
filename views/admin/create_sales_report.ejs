@@ -24,129 +24,63 @@
             </div>
 
             <div class="row">
-                <div class="d-flex justify-content-center m-5">
-                    <button class="btn btn-primary me-3" id="btn-daily">Daily</button>
-                    <button class="btn btn-primary me-3" id="btn-weekly">Weekly</button>
-                    <button class="btn btn-primary me-3" id="btn-monthly">Monthly</button>
-                    <button class="btn btn-primary me-3" id="btn-yearly">Yearly</button>
-                </div>
-            
+
+                <div class="container mt-5">
+                    
+                    <div class="d-flex flex-wrap align-items-center justify-content-start">
+                        <!-- For Select the periods. -->
+                        <div class="d-flex flex-column align-items-center me-4">
+                            <h6 class="text-center mb-2">Select Period</h6>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-filter"></i>
+                                </span>
+                                <select id="sales-select" class="form-select">
+                                    <option value="daily">Daily</option>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                        </div>
                 
-                <div id="table-daily" class="sales-table align-items text-center">
+                        <!--Fro the Custom Range -->
+                        <div class="d-flex flex-column justify-content-space-between m-5">
+                            <h6 class="text-center mb-2">Custom Range</h6>
+                            <div class="input-group">
+                                <p class="align-items-center m-1">From</p>
+                                <input type="date" id="start-date" class="m-1 form-control" max="<%= new Date().toISOString().split('T')[0] %>">
+                                <p class="align-items-center m-1">To</p>
+                                <input type="date" id="end-date" class="form-control" max="<%= new Date().toISOString().split('T')[0] %>">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                                
+                <div id="sales-table" class="text-center">
                     <div class="card mb-4">
                         <div class="card-body">
-                            <h4 class="mb-4">Daily Sales</h4>
+                            <h4 class="mb-4" id="report-title">Sales Report</h4>
                             <div class="table-responsive">
                                 <table class="table table-hover">
                                     <thead>
                                         <tr>
                                             <th>Date</th>
-                                            <th>Total Sales</th>
-                                            <th>Order Count</th>
+                                            <th>Product ID</th>
+                                            <th>Product Name</th>
+                                            <th>Product Brand</th>
+                                            <th>Quantity</th>
+                                            <th>Revenue</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <% daily.forEach(day => { %>
-                                        <tr>
-                                            <td><%= day._id.year %>-<%= day._id.month %>-<%= day._id.day %></td>
-                                            <td>₹<%= day.total_sales.toFixed(2) %></td>
-                                            <td><%= day.order_count %></td>
-                                        </tr>
-                                        <% }) %>
+                                    <tbody id="sales-data">
+                                        
                                     </tbody>
                                 </table>
                             </div>
                         </div>
                     </div>
-                </div>
-            
-                <div id="table-weekly" class="sales-table text-center" style="display: none;">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="mb-4">Weekly Sales</h4>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Year</th>
-                                            <th>Week Range</th>
-                                            <th>Total Sales</th>
-                                            <th>Order Count</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% weekly.forEach(week => { %>
-                                        <tr>
-                                            <td><%= week._id.year %></td>
-                                            <td><%= week.week_range %></td>
-                                            <td>₹<%= week.total_sales.toFixed(2) %></td>
-                                            <td><%= week.order_count %></td>
-                                        </tr>
-                                        <% }) %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>                        
-                    </div>
-                </div>
-                
-                <div id="table-monthly" class="sales-table text-center" style="display: none;">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="mb-4">Monthly Sales</h4>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Year</th>
-                                            <th>Month</th>
-                                            <th>Total Sales</th>
-                                            <th>Order Count</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% monthly.forEach(month => { %>
-                                        <tr>
-                                            <td><%= month._id.year %></td>
-                                            <td><%= month.month_name %></td>
-                                            <td>₹<%= month.total_sales.toFixed(2) %></td>
-                                            <td><%= month.order_count %></td>
-                                        </tr>
-                                        <% }) %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>                              
-                
-                <div id="table-yearly" class="sales-table text-center" style="display: none;">
-                    <div class="card mb-4">
-                        <div class="card-body">
-                            <h4 class="mb-4">Yearly Sales</h4>
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Year</th>
-                                            <th>Total Sales</th>
-                                            <th>Order Count</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <% yearly.forEach(year => { %>
-                                        <tr>
-                                            <td><%= year._id.year %></td>
-                                            <td>₹<%= year.total_sales.toFixed(2) %></td>
-                                            <td><%= year.order_count %></td>
-                                        </tr>
-                                        <% }) %>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </div>                
                 
             </div>            
         </section>
@@ -159,58 +93,163 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
 <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const salesSelect = document.getElementById('sales-select');
+        const startDateInput = document.getElementById('start-date');
+        const endDateInput = document.getElementById('end-date');
+        const salesData = document.getElementById('sales-data');
+        const reportTitle = document.getElementById('report-title');
 
-document.getElementById('btn-excel').addEventListener('click', () => {
-    const visibleTable = document.querySelector('.sales-table:not([style*="display: none"]) table');
+        const fetchData = async (type, startDate, endDate) => {
+            try {
+                const params = new URLSearchParams({
+                    type: type,
+                    startDate: startDate,
+                    endDate: endDate,
+                });
 
-    if (!visibleTable) {
-        alert("No table to export!");
-        return;
-    }
+                const response = await fetch(`/admin/sales_report_table?${params.toString()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
 
-    const wsData = [];
-    visibleTable.querySelectorAll('tr').forEach(tr => {
-        const row = [];
-        tr.querySelectorAll('th, td').forEach(td => {
-            row.push(td.innerText);
-        });
-        wsData.push(row);
+                if (!response.ok) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: `Failed to fetch data: ${response.statusText}`,
+                    });
+                    return [];
+                }
+
+                const data = await response.json();
+                return data.report || [];
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Something went wrong while fetching data. Please try again later.',
+                });
+                console.error('Error fetching sales report data:', error);
+                return [];
+            }
+        };
+
+        const renderTable = (data) => {
+            salesData.innerHTML = '';
+
+            if (data.length > 0) {
+                data.forEach(item => {
+                    item.products.forEach(product => {
+                        const row = `
+                            <tr>
+                                <td>${item._id}</td>
+                                <td>#${product.productId.slice(0,10).toUpperCase() || 'N/A'}</td>
+                                <td>${product.productName || 'N/A'}</td>
+                                <td>${product.productBrand || 'N/A'}</td>
+                                <td>${product.quantity || 0}</td>
+                                <td>₹${(product.revenue || 0).toFixed(2)}</td>
+                            </tr>
+                        `;
+                        salesData.innerHTML += row;
+                    });
+                });
+            } else {
+                salesData.innerHTML = `<tr><td colspan="6">No data available for the selected period.</td></tr>`;
+            }
+        };
+
+        const updateTable = async () => {
+            const selectedType = salesSelect.value;
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
+
+            reportTitle.textContent = `${selectedType.charAt(0).toUpperCase() + selectedType.slice(1)} Sales Report`;
+
+            const filteredData = await fetchData(selectedType, startDate, endDate);
+            renderTable(filteredData);
+        };
+
+        salesSelect.addEventListener('change', updateTable);
+        startDateInput.addEventListener('change', updateTable);
+        endDateInput.addEventListener('change', updateTable);
+
+        updateTable();
     });
 
-    const wb = XLSX.utils.book_new();
-    const ws = XLSX.utils.aoa_to_sheet(wsData);
 
-    XLSX.utils.book_append_sheet(wb, ws, 'Sales Report');
+    document.getElementById('btn-excel').addEventListener('click', () => {
+        const visibleTable = document.querySelector('#sales-table table');
 
-    XLSX.writeFile(wb, 'sales-report.xlsx');
-});
+        if (!visibleTable) {
+            Swal.fire({
+                icon: 'error',
+                title: 'No Data',
+                text: 'No table is currently available to export!',
+            });
+            return;
+        }
+
+        const wsData = [];
+        visibleTable.querySelectorAll('tr').forEach(tr => {
+            const row = [];
+            tr.querySelectorAll('th, td').forEach(td => {
+                row.push(td.innerText.trim());
+            });
+            wsData.push(row);
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(wsData);
+        XLSX.utils.book_append_sheet(wb, ws, 'Sales Report');
+
+        XLSX.writeFile(wb, 'sales-report.xlsx');
+
+        Swal.fire({
+            icon: 'success',
+            title: 'Export Successful',
+            text: 'The sales report has been exported as an Excel file!',
+        });
+    });
+
 
 
 </script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-    const dailyBtn = document.getElementById('btn-daily');
-    const weeklyBtn = document.getElementById('btn-weekly');
-    const monthlyBtn = document.getElementById('btn-monthly');
-    const yearlyBtn = document.getElementById('btn-yearly');
-    const tables = document.querySelectorAll('.sales-table');
 
-    const showTable = (id) => {
-        tables.forEach(table => table.style.display = 'none');
-        document.getElementById(id).style.display = 'block';
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+        const salesSelect = document.getElementById('sales-select');
+        const tables = document.querySelectorAll('.sales-table');
 
-    dailyBtn.addEventListener('click', () => showTable('table-daily'));
-    weeklyBtn.addEventListener('click', () => showTable('table-weekly'));
-    monthlyBtn.addEventListener('click', () => showTable('table-monthly'));
-    yearlyBtn.addEventListener('click', () => showTable('table-yearly'));
+        const showTable = (id) => {
+            tables.forEach(table => table.style.display = 'none');
+            const selectedTable = document.getElementById(id);
+            if (selectedTable) {
+                selectedTable.style.display = 'block';
+            }
+        };
+
+        salesSelect.addEventListener('change', () => {
+            const selectedValue = salesSelect.value;
+            showTable(selectedValue);
+        });
+
+        showTable(salesSelect.value); 
+    });
 
     document.getElementById('btn-pdf').addEventListener('click', () => {
-        const visibleTable = document.querySelector('.sales-table:not([style*="display: none"])');
+        const visibleTable = document.querySelector('#sales-table');
 
         if (!visibleTable) {
-            alert("No table to export!");
+            Swal.fire({
+                icon: 'error',
+                title: 'No Table Found',
+                text: 'No table is currently available to export!',
+            });
             return;
         }
 
@@ -229,13 +268,12 @@ document.getElementById('btn-excel').addEventListener('click', () => {
         header.style.fontSize = '14px';
         header.style.fontWeight = 'bold';
         header.innerHTML = `
-            <span>Sales Report</span>
+            <span>EssenceAura</span>
             <span>${formattedDate} ${formattedTime}</span>
         `;
 
         const pdfContainer = document.createElement('div');
-        pdfContainer.style.width = '210mm';
-        pdfContainer.style.height = '297mm'; 
+        pdfContainer.style.width = '210mm'; 
         pdfContainer.style.padding = '10mm';
         pdfContainer.style.boxSizing = 'border-box';
         pdfContainer.style.fontSize = '12px'; 
@@ -245,12 +283,31 @@ document.getElementById('btn-excel').addEventListener('click', () => {
         const options = {
             margin: 0,
             filename: 'sales-report.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
             html2canvas: { scale: 2, useCORS: true },
             jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
         };
 
-        html2pdf().set(options).from(pdfContainer).save();
+        html2pdf()
+            .set(options)
+            .from(pdfContainer)
+            .save()
+            .then(() => {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Export Successful',
+                    text: 'The sales report has been successfully exported as a PDF!',
+                });
+            })
+            .catch((error) => {
+                console.error('PDF Export Error:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Export Failed',
+                    text: 'An error occurred while exporting the PDF. Please try again.',
+                });
+            });
     });
+
+
 </script>
 
