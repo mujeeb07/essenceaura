@@ -50,7 +50,7 @@ const forgot_password = async(req, res) => {
 
       console.log("saving hahsed token:",user_data.hashed_token);
 
-      const reset_link = `http://localhost:3000/reset_password/${hashed_token}`;
+      const reset_link = `${process.env.URL}/reset_password/${hashed_token}`;
 
       const transporter = nodemailer.createTransport({
 

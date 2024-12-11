@@ -7,7 +7,7 @@ require("dotenv").config();
 passport.use(new google_strategy({
     clientID:process.env.GOOGLE_CLIENT_ID,
     clientSecret:process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL:'http://localhost:3000/auth/google/callback',
+    callbackURL:`${process.env.URL}/auth/google/callback`,
     scope:['profile', 'email'],
     prompt: 'select_account',
     passReqToCallback: true
