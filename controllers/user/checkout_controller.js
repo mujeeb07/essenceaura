@@ -75,6 +75,7 @@ const checkout = async (req, res) => {
 
 const apply_coupon = async (req, res) => {
   let { selectedCoupon, total   } = req.body;
+  console.log(`Apply coupon, TOTAL: ${total}`)
   total = Number(total);
 try {
   if (!selectedCoupon) {
@@ -100,14 +101,15 @@ try {
 
   req.session.coupon = selectedCoupon;
   
-  const couponDiscount = Math.min(
-      (total * selectedCoupon.discount_percentage) / 100, 
-      selectedCoupon.coupon_max_amount
-  );
-
+  const couponDiscount = Math.min( (total * selectedCoupon.discount_percentage) / 100, selectedCoupon.coupon_max_amount );
+  console.log('Discount amount:', couponDiscount)
   req.session.coupon_discounted = couponDiscount;
 
-  total = (total - couponDiscount).toFixed(2);
+  let a = (total - couponDiscount).toFixed(2);
+  console.log("value od a:", a)
+  total = a
+  console.log("value od total:", total)
+
   const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
   await Cart.findOneAndUpdate({ user: user_id }, 
     {
@@ -115,7 +117,7 @@ try {
     },
     { new: true }
   )
-  return res.status(200).json({ success: true, total });
+  return res.status(200).json({ success: true, total, couponDiscount});
 
 } catch (error) {
   console.error('Error applying coupon:', error);
@@ -130,7 +132,7 @@ const remove_coupon = async (req, res) => {
 
     console.log("Remove coupon data:", coupon_discount, total);
     total = Number(total) + Number(coupon_discount);
-    console.log("TOTAL:",typeof(total), total);
+    console.log("TOTAL:", total);
     req.session.coupon = null;
     req.session.coupon_discounted = 0;
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
@@ -147,6 +149,7 @@ const post_checkout = async (req, res) => {
   try {
 
     const { payment, address, paymentId, final_amt } = req.body;
+    console.log("final amount from the body:", final_amt)
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const coupon_discounted = req.session.coupon_discounted;
     const cart_data = await Cart.findOne({ user: user }).populate({ path: "item.product", populate: ["brand", "category"] });
@@ -235,6 +238,7 @@ const post_checkout = async (req, res) => {
 
       wallet.balance -= Number(final_amt);
       console.log("Wallet balance after :", wallet.balance);
+      console.log("ORDER DATA:",  final_amt , order.delivery_charge)
       const wallet_txns = new Wallet_txns({
         wallet_id: wallet._id,
         txn_amount: Number(final_amt + order.delivery_charge),
@@ -270,6 +274,39 @@ const post_checkout = async (req, res) => {
   }
 };
 
+const validate_stock = async (req, res) => {
+  try {
+    const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    
+    const cart = await Cart.findOne({ user: user_id }).populate('item.product');
+
+    if (!cart || cart.item.length === 0) {
+      return res.status(404).json({ message: 'Cart is empty.' });
+    }
+
+    const itemsWithStock = cart.item.map(i => {
+      const product = i.product;
+      if (!product || !product.variants) {
+        return { name: "Unknown Product", volume: i.volume, quantity: i.quantity, stock: 0 };
+      }
+
+      const variant = product.variants.find(v => v.volume === i.volume);
+      return {
+        name: product.name,
+        volume: i.volume,
+        quantity: i.quantity,
+        stock: variant ? variant.stock : 0,
+      };
+    });
+
+    return res.json({ items: itemsWithStock });
+  } catch (error) {
+    console.error('Error validating stock:', error);
+    res.status(500).json({ message: 'Internal server error.' });
+  }
+};
+ 
+
 const order_confirmation = async (req, res) => {
   try {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
@@ -285,6 +322,8 @@ const order_confirmation = async (req, res) => {
       req.session.coupon = null;
     }
 
+    console.log("Order details passing:", order, estimated_delivery, order.items, order.items.discount_amount)
+
     return res.status(200).render('user/order_confirmation', { order, estimated_delivery, cartItems: order.items, coupon_discount_amount: order.items.discount_amount });
   } catch (error) {
     console.error('Confirmation Error: ', error);
@@ -297,5 +336,6 @@ module.exports = {
   post_checkout,
   order_confirmation,
   apply_coupon,
-  remove_coupon
+  remove_coupon,
+  validate_stock
 };

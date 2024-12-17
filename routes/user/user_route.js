@@ -14,28 +14,46 @@ const wishlist_controller = require("../../controllers/user/wishlist_controller"
 const razorpay_controller = require("../../controllers/user/razorpay_controller");
 const wallet_controller = require("../../controllers/user/wallet_controller");
 const order_controller =  require("../../controllers/user/orders_controller");
+const check_referral = require('../../utils/validate_referral_code')
 
 //middleware
 const is_authenticated = require("../../middleware/auth");
 const user_blocked = require("../../middleware/user_is_blocked");
+const validate_referral_code = require("../../utils/validate_referral_code");
 
-//user
+//user login
 user_route.get("/", user_controller.load_home_page);
 user_route.get("/login", user_controller.load_login);
 user_route.post("/login", user_controller.login_user); 
+
+//user register
 user_route.get('/register', user_controller.load_register);
 user_route.post('/register', user_controller.register_user);
+
+// referral 
+user_route.get('/check_referral/:referral_code', async (req, res) => {
+    const { referral_code } = req.params;
+    console.log(referral_code)
+    await validate_referral_code(referral_code, res)
+})
 user_route.get("/auth/google", passport.authenticate('google', { scope: ['profile', 'email'] }));
 user_route.get('/auth/google/callback', passport.authenticate('google', { failureRedirect: "/login", successRedirect: "/" }));
+
+//home
 user_route.get("/home", user_controller.load_home_page);
+
+//OTP 
 user_route.get("/otp", user_controller.user_send_otp);
 user_route.post("/verify-otp", user_controller.verify_otp);
 user_route.post("/resend-otp", user_controller.resend_otp);
+
+//user logout
 user_route.get("/logout", user_controller.user_logout);
+
+//product details page.
 user_route.get("/product/:product_id", user_controller.view_product);
 
-
-//profile- address
+//profile-address
 user_route.post("/user_address", user_blocked, is_authenticated, user_controller.user_address);
 user_route.delete('/delete_address/:id', user_blocked, is_authenticated, user_controller.delete_address);
 user_route.get('/edit_address/:id', user_blocked, is_authenticated, user_controller.load_edit_address);
@@ -75,6 +93,7 @@ user_route.get("/search-products", shop_page_controller.search_filter);
 //checkout
 user_route.get("/checkout", user_blocked, is_authenticated, checkout_controller.checkout);
 user_route.post("/checkout", user_blocked, is_authenticated, checkout_controller.post_checkout);
+user_route.get('/cart/validate_stock', user_blocked, is_authenticated, checkout_controller.validate_stock)
 user_route.get('/order_confirmation', user_blocked, is_authenticated, checkout_controller.order_confirmation);
 user_route.post('/apply_coupon', user_blocked, is_authenticated, checkout_controller.apply_coupon);
 user_route.post('/remove_coupon', user_blocked, is_authenticated, checkout_controller.remove_coupon);

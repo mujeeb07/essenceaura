@@ -3,6 +3,8 @@ const Wallet = require("../../models/wallet");
 const ObjectId = require('mongoose').Types.ObjectId;
 const Wallet_txns = require('../../models/wallet_transactions');
 const Product = require('../../models/product_model');
+const refund =require("../../utils/refund");
+const calculateRefund = require("../../utils/refund");
 
 const load_my_orders = async(req, res) => {
     try {
@@ -129,27 +131,43 @@ const load_my_orders = async(req, res) => {
             }
             
             let balance = 0
+            let quantity =0
             for(let item of order_data.items){
                 if(item.product._id.toString() === product_id.toString() && item.product.variants.volume.toString() === product_variant){
-                    balance = Number(item.price) * Number(item.quantity);
+                    balance = Number(item.price)
+                    quantity= Number(item.quantity);
                     break;
                 }
             }
             console.log('BALANCE:', balance);
             wallet.user_id = user;
-            balance += balance * 0.18;
-            if(order_data.discount_amount){
-                const discount = order_data.discount_amount;
-                const total = order_data.total + discount
-                balance += balance * discount / total;
-                console.log('Actual balance:', balance)
-            }
-            wallet.balance += balance;
+            // balance += balance * 0.18;
+            // if(order_data.discount_amount){
+            //     const discount = order_data.discount_amount;
+            //     const total = order_data.total
+            //     let product_discount = balance * discount / total;
+            //     refund = balance - product_discount
+            //     // console.log('Actual balance:', product_discount)
+            //     // console.log('Actual balance:', refund)
+            // }
+
+            const { refund_amount, updated_discount, updated_tax } = refund(balance, quantity, order_data.sub_total, order_data.tax, order_data.discount_amount);
+
+            // Update remaining values for the next cancellation
+            order_data.discount_amount = updated_discount;
+            order_data.tax = updated_tax;
+            await order_data.save();
+
+
+            console.log("refund amount",refund_amount)
+            
+
+            wallet.balance += refund_amount;
             await wallet.save();
 
             const new_wallet_txn = new Wallet_txns({ 
                 wallet_id: wallet._id,
-                txn_amount: balance,
+                txn_amount: refund_amount,
                 txn_description: `Refunded for product "${product_name}" cancellation.`,
                 txn_type: "Credit",
                 wallet_transaction_status: "Refunded"

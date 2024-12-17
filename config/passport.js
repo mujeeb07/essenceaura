@@ -6,7 +6,7 @@ require("dotenv").config();
 
 passport.use(new google_strategy({
     clientID:process.env.GOOGLE_CLIENT_ID,
-    clientSecret:process.env.GOOGLE_CLIENT_SECRET,
+    clientSecret:process.env.GOOGLE_CLIENT_SECRET,                                                                                      
     callbackURL:`${process.env.URL}/auth/google/callback`,
     scope:['profile', 'email'],
     prompt: 'select_account',
@@ -28,7 +28,7 @@ passport.use(new google_strategy({
                 await user.save();
             }
             req.session.user = user._id;
-            console.log("helfsdfhsdfklsf", req.session.user );
+            // console.log("helfsdfhsdfklsf", req.session.user );
             req.session.userType = 'google'
             return cb(null, user)
         } catch (error) {

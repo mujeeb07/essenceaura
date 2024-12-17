@@ -24,6 +24,11 @@
                                     <small id="emailError" class="text-danger"></small>
                                 </div>
                                 <div class="form-group">
+                                    <input type="text" id="referral" name="referral" placeholder="Referral Code (Optional)">
+                                    <small id="referralError" class="text-danger"></small>
+                                    <small id="referralSuccess" class="text-success"></small>
+                                </div>
+                                <div class="form-group">
                                     <input type="password" id="password" name="password" placeholder="Password">
                                     <small id="passwordError" class="text-danger"></small>
                                 </div>
@@ -32,7 +37,7 @@
                                     <small id="cpasswordError" class="text-danger"></small>
                                 </div>
                                 <div class="form-group">
-                                    <button type="submit" class="btn mx-auto d-block hover-up" name="login">Submit & Register</button>
+                                    <button id="submitButton" type="submit" class="btn mx-auto d-block hover-up" name="login">Submit & Register</button>
                                 </div>
                             </form>
                             
@@ -45,26 +50,69 @@
     </section>
 </main>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-    function validateForm() {
-        let valid = true;
+    let message = '<%= message %>';
+    if(message){
+        Swal.fire({
+            icon: "error",
+            text: `${message}`,
+            toast: true,
+            position: "top-right",
+            showConfirmButton: false,
+            timer: 3000,
+        });
+    }
 
+    let referral_status = null; 
+
+    const checkReferral = async (referralCode) => {
+        try {
+            const response = await fetch(`/check_referral/${referralCode}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (!response.ok) {
+                throw new Error('Invalid response from server');
+            }
+
+            const data = await response.json();
+            if (data.valid) {
+                referral_status = true; 
+                return true;
+            }
+
+            referral_status = false; 
+            return false;
+
+        } catch (error) {
+            console.error('Error validating referral code:', error);
+            referral_status = false;
+            return false;
+        }
+    };
+
+    
+    async function validateForm() {
+        let valid = true;
         
         document.getElementById("nameError").textContent = "";
         document.getElementById("emailError").textContent = "";
         document.getElementById("passwordError").textContent = "";
         document.getElementById("cpasswordError").textContent = "";
+        document.getElementById("referralError").textContent = "";
+        document.getElementById("referralSuccess").textContent = "";
 
         
-        const name = document.getElementById("name").value;
+        const name = document.getElementById("name").value.trim();
         if (name.length < 3) {
             document.getElementById("nameError").textContent = "Username must be at least 3 characters long.";
             valid = false;
         }
 
         
-        const email = document.getElementById("email").value;
+        const email = document.getElementById("email").value.trim();
         const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
         if (!emailPattern.test(email)) {
             document.getElementById("emailError").textContent = "Please enter a valid email address.";
@@ -72,17 +120,29 @@
         }
 
         
-        const password = document.getElementById("password").value;
+        const password = document.getElementById("password").value.trim();
         if (password.length < 6) {
             document.getElementById("passwordError").textContent = "Password must be at least 6 characters long.";
             valid = false;
         }
 
         
-        const cpassword = document.getElementById("cpassword").value;
+        const cpassword = document.getElementById("cpassword").value.trim();
         if (password !== cpassword) {
             document.getElementById("cpasswordError").textContent = "Passwords do not match.";
             valid = false;
+        }
+
+        
+        const referral = document.getElementById("referral").value.trim();
+        if (referral) {
+            const isReferralValid = await checkReferral(referral);
+            if (isReferralValid) {
+                document.getElementById("referralSuccess").textContent = "Eligible for referral coupon.";
+            } else {
+                document.getElementById("referralError").textContent = "Enter a valid referral code.";
+                valid = false;
+            }
         }
 
         return valid;

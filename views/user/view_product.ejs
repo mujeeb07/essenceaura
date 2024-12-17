@@ -219,13 +219,8 @@
                                     </div>
                                     <ul class="product-meta font-xs color-grey mt-50">
                                         <li class="mb-5">SKU: <a href="#">FWM15VKT</a></li>
-                                        <li id="selectedStock"> Stock: <%= product.variants[0].stock %></li>
-                                        <li id="selectedStock">Availability:
-                                            <% if (product.variants[0].stock >= 5 ) { %>
-                                                <span class="in-stock text-success ml-5">Item In Stock</span></li>
-                                            <% }else{ %>
-                                                <span class="in-stock text-danger ml-5">Only <%= product.variants[0].stock %> Items In Stock </span></li>
-                                            <% } %>
+                                        <li id="selectedStock">Stock: </li>
+                                        <li id="availablity">Availability: </li>
                                     </ul>
                                 </div>
                             </div>
@@ -247,13 +242,11 @@ let selectedSize = {
 const isLoggedIn = "<%= user %>";
 
 function selectSize(element) {
-    // Remove selection from all buttons
     const sizeButtons = document.querySelectorAll('.size-button');
     sizeButtons.forEach(button => {
-        button.classList.remove('selected', 'default'); // Remove 'default' and 'selected' classes
+        button.classList.remove('selected', 'default'); 
     });
 
-    // Check if the selected size is out of stock
     if (element.classList.contains('out-of-stock')) {
         Swal.fire({
             icon: 'warning',
@@ -264,24 +257,27 @@ function selectSize(element) {
         return;
     }
 
-    // Add selected class to the clicked button
     element.classList.add('selected');
 
-    // Update selected size details
     selectedSize.price = element.getAttribute('data-price');
     selectedSize.volume = element.getAttribute('data-volume');
     selectedSize.stock = element.getAttribute('data-stock');
 
-    // Update price and stock display
     document.getElementById('selectedPrice').textContent = `₹${selectedSize.price}`;
     document.getElementById('selectedStock').textContent = `Stock: ${selectedSize.stock}`;
+    if (selectedSize.stock >= 5) {
+        document.getElementById('availablity').innerHTML = `Availability: <span class="in-stock text-success ml-5">Item In Stock</span>`;
+    } else {
+        document.getElementById('availablity').innerHTML = `Availability: <span class="in-stock text-danger ml-5">Only ${selectedSize.stock} Items In Stock</span>`;
+    }
+
 }
 
-// Set the default selected button on page load
+
 document.addEventListener('DOMContentLoaded', () => {
     const defaultButton = document.querySelector('.size-button.default');
     if (defaultButton) {
-        selectSize(defaultButton); // Trigger selection for the default button
+        selectSize(defaultButton); 
     }
 });
 
@@ -296,7 +292,6 @@ function updateQuantity(change) {
 document.getElementById("shop_cart").addEventListener("click", async (event) => {
     event.preventDefault();
     try {
-        // Check if user is logged in
         if (!isLoggedIn) {
             Swal.fire({
                 icon: 'warning',
@@ -315,7 +310,6 @@ document.getElementById("shop_cart").addEventListener("click", async (event) => 
         const productId = document.getElementById('productId').value;
         const quantity = parseInt(document.getElementById('quantity').value, 10);
         
-        // Validate stock
         const availableStock = parseInt(selectedSize.stock);
         
         if (availableStock === 0) {
@@ -335,7 +329,6 @@ document.getElementById("shop_cart").addEventListener("click", async (event) => 
                 text: `Only ${availableStock} item(s) available in this size. Please reduce the quantity.`,
                 confirmButtonText: 'OK'
             });
-            // Reset quantity to available stock
             document.getElementById('quantity').value = availableStock;
             return;
         }
@@ -366,15 +359,17 @@ document.getElementById("shop_cart").addEventListener("click", async (event) => 
                 showConfirmButton: false,
                 timerProgressBar: true,
                 timer: 2000
-            }).then((result) => {
-                // Change button to "Go to Cart"
+            }).then(() => {
                 const cartButton = document.getElementById('shop_cart');
-                cartButton.textContent = 'Go to Cart';
-                cartButton.onclick = () => {
-                    window.location.href = '/shop_cart';
-                };
 
-                // Update cart total and quantity
+                cartButton.textContent = 'Go to Cart';
+
+                cartButton.replaceWith(cartButton.cloneNode(true));
+                const newCartButton = document.getElementById('shop_cart');
+                newCartButton.addEventListener("click", () => {
+                    window.location.href = '/shop_cart';
+                });
+
                 if (document.getElementById('cart_total')) {
                     document.getElementById('cart_total').textContent = `Total: ${data.cartTotal}`;
                 }
@@ -402,6 +397,7 @@ document.getElementById("shop_cart").addEventListener("click", async (event) => 
     }
 });
 
+
 document.addEventListener('DOMContentLoaded', () => {
     const sizeButtons = document.querySelectorAll('.size-button');
     const firstAvailableSize = Array.from(sizeButtons).find(button => !button.classList.contains('out-of-stock'));
@@ -409,7 +405,6 @@ document.addEventListener('DOMContentLoaded', () => {
     if (firstAvailableSize) {
         firstAvailableSize.click();
     } else {
-        // If all sizes are out of stock
         document.getElementById('shop_cart').disabled = true;
         document.getElementById('shop_cart').textContent = 'Out of Stock';
     }

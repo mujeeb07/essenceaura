@@ -37,13 +37,13 @@
                 </tr>
               </thead>
               <tbody>
-                <% cart.item.forEach(function(cartItem) { %>
-                <tr>
+                <% cart.item.forEach(function(cartItem) { 
+                  const variant_item = cartItem.product.variants.find(v => v.volume === cartItem.volume); 
+                  const stock = variant_item?.stock || 0;
+                %>
+                <tr class="cart-item-row" data-product-id="<%= cartItem.product.name %>" data-variant="<%= cartItem.volume %>" data-quantity="<%= cartItem.quantity %>" data-stock="<%= stock %>" >
                   <td class="image product-thumbnail">
-                    <img
-                      src="<%= cartItem.product.product_card_image %>"
-                      alt="<%= cartItem.product.name %>"
-                    />
+                    <img src="<%= cartItem.product.product_card_image %>" alt="<%= cartItem.product.name %>"/>
                   </td>
                   <td class="product-des product-name">
                     <h5 class="product-name">
@@ -53,15 +53,15 @@
                     </h5>
                     <p class="font-xs"><%= cartItem.product.description %></p>
                   </td>
-                  <td>
-                    <span> <%= cartItem.volume %> ML </span>
-                  </td>
+                  <td> <span> <%= cartItem.volume %> ML </span> </td>
                   <td class="price" data-title="Price">
-                    <% const productOffer = cartItem.product.product_offer;
-                    const today = new Date(); const offerIsValid =
-                    productOffer?.offer_status && new Date(productOffer.offer_start_date) <= today && today <= new Date(productOffer.offer_expire_date);
-                    const variant = cartItem.product.variants.find(v => v.volume === cartItem.volume); 
-                    const displayPrice = offerIsValid && variant?.sale_price_after_discount ? variant.sale_price_after_discount : variant?.price; %>
+                    <% 
+                      const productOffer=cartItem.product.product_offer; 
+                      const today = new Date(); 
+                      const offerIsValid=productOffer?.offer_status && new Date(productOffer.offer_start_date) <=today && today <=new Date(productOffer.offer_expire_date); 
+                      const variant = cartItem.product.variants.find(v=> v.volume === cartItem.volume); 
+                      const displayPrice = offerIsValid && variant?.sale_price_after_discount ? variant.sale_price_after_discount : variant?.price; 
+                    %>
                     <span>₹<%= displayPrice.toFixed(2) %></span>
                   </td>
 
@@ -91,8 +91,11 @@
                   </td>
 
                   <td data-title="Subtotal">
-                    <% const subtotal = displayPrice * cartItem.quantity; %>
-                    <span id="subtotal-<%= cartItem.product._id %>-<%= cartItem.volume %>">₹<%= subtotal.toFixed(2) %></span>
+                    <% const subtotal=displayPrice * cartItem.quantity; %>
+                    <span
+                      id="subtotal-<%= cartItem.product._id %>-<%= cartItem.volume %>"
+                      >₹<%= subtotal.toFixed(2) %></span
+                    >
                   </td>
 
                   <td class="action" data-title="Remove">
@@ -111,9 +114,14 @@
           </div>
 
           <div class="cart-action text-end">
-            <a href="/checkout" class="btn mr-10 mb-sm-15"><i class="fi-rs-shuffle mr-10"></i>CheckOut</a>
-            <a class="btn" href="/shoping_page"><i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping</a>
+            <button onclick="validateCartStock()" class="btn mr-10 mb-sm-15">
+              <i class="fi-rs-shuffle mr-10"></i>CheckOut
+            </button>
+            <a class="btn" href="/shopping_page">
+              <i class="fi-rs-shopping-bag mr-10"></i>Continue Shopping
+            </a>
           </div>
+          
 
           <div class="divider center_icon mt-50 mb-50">
             <i class="fi-rs-fingerprint"></i>
@@ -146,7 +154,9 @@
                     </tr>
                   </table>
                 </div>
-                <a href="/checkout"class="btn mr-10 mb-sm-15"><i class="fi-rs-shuffle mr-10"></i>Proceed To CheckOut</a>
+                <a href="/checkout" class="btn mr-10 mb-sm-15"
+                  ><i class="fi-rs-shuffle mr-10"></i>Proceed To CheckOut</a
+                >
               </div>
             </div>
           </div>
@@ -159,6 +169,49 @@
 </main>
 
 <script>
+
+  async function validateCartStock() {
+      try {
+          const cartItems = document.querySelectorAll('.cart-item-row');
+          const outOfStockItems = [];
+
+          cartItems.forEach(item => {
+              const producName = item.getAttribute('data-product-id');
+              const variant = item.getAttribute('data-variant');
+              const quantity = parseInt(item.getAttribute('data-quantity'));
+              const stock = parseInt(item.getAttribute('data-stock'));
+
+              if (quantity > stock) {
+                  outOfStockItems.push({ producName, variant, quantity, stock });
+              }
+          });
+
+          if (outOfStockItems.length > 0) {
+              const outOfStockNames = outOfStockItems
+                  .map(item => `Product: ${item.producName}, Variant: ${item.variant}`)
+                  .join(', ');
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Out of Stock',
+                  text: `The following items are out of stock. ${outOfStockNames}. Please update your cart.`,
+                  confirmButtonText: 'OK',
+              });
+              return;
+          }
+
+          window.location.href = '/checkout';
+      } catch (error) {
+          console.error('Error during stock validation:', error);
+          Swal.fire({
+              icon: 'error',
+              title: 'Something went wrong',
+              text: 'Unable to validate stock. Please try again later.',
+              confirmButtonText: 'OK',
+          });
+      }
+  }
+
+
   document.addEventListener("DOMContentLoaded", function () {
     const qtyUpButtons = document.querySelectorAll(".qty-up");
     const qtyDownButtons = document.querySelectorAll(".qty-down");
@@ -181,80 +234,96 @@
       });
     });
 
-    function updateQuantity(productId, productSize, change) {
-      const qtyElement = document.getElementById(`qty-${productId}-${productSize}`);
-      let currentQty = parseInt(qtyElement.innerText);
-      console.log("FGHJKKKK ",currentQty)
-      const maxQty = 5;
+    async function updateQuantity(productId, productSize, change) {
+      try {
+          const qtyElement = document.getElementById(`qty-${productId}-${productSize}`);
+          const currentQty = parseInt(qtyElement.innerText);
+          const maxQty = 5;
 
-      if (currentQty + change > 0 && currentQty + change <= maxQty) {
-        console.log(`Fetching stock for Product ID: ${productId}, Volume: ${productSize}`);
-        fetch(`/cart/get-stock/${productId}/${productSize}`)
-          .then((response) => response.json())
-          .then((data) => {
-            if (data.success) {
-              const availableStock = data.stock;
-              console.log("Available Stock:",availableStock)
-              if (currentQty + change > availableStock) {
-                Swal.fire({
-                  title: "Out of stock",
-                  text: `Only ${availableStock} items are in stock.`,
-                  icon: "warning",
-                  confirmButtonText: "OK",
-                });
-                return;
-              }
+          if (currentQty + change <= 0 || currentQty + change > maxQty) {
+              return;
+          }
 
-              const newQty = currentQty + change;
-              fetch("/cart/update-quantity", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  productId,
-                  productSize,
-                  quantity: newQty,
-                }),
-              })
-                .then((response) => response.json())
-                .then((data) => {
-                  console.log("Response Data:", data)
-                  if (data.success) {
-                    qtyElement.innerText = newQty;
-                    document.getElementById(
-                      `subtotal-${productId}-${productSize}`
-                    ).innerText = `₹${data.subtotal.toFixed(2)}`;
-                    updateTotal();
-                  }else{
-                    Swal.fire({
-                      title: "Error",
-                      text: data.message,
-                      icon: "error",
-                      confirmButtonText: "OK",
-                    });
-                  }
-                })
-                .catch((error) => console.error("Error updating quantity:", error));
-            }else{
+          const stockResponse = await fetch(`/cart/get-stock/${productId}/${productSize}`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+          });
+
+          if (!stockResponse.ok) {
+              throw new Error('Failed to fetch stock details.');
+          }
+
+          const stockData = await stockResponse.json();
+
+          if (!stockData.success) {
               Swal.fire({
-                title: "Error",
-                text: data.message,
-                icon: "error",
-                confirmButtonText: "OK",
+                  icon: 'error',
+                  title: 'Error',
+                  text: stockData.message,
+                  confirmButtonText: 'OK',
               });
-            }
-          })
-          .catch((err) => console.error("Error fetching stock:", err))
+              return;
+          }
+
+          const availableStock = stockData.stock;
+          if (currentQty + change > availableStock) {
+              Swal.fire({
+                  title: 'Out of Stock',
+                  text: `Only ${availableStock} items are in stock.`,
+                  icon: 'warning',
+                  confirmButtonText: 'OK',
+              });
+              return;
+          }
+
+          const newQty = currentQty + change;
+          const updateResponse = await fetch('/cart/update-quantity', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ productId, productSize, quantity: newQty }),
+          });
+
+          if (!updateResponse.ok) {
+              throw new Error('Failed to update quantity.');
+          }
+
+          const updateData = await updateResponse.json();
+
+          if (updateData.success) {
+              qtyElement.innerText = newQty;
+              document.getElementById(`subtotal-${productId}-${productSize}`).innerText = `₹${updateData.subtotal.toFixed(2)}`;
+              updateTotal();
+          } else {
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Error',
+                  text: updateData.message,
+                  confirmButtonText: 'OK',
+              });
+          }
+      } catch (error) {
+          console.error('Error during quantity update:', error);
+          Swal.fire({
+              icon: 'error',
+              title: 'Something went wrong',
+              text: 'Unable to update the quantity. Please try again later.',
+              confirmButtonText: 'OK',
+          });
       }
     }
 
+
     function updateTotal() {
       let total = 0;
-      document.querySelectorAll('[id^="subtotal-"]').forEach((subtotalElement) => {
-      const subtotal = parseFloat(subtotalElement.innerText.replace("₹", "")) || 0;
-      total += subtotal;
-    });
-  document.getElementById("cart-total").innerText = `₹${total.toFixed(2)}`;
-}
+      document
+        .querySelectorAll('[id^="subtotal-"]')
+        .forEach((subtotalElement) => {
+          const subtotal =
+            parseFloat(subtotalElement.innerText.replace("₹", "")) || 0;
+          total += subtotal;
+        });
+      document.getElementById("cart-total").innerText = `₹${total.toFixed(2)}`;
+    }
     document.addEventListener("DOMContentLoaded", calculateInitialTotal());
 
     function calculateInitialTotal() {
@@ -301,9 +370,6 @@
       });
     });
   });
-
-  
-
 </script>
 
 <%- include('../layouts/user/footer.ejs') %>

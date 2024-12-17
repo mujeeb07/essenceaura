@@ -323,14 +323,10 @@ const gst = '<%= gst %>';
 const userEmail = '<%- userData?.email %>';
 const userPhone = '<%- userData?.phone %>';
 let razorpay_key = "<%= razorpay_key %>";
-let final_amt = Number(total) < 2500 ? Number(total) + 50 : Number(total)
+let final_amt = Number(total) < 2500 ? Number(total) + 50 : Number(total);
+console.log("FINAL AMT", final_amt)
 
-// let delivery_charge = "<%= delivery_charge %>";
-
-
-
-
-
+let delivery_charge = "<%= delivery_charge %>";
 
 document.addEventListener("DOMContentLoaded", function() {
     document.querySelectorAll("[id^='delete_btn_']").forEach(button => {
@@ -405,6 +401,7 @@ try {
 document.addEventListener("DOMContentLoaded", function() {
     let isCouponApplied = false;
     let appliedCoupon = null;
+    let couponDiscount = null
     const addCouponButton = document.getElementById("addCoupon");
     const oerderSummaryElement = document.getElementById("orderSummary");
 
@@ -436,7 +433,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const couponOptions = couponsArray.map((coupon, index) => {
         return `
-            <div style="width: 48%; border: 2px dashed #ffa500; border-radius: 10px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; background: #f9f9f9; position: relative; box-sizing: border-box;">
+            <div style="width: 48%; border: 2px dashed #ffa500; border-radius: 10px; padding: 10px; margin-bottom: 15px; display: flex; flex-direction: column; background: #f9f9f9; position: relative; box-sizing: border-box;" >
                 <div style="display: flex; align-items: center; margin-bottom: 5px;">
                     <input type="radio" id="coupon${index}" name="selectedCoupon" value="${index}" style="margin-right: 10px; width: 16px; height: 16px;">
                     <label for="coupon${index}" style="font-weight: bold; color: #ff6b00; font-size: 16px; margin: 0;">
@@ -485,13 +482,15 @@ document.addEventListener("DOMContentLoaded", function() {
             });
 
             const data = await response.json();
+            console.log("abcdefgh:", data)
 
             if (data.success) {
                 total = data.total
-                final_amt = total
+                final_amt = Number(total)
                 console.log("final amoutn afrer coupon apply:",final_amt)
                 isCouponApplied = true;
                 appliedCoupon = selectedCoupon;
+                couponDiscount = data.couponDiscount
                 addCouponButton.textContent = "Remove Coupon";
                 Swal.fire({
                 icon: 'success',
@@ -518,9 +517,14 @@ document.addEventListener("DOMContentLoaded", function() {
     function renderOrderSummary(appliedCoupon) {
         
         let discountAmount = 0;
-        if (appliedCoupon && Number(subtotal) + Number(gst) >= appliedCoupon.coupon_min_amount) {
-            discountAmount =  Math.min( (Number(subtotal) * appliedCoupon.discount_percentage )/100,appliedCoupon.coupon_max_amount )
+        if (isCouponApplied && Number(subtotal) + Number(gst) >= appliedCoupon.coupon_min_amount) {
+            discountAmount =  Number(couponDiscount);
         }
+
+        final_amt = Number(subtotal) + Number(gst) + Number(delivery_charge) - Number(discountAmount); 
+
+        console.log("Final amount at the order summary(after discount amount ):", final_amt)
+      
         
         document.getElementById("orderSummary").innerHTML = `
         <tr>
@@ -543,10 +547,12 @@ document.addEventListener("DOMContentLoaded", function() {
             : ""}
         <tr>
             <td><strong>Total</strong></td>
-            <td class="text-right"><strong>₹${Number(final_amt + delivery_charge).toFixed(2)}</strong></td>
+            <td class="text-right"><strong>₹${Number(final_amt).toFixed(2)}</strong></td>
         </tr>
         <input id="coupon_discount" type="hidden" value="${discountAmount.toFixed(2)}">
         `;
+        console.log(`Order summary function amounts subtotal:${subtotal}, gst:${gst}, delivery charge:${delivery_charge}, discount:${discountAmount}`)
+
     }
 
     async function removeCoupon() {
@@ -567,7 +573,7 @@ document.addEventListener("DOMContentLoaded", function() {
             console.log("total amount after removed coupon:", total)
             isCouponApplied = false;
             appliedCoupon = null;
-            final_amt = total;
+            final_amt = Number(total);
 
             addCouponButton.textContent = "Apply Coupon";
             
@@ -590,12 +596,12 @@ document.addEventListener("DOMContentLoaded", function() {
             <td><strong>Total</strong></td>
             <td class="text-right"><strong>₹${final_amt.toFixed(2)}</strong></td> 
         </tr>
-    `; 
+     `; 
         } else {
             console.error('Failed to remove coupon:', data.message);
         }
 
-}
+    }
 });
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -664,7 +670,6 @@ document.addEventListener("DOMContentLoaded", function () {
             let address_message = '<%- JSON.stringify(address_message || "") %>';
             if ( address_message) {
                 const modalElement =  document.getElementById("shippingModal");
-                // const modalInstance = bootstrap.Modal.getInstance(modalElement);
                     Swal.fire({ 
                     icon: 'success', 
                     text: 'Address added successfully.', 
@@ -695,7 +700,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 timer: 3000 });
         }
     }
-    
 
     form.addEventListener("submit", function (event) {
         event.preventDefault();
@@ -706,49 +710,105 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 //Place Order 
-    placeOrderBtn.addEventListener('click', async function(e) {
-        e.preventDefault();
+document.getElementById('placeOrder').addEventListener('click', async () => {
+    try {  
+        const cartResponse = await fetch('/cart/validate_stock', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+
+        if (!cartResponse.ok) {
+            throw new Error('Failed to validate stock. Please try again.');
+        }
+
+        const cartData = await cartResponse.json();
+
+        
+        const outOfStockItems = cartData.items.filter(item => item.quantity > item.stock);
+
+        if (outOfStockItems.length > 0) {
+            
+            const outOfStockDetails = outOfStockItems.map(item =>
+                `Product: ${item.name}, Variant: ${item.volume}, Available: ${item.stock}, Requested: ${item.quantity}`
+            ).join('\n');
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Out of Stock',
+                html: `<pre>${outOfStockDetails}</pre> Please update your cart.`,
+                confirmButtonText: 'OK',
+            });
+
+            return; 
+        }
+
         const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
         const selectedPayment = document.querySelector('input[name="paymentMethod"]:checked');
 
         if (!selectedAddress) {
-            addressError.style.display = 'block';
+            document.getElementById('addressError').style.display = 'block';
+            return;
         } else {
-            addressError.style.display = 'none';
+            document.getElementById('addressError').style.display = 'none';
         }
 
         if (!selectedPayment) {
-            paymentError.style.display = 'block';
+            document.getElementById('paymentError').style.display = 'block';
+            return;
         } else {
-            paymentError.style.display = 'none';
+            document.getElementById('paymentError').style.display = 'none';
         }
 
-        if(selectedAddress && selectedPayment) {
-            const address = selectedAddress.value;
-            const paymentMethod = selectedPayment.value;
+        const address = selectedAddress.value;
+        const paymentMethod = selectedPayment.value;
 
-            switch(paymentMethod) {
-                case 'COD':
-                    await handleCODPayment(address);
-                    break;
-                case 'razorpay':
-                    await handleRazorpayPayment(address, final_amt);
-                    break;
-                case 'wallet':
-                    await handleWalletPayment(address, final_amt)
-            }
+        switch (paymentMethod) {
+            case 'COD':
+                await handleCODPayment(address);
+                break;
+            case 'razorpay':
+                await handleRazorpayPayment(address);
+                break;
+            case 'wallet':
+                await handleWalletPayment(address);
+                break;
+            default:
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Payment Method Error',
+                    text: 'Please select a valid payment method.',
+                    confirmButtonText: 'OK',
+                });
+                return;
         }
-    });
+    } catch (error) {
+        console.error('Error during stock validation or order placement:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Something went wrong',
+            text: 'Unable to validate stock or place the order. Please try again later.',
+            confirmButtonText: 'OK',
+        });
+    }
+});
+
+
+console.log("final amount from global", final_amt)
 
     async function handleCODPayment(address) {
+        console.log("final amount from COD fucntion", final_amt)
         await makeOrderRequest(address, 'COD', null, final_amt)
     }
 
     async function handleWalletPayment(address, final_amt){
+        console.log("final amount from wallet function", final_amt)
         await makeOrderRequest(address, "wallet", null, final_amt)
     }
 
     async function handleRazorpayPayment(address, final_amt) {
+        console.log("final amount from razorpay", final_amt)
         const options = {
             key: razorpay_key,
             amount: Math.round(final_amt * 100),
@@ -785,7 +845,7 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     async function makeOrderRequest(address, payment, paymentId = null, final_amt) {
-        // console.log("aaaaaaaaaaaaaaaaaaaa:", final_amt)
+        console.log("final amount from make order request", final_amt)
         try {
             const response = await fetch("/checkout", {
                 method: "POST",

@@ -62,7 +62,7 @@ const shop_cart = async (req, res) => {
 
 const update_quantity = async (req, res) => {
   try {
-    const user = req.session.user || req.session.passport.user;
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
 
     const productId = String(req.body.productId);
     const productSize = Number(req.body.productSize);

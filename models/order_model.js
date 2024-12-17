@@ -68,8 +68,7 @@ const order_schema = new mongoose.Schema({
     required: true
   },
   tax: {
-    type: Number,
-    required: true
+    type: Number
   },
   discount_amount: {
     type: Number,

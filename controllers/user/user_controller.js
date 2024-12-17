@@ -8,10 +8,12 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
-
+const generate_referral_code = require("../../utils/generate_referral_code");
+const create_mail_options = require("../../utils/create_email");
+const Wallet = require("../../models/wallet");
+const Wallet_txns = require('../../models/wallet_transactions');
 
 const load_login = async (req, res) => {
-
   try {
 
     let success_message = req.session.success_message;
@@ -32,7 +34,7 @@ const load_register = async (req, res) => {
 
   try {
 
-    return res.status(200).render("user/user_register");
+    return res.status(200).render("user/user_register", { message: null });
 
   } catch (error) {
 
@@ -44,24 +46,27 @@ const load_register = async (req, res) => {
 
 
 const register_user = async (req, res) => {
-
   try {
-
-    const { name, email, password, cpassword } = req.body;
-
-    // console.log(`Registration details:`, name, email, password, cpassword);
-
+    const { name, email, referral, password, cpassword } = req.body;
+    // console.log( 'CHECKS REFERRERAL IS EMPTY OR NOT: ',referral === '' );
     if (password !== cpassword) {
-
-      return res.status(400);
-
+      return res.status(400).render("user/user_register", { message: "Passwords do not match!" });
     }
 
     const existing_user = await user.findOne({ email: email });
-
     if (existing_user) {
+      return res.status(400).render("user/user_login", { message: "User already exists! Please log in." });
+    }
 
-      return res.status(400).render("user/user_login", { message: "User already exist!. Please Login." });
+    let referrer_id = null;
+    if (referral !== '') {
+      console.log("Creting referrer id.");
+      const referrer = await user.findOne({ referral_code: referral });
+      console.log("Referre Details:", referrer)
+      if (!referrer) {
+        return res.status(400).render("user/user_register", { message: "Invalid referral code!" });
+      }
+      referrer_id = referrer._id;
     }
 
     const otp = otp_generator.generate(6, {
@@ -72,18 +77,16 @@ const register_user = async (req, res) => {
       specialChars: false,
     });
 
-    console.log(`this is the generated otp`, otp);
+    console.log(`Generated OTP: ${otp}`);
 
-    const otp_data = new user_otp({
-      email: email,
-      otpCode: otp,
-    });
-
+    const otp_data = new user_otp({ email: email, otpCode: otp });
     await otp_data.save();
 
-    req.session.form_data = { name, email, password, cpassword };
+    req.session.form_data = { name, email, password, cpassword, referrer_id };
 
-    // console.log("Session Data:", req.session.form_data);
+    const otp_text = `Hello, your OTP code is ${otp}. It will expire in 1 minute.`;
+    const mailOptions = create_mail_options(email, "Your OTP Code", otp_text);
+
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
@@ -92,32 +95,14 @@ const register_user = async (req, res) => {
       },
     });
 
-    const mailOptions = {
-      from: {
-        name: "Essence Aura",
-        address: process.env.EMAIL_USER,
-      },
+    await transporter.sendMail(mailOptions);
+    console.log("Email has been sent!");
 
-      to: email,
-      subject: "Your OTP Code",
-      text: `Hello, your OTP code is ${otp}. It will be expire in 1 minute.`
-
-    };
-
-    const sendMail = async () => {
-      try {
-        transporter.sendMail(mailOptions);
-        console.log("Email has been sent!");
-
-      } catch (error) {
-        console.log(error.message);
-      }
-    };
-
-    await sendMail();
-    return res.render("user/user_send_otp", { message: "OTP send to your Email" });
+    
+    return res.render("user/user_send_otp", { message: "OTP sent to your email." });
   } catch (error) {
-    return res.status(500).json({ message: "error while sending email", error });
+    console.error("Error in register_user function:", error);
+    return res.status(500)
   }
 };
 
@@ -140,39 +125,92 @@ const secure_password = async (password) => {
 };
 
 const verify_otp = async (req, res) => {
-
   try {
-
     const { otp } = req.body;
-    const { email, name, password } = req.session.form_data;
+    const { email, name, password, referrer_id } = req.session.form_data;
     const otp_data = await user_otp.findOne({ otpCode: otp, email });
 
     if (!otp_data) {
-      return res.status(400).json({ message: "Invalid or expired OTP", success: false});
+      return res.status(400).json({ message: "Invalid or expired OTP", success: false });
     }
 
+    // Create new user
     const user_data = new user({
       name,
       email,
       password: await secure_password(password),
       is_admin: false,
+      referred_by: referrer_id,
     });
 
     await user_data.save();
     await user_otp.deleteOne({ email });
 
-    console.log("User data saved to the database");
-    return res.status(200).json({ message: "OTP verified successfully", success: true });
+    // Generate referral code for the new user
+    user_data.referral_code = generate_referral_code(user_data._id);
+    await user_data.save();
 
+    // Create wallet for the new user if not exists
+    let wallet = await Wallet.findOne({ user_id: user_data._id });
+    if (!wallet) {
+      const new_wallet = new Wallet({ user_id: user_data._id });
+      wallet = await new_wallet.save();
+    }
+
+    // Credit ₹1000 to the referred user's wallet only if referred
+    if (user_data.referred_by) {
+      wallet.balance += 1000;
+      await wallet.save();
+
+      // Record transaction for the referred user
+      const referred_user_txn = new Wallet_txns({
+        wallet_id: wallet._id,
+        txn_amount: 1000,
+        txn_description: "Referral bonus credited to your wallet",
+        txn_type: "Credit",
+        wallet_transaction_status: "Referral",
+      });
+      await referred_user_txn.save();
+    }
+
+
+    // If user was referred, update the referrer's wallet and transactions
+    if (user_data.referred_by) {
+      // Update referrer's wallet
+      let referrer_wallet = await Wallet.findOne({ user_id: user_data.referred_by });
+      if (!referrer_wallet) {
+        const new_referrer_wallet = new Wallet({ user_id: user_data.referred_by });
+        referrer_wallet = await new_referrer_wallet.save();
+      }
+      referrer_wallet.balance += 500;
+      await referrer_wallet.save();
+
+      // Record transaction for the referrer
+      const referrer_txn = new Wallet_txns({
+        wallet_id: referrer_wallet._id,
+        txn_amount: 500,
+        txn_description: `Referral bonus credited for referring "${user_data.name}"`,
+        txn_type: "Credit",
+        wallet_transaction_status: "Referral",
+      });
+      await referrer_txn.save();
+
+      // Update referred users list in referrer's user document
+      const referrer_user = await user.findById(user_data.referred_by);
+      referrer_user.referred_users.push(user_data._id);
+      await referrer_user.save();
+    }
+
+    console.log("User data and referral details saved successfully");
+    return res.status(200).json({ message: "OTP verified successfully", success: true });
   } catch (err) {
     console.log("Error from verify OTP function:", err);
     return res.status(500).json({ message: "Verification failed. Please try again.", success: false });
   }
-
 };
 
-const resend_otp = async (req, res) => {
 
+const resend_otp = async (req, res) => {
   try {
 
     const { email } = req.session.form_data;
@@ -271,7 +309,7 @@ const login_user = async (req, res) => {
       return res.status(400).render("user/user_login", { message: "Invalid email or password.", show_message: "false" });
     }
 
-    req.session.success_message = `welcome back ${user_data.name}`
+    req.session.success_message = ` Welcome ${user_data.name}`
     req.session.user = user_data._id;
 
     return res.status(200).redirect("/");

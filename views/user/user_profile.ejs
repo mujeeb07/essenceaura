@@ -50,10 +50,18 @@
                                             <h5 class="mb-0">Hello <%= id.name %>! </h5>
                                         </div>
                                         <div class="card-body">
-                                            <p>From your account dashboard. you can easily check &amp; view your <a
-                                                    href="#">recent orders</a>, manage your <a href="#">shipping and
-                                                    billing addresses</a> and <a href="#">edit your password and account
-                                                    details.</a></p>
+                                            <p>Welcome to your account dashboard! From here, you can easily view your <a href="#">recent orders</a>, manage your <a href="#">shipping and billing addresses</a>, and <a href="#">edit your password and account details</a>.</p>
+
+                                            <p>**Referral Offer:** Refer someone to join us and earn ₹500 instantly in your wallet when they register using your referral code. Additionally, the referred user will get ₹1000 credited to their wallet upon successful registration. Start sharing and earning now!</p>
+
+                                            <div class="form-group mt-4">
+                                                <label for="referralCode"><strong>Your Referral Code:</strong></label>
+                                                <div class="input-group">
+                                                    <input type="text" id="referralCode" class="form-control" value="<%= id.referral_code ? id.referral_code : 'You Don\'t Have a Referral Code' %>" readonly >
+                                                    <button class="btn btn-outline-secondary" onclick="copyReferralCode()">Copy</button>
+                                                </div>
+                                                <small id="copySuccess" class="text-success" style="display: none;">Referral code copied!</small>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -325,6 +333,20 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/js/bootstrap.bundle.min.js"></script>
     
         <script>
+
+            function copyReferralCode() {
+                const referralInput = document.getElementById("referralCode");
+                referralInput.select();
+                referralInput.setSelectionRange(0, 99999); 
+                navigator.clipboard.writeText(referralInput.value)
+                    .then(() => {
+                        document.getElementById("copySuccess").style.display = "inline";
+                        setTimeout(() => {
+                            document.getElementById("copySuccess").style.display = "none";
+                        }, 3000);
+                    })
+                    .catch(err => console.error('Could not copy referral code:', err));
+            }
 
             document.addEventListener("DOMContentLoaded", function () {
                 const form = document.querySelector("form");

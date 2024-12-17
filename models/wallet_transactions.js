@@ -24,7 +24,7 @@ const wallet_txns_schema = new mongoose.Schema({
     },
     wallet_transaction_status:{
         type: String,
-        enum: ["Refunded", "Pending", "Purchase"],
+        enum: ["Refunded", "Pending", "Purchase", "Referral"],
         default: 'pending'
     }
 }, { timestamps: true });
