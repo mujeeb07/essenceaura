@@ -36,8 +36,8 @@
                     <p class="mb-1"><strong>Payment Method:</strong> 
                       <% if(order.payment_method === "COD") { %>
                           COD
-                      <% } else if(order.payment_method === "Razorpay") {%>
-                          Razorpay
+                      <% } else if(order.payment_method === "online") {%>
+                          Online
                       <% } else { %>
                         wallet
                       <% } %>
@@ -97,7 +97,7 @@
                   <td>₹ <%= (order.tax).toFixed(2) %></td>
                 </tr>
 
-                <% if (order.discount_amount) { %>
+                <% if (order.discount_amount != 0) { %>
                   <tr>
                     <td colspan="3" class="text-right"><strong>Coupon Discount</strong></td>
                     <td>₹ - <span style="color: red;"><%= order.discount_amount %></span></td>
@@ -116,7 +116,7 @@
     <div class="text-center mt-4">
       <a href="/home" class="mx-2">Go To Home</a>
       <a href="/shoping_page" class="mx-2">Continue Shopping</a>
-      <a href="/user_profile" class="mx-2">View Your Orders</a>
+      <a href="/my_orders" class="mx-2">View Your Orders</a>
     </div>
   </div>
 </div>

@@ -48,7 +48,6 @@ const load_shop_page = async (req, res) => {
 
 const filter_items = async (req, res) => {
   const { categories, brands, price, nameSort } = req.body;
-  // console.log("Items for filtering:", categories, brands, price, nameSort);
 
   let filter_query = {};
   let sort_query = {};

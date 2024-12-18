@@ -35,8 +35,6 @@ const forgot_password = async(req, res) => {
 
       const token = crypto.randomBytes(32).toString('hex');
 
-      console.log("Unhashed Token:", token)
-
       const hashed_token = crypto.createHash('sha256').update(token).digest('hex');
       
       const token_expires = Date.now() + 1800000;
@@ -47,8 +45,6 @@ const forgot_password = async(req, res) => {
 
 
       await user_data.save();
-
-      console.log("saving hahsed token:",user_data.hashed_token);
 
       const reset_link = `${process.env.URL}/reset_password/${hashed_token}`;
 
@@ -125,7 +121,6 @@ const reset_password = async(req, res) => {
     console.log("data form the body:",token,password);
 
     const user_data = await User.findOne({email:user});
-    console.log("user data from the database:", user_data);
 
     if(!user_data){
       return res.status(400).json({message:"user not found."});
@@ -134,9 +129,6 @@ const reset_password = async(req, res) => {
     if(user_data.token_expires < Date.now()){
       return res.status(400).json({message:"The token has expired"})
     }
-
-    console.log("token :", token);
-    console.log("hashed token from DB:", user_data.hashed_token);
 
     if(token !== user_data.hashed_token){
       return res.status(400).json({message:"Invalid token or expired token."})

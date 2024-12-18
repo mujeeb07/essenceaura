@@ -70,7 +70,6 @@ const users_list = async (req, res) => {
 
 const load_order_details = async (req, res) => {
   const { id } = req.params;
-  console.log("Order Id: ",id);
   try {
     const order_details = await Orders.findOne({_id:id}).populate('user')
     
@@ -84,7 +83,6 @@ const load_order_details = async (req, res) => {
 
 const order_details = async(req, res) => {
   const { orderId, status } = req.body
-  console.log("status body: ", orderId, status);
   try {
     let order_data = await Orders.findByIdAndUpdate(orderId, {order_status: status});
     order_data.items.forEach((i) => {
@@ -129,26 +127,22 @@ const return_action = async(req, res) => {
   try {
 
     const { orderId, itemId, variant, status, quantity, reason } = req.body;
-    console.log("Order ID: ", orderId,",", "Item ID: ", itemId,",", "Variant: ", variant,",", "Status: ", status,",", "Quantity: ", quantity,",", "Reason: ", reason,".");
     let order_data = await Orders.findById( new ObjectId(orderId) );
     let price = 0;
     let product_name = '';
     if(status === 'Approve'){
       for (let item of order_data.items) {
-          // console.log('zzz:', item.product.variants.price)
-          // console.log('zzz:', item.product.return_request)
         if(String(order_data._id) === orderId){
           price = item.product.variants.price * item.quantity;
           product_name = item.product.name;
           price += price * 0.18;
           let discount = (price * order_data.discount_amount) / order_data.total + order_data.discount_amount
           price -= discount;
-          // console.log(price);
           item.product.return_request = "Return Approved";
         }
       }
       await order_data.save();
-      // console.log(order_data);
+      
       const wallet = await Wallet.findOne({ user_id : order_data.user });
       console.log(wallet)
       if(!wallet){
@@ -168,7 +162,6 @@ const return_action = async(req, res) => {
       });
 
       await new_wallet_txn.save();
-      console.log("Transaction for return item saved successfully. :)");
     } 
     
     if(status === 'Reject'){
@@ -191,7 +184,6 @@ const return_qty_update = async (req, res) => {
   try {
     const { itemId, variant, quantity } = req.body;
 
-    console.log("Data for update stock: ", itemId, variant, quantity );
     let product_to_update = await Product.findById( new ObjectId(itemId) );
     let price;
     // console.log("PRODUCT DATA TO UPDATE:", product_to_update);
@@ -202,11 +194,7 @@ const return_qty_update = async (req, res) => {
     });
 
     await product_to_update.save();
-    console.log("Returned item quantity updated with stock. :)");
-
-
-
-
+    
     return res.status(200).json({ success:true })
   } catch (error) {
     console.log('Error while updating returned item quantity.', error);

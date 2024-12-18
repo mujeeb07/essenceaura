@@ -3,8 +3,13 @@ const Wallet = require("../../models/wallet");
 const ObjectId = require('mongoose').Types.ObjectId;
 const Wallet_txns = require('../../models/wallet_transactions');
 const Product = require('../../models/product_model');
-const refund =require("../../utils/refund");
+const refund = require("../../utils/refund");
 const calculateRefund = require("../../utils/refund");
+
+require('dotenv').config();
+
+const { create_razorpay_order, verify_razorpay_signature, verify_online_payment } = require("../../controllers/user/razorpay_controller");
+
 
 const load_my_orders = async(req, res) => {
     try {
@@ -13,11 +18,11 @@ const load_my_orders = async(req, res) => {
       const page = parseInt(req.query.page) || 1;
       const skip = (page - 1) * limit
       const total_orders = await Orders.countDocuments({ user : user} )
-
       const my_orders = await Orders.find({ user: user }).sort({_id:-1}).skip(skip).limit(limit);
       const total_pages = Math.ceil(total_orders / limit);
+      const razorpay_key = process.env.RAZORPAY_ID;
   
-      return res.status(200).render('user/my_orders', { my_orders, current_page: page, total_pages } );
+      return res.status(200).render('user/my_orders', { my_orders, current_page: page, total_pages, razorpay_key } );
   
     } catch (error) {
       console.log("error while renders the my orders page", error);
@@ -48,12 +53,9 @@ const load_my_orders = async(req, res) => {
 
             const order_id = order_data._id
             let balance = Number(order_data.total)
-            console.log("Order Grand Total : ", Number(balance));
-
-            console.log('Wallet balance before:', wallet.balance)
 
             wallet.balance += balance;
-            console.log('Wallet balance after :', wallet.balance);
+            
             await wallet.save();
 
             const new_wallet_txn = new Wallet_txns({
@@ -65,7 +67,6 @@ const load_my_orders = async(req, res) => {
             });
 
             await new_wallet_txn.save();
-            console.log("Wallet transaction for order saved successfully :)");
         }
       return res.status(200).json({ message:"Order Cancelled Successfully",success:true });
     } catch (error) {
@@ -92,7 +93,6 @@ const load_my_orders = async(req, res) => {
     try {
         const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
         const { order_id, product_id, product_variant } = req.body;
-        // console.log("DATA FROM THE BODY:", order_id, product_id, product_variant);
         const order_data = await Orders.findById(order_id);
         if(!order_data){
             return res.status(400).json({ message: "Order Not Found", success: false });
@@ -117,7 +117,6 @@ const load_my_orders = async(req, res) => {
         });
     
         if (allCancelled) {
-            console.log("All products in the order are already cancelled.");
             order_data.order_status = "Cancelled"
         } 
         
@@ -139,21 +138,11 @@ const load_my_orders = async(req, res) => {
                     break;
                 }
             }
-            console.log('BALANCE:', balance);
+            
             wallet.user_id = user;
-            // balance += balance * 0.18;
-            // if(order_data.discount_amount){
-            //     const discount = order_data.discount_amount;
-            //     const total = order_data.total
-            //     let product_discount = balance * discount / total;
-            //     refund = balance - product_discount
-            //     // console.log('Actual balance:', product_discount)
-            //     // console.log('Actual balance:', refund)
-            // }
 
             const { refund_amount, updated_discount, updated_tax } = refund(balance, quantity, order_data.sub_total, order_data.tax, order_data.discount_amount);
 
-            // Update remaining values for the next cancellation
             order_data.discount_amount = updated_discount;
             order_data.tax = updated_tax;
             await order_data.save();
@@ -174,7 +163,6 @@ const load_my_orders = async(req, res) => {
             });
 
             await new_wallet_txn.save();
-            console.log("Wallet transaction for product saved successfully :)");
         }
 
         return res.status(200).json({message:"Product cancelled successfully", success: true})
@@ -219,7 +207,6 @@ const return_product = async (req, res) => {
         });
 
         if (allCancelled) {
-            console.log("All products in the order are already cancelled.");
             order_data.order_status = "Cancelled"
         } 
 
@@ -228,7 +215,7 @@ const return_product = async (req, res) => {
         if(order_data.order_status !== "Delivered"){
             return res.status(400).json({ message:'Sorry cannot initiate return request due to "Undelivered" order.', success: false });
         }
-        console.log('The product return request initiated successfully :)')
+        
         return res.status(200).json({ message: 'The product return request initiated successfully.', success: true })
     } catch (error) {
         console.log("Error while return order.", error);
@@ -246,23 +233,17 @@ const get_invoice = async (req, res) => {
         if(!order){
             return res.status(404).json({ message: "Order not found.", success:false });
         }
-
-        for(let i of order.items){
-            console.log("Order data:", i.price)
-        }
         
         let cartItems = [];
 
         for (let i of order.items) {
-        cartItems.push({
-            product: i.product, 
-            quantity: i.quantity,
-            price: i.price,
-            offer_price: i.offer_price,
-        });
+            cartItems.push({
+                product: i.product, 
+                quantity: i.quantity,
+                price: i.price,
+                offer_price: i.offer_price,
+            });
         }
-
-        console.log("cart items:", cartItems)
         
           return res.status(200).render("user/invoice", { cartItems, order });
     } catch (error) {
@@ -271,11 +252,48 @@ const get_invoice = async (req, res) => {
     }
 }
 
+
+const orders_retrypayment = async (req, res) => {
+    try {
+        const {orderId} = req.body;
+        const order_data = await Orders.findById(orderId);
+        console.log('sdfafsdfadfdsafsa',order_data)
+
+        return res.status(200).json({ success:true, order_data })
+    } catch (error) {
+        console.log('error retry payment', error)
+        return res.status(500).json({ message: error })
+    }
+}
+
+
+const update_order_status = async (req, res) => {
+    const {orderId} = req.body
+    try {
+        await Orders.findByIdAndUpdate({ _id: orderId}, {
+            payment_status: 'completed',
+            order_status: 'Pending'
+        })
+        return res.status(200).json({success:true, message:"order status updated"})
+    } catch (error) {
+        console.log('Error while updatign order status', error);
+        return res.status(500).json({success:false, message:"Error while updatign order status"})
+    }
+}
+
+
+
+
+
+
+
 module.exports = {
     load_my_orders,
     cancel_order,
     order_details,
     cancel_product,
     return_product,
-    get_invoice
+    get_invoice,
+    orders_retrypayment,
+    update_order_status
 }

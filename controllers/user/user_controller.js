@@ -48,7 +48,7 @@ const load_register = async (req, res) => {
 const register_user = async (req, res) => {
   try {
     const { name, email, referral, password, cpassword } = req.body;
-    // console.log( 'CHECKS REFERRERAL IS EMPTY OR NOT: ',referral === '' );
+    
     if (password !== cpassword) {
       return res.status(400).render("user/user_register", { message: "Passwords do not match!" });
     }
@@ -60,9 +60,9 @@ const register_user = async (req, res) => {
 
     let referrer_id = null;
     if (referral !== '') {
-      console.log("Creting referrer id.");
+      
       const referrer = await user.findOne({ referral_code: referral });
-      console.log("Referre Details:", referrer)
+      
       if (!referrer) {
         return res.status(400).render("user/user_register", { message: "Invalid referral code!" });
       }
@@ -134,7 +134,7 @@ const verify_otp = async (req, res) => {
       return res.status(400).json({ message: "Invalid or expired OTP", success: false });
     }
 
-    // Create new user
+    //new user
     const user_data = new user({
       name,
       email,
@@ -146,23 +146,23 @@ const verify_otp = async (req, res) => {
     await user_data.save();
     await user_otp.deleteOne({ email });
 
-    // Generate referral code for the new user
+    //  referral code for new user
     user_data.referral_code = generate_referral_code(user_data._id);
     await user_data.save();
 
-    // Create wallet for the new user if not exists
+    // wallet for the new user
     let wallet = await Wallet.findOne({ user_id: user_data._id });
     if (!wallet) {
       const new_wallet = new Wallet({ user_id: user_data._id });
       wallet = await new_wallet.save();
     }
 
-    // Credit ₹1000 to the referred user's wallet only if referred
+    // new user get ₹1000 bonus
     if (user_data.referred_by) {
       wallet.balance += 1000;
       await wallet.save();
 
-      // Record transaction for the referred user
+      
       const referred_user_txn = new Wallet_txns({
         wallet_id: wallet._id,
         txn_amount: 1000,
@@ -172,11 +172,8 @@ const verify_otp = async (req, res) => {
       });
       await referred_user_txn.save();
     }
-
-
-    // If user was referred, update the referrer's wallet and transactions
+    
     if (user_data.referred_by) {
-      // Update referrer's wallet
       let referrer_wallet = await Wallet.findOne({ user_id: user_data.referred_by });
       if (!referrer_wallet) {
         const new_referrer_wallet = new Wallet({ user_id: user_data.referred_by });
@@ -185,7 +182,7 @@ const verify_otp = async (req, res) => {
       referrer_wallet.balance += 500;
       await referrer_wallet.save();
 
-      // Record transaction for the referrer
+      
       const referrer_txn = new Wallet_txns({
         wallet_id: referrer_wallet._id,
         txn_amount: 500,
@@ -201,7 +198,6 @@ const verify_otp = async (req, res) => {
       await referrer_user.save();
     }
 
-    console.log("User data and referral details saved successfully");
     return res.status(200).json({ message: "OTP verified successfully", success: true });
   } catch (err) {
     console.log("Error from verify OTP function:", err);
@@ -338,7 +334,7 @@ const view_product = async (req, res) => {
       return res.status(404).json({ error: "Product not found" });
     }
 
-    // Find the first variant with stock
+    
     const default_variant = product.variants.find(variant => variant.stock > 0) || product.variants[0];
     const actualPrice = default_variant.price;
 
@@ -357,7 +353,7 @@ const view_product = async (req, res) => {
       product, 
       actualPrice, 
       offerPrice,
-      user: req.session.user // Pass user session to check login status
+      user: req.session.user
     });
   } catch (error) {
     console.error("Error while rendering the product view page", error);
@@ -369,7 +365,7 @@ const view_product = async (req, res) => {
 const user_address = async (req, res) => {
   try {
     const { full_name, mobile_number, pincode, address, landmark, town_city, state } = req.body;
-    console.log("address data from the body:",full_name, mobile_number, pincode, address, landmark, town_city, state)
+    
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const address_data = new Address({
       user: user_id,

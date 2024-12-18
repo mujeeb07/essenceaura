@@ -17,8 +17,8 @@ const validate_referral_code = async (referral_code, res = null) => {
 
     } catch (error) {
         console.error("Error validating referral code:", error);
-        if (res) {
-            return res.status(500).json({ valid: false, message: "Server error" });
+        if (res) { 
+        return res.status(500).json({ valid: false, message: "Server error" });
         }
         throw error;
     }

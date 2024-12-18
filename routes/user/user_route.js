@@ -95,6 +95,7 @@ user_route.get("/checkout", user_blocked, is_authenticated, checkout_controller.
 user_route.post("/checkout", user_blocked, is_authenticated, checkout_controller.post_checkout);
 user_route.get('/cart/validate_stock', user_blocked, is_authenticated, checkout_controller.validate_stock)
 user_route.get('/order_confirmation', user_blocked, is_authenticated, checkout_controller.order_confirmation);
+user_route.post('/decline_payment', user_blocked, is_authenticated, checkout_controller.decline_payment)
 user_route.post('/apply_coupon', user_blocked, is_authenticated, checkout_controller.apply_coupon);
 user_route.post('/remove_coupon', user_blocked, is_authenticated, checkout_controller.remove_coupon);
 
@@ -106,5 +107,9 @@ user_route.post("/cancel_order/:order_id", user_blocked, is_authenticated, order
 user_route.get("/order_details/:order_id", user_blocked, is_authenticated, order_controller.order_details);
 user_route.post("/cancel_product", user_blocked, is_authenticated, order_controller.cancel_product)
 user_route.post('/return_product', user_blocked, is_authenticated, order_controller.return_product);
+user_route.post("/orders_retrypayment", user_blocked, is_authenticated, order_controller.orders_retrypayment);
+user_route.post('/update_order', user_blocked, is_authenticated, order_controller.update_order_status)
+
+
 
 module.exports = user_route;

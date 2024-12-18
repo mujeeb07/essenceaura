@@ -22,7 +22,6 @@ const create_razorpay_order = async (amount) => {
         }
         
         const razorpay_order = await razorpay.orders.create(data);
-        console.log('razorpay order details: ', razorpay_order);
         return razorpay_order
 
     } catch (error) {
@@ -43,12 +42,11 @@ const verify_razorpay_signature = async (orderId, paymentId, signature) => {
             await transactions_data.save();
         }
       
-
         return generate_signature === signature
     } catch (error) {
         console.log("Error while verify razorpay signature.", error.message);
         throw error
-        // return res.status(500).json({ success: false, message:"Error while verify razorpay signature." })
+        
     }
 }
 
@@ -66,7 +64,7 @@ const verify_online_payment = async (req, res) => {
         } else {
             await Transaction.findOneAndUpdate(
                 { online_payment_order_id: orderId },
-                {$set: { payment_status: 'Pending'} }
+                {$set: { payment_status: 'Failed'} }
             );
             return res.status(400).json({success: false, message:"Online payment failed"});
         }

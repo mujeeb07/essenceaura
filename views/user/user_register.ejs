@@ -138,7 +138,7 @@
         if (referral) {
             const isReferralValid = await checkReferral(referral);
             if (isReferralValid) {
-                document.getElementById("referralSuccess").textContent = "Eligible for referral coupon.";
+                document.getElementById("referralSuccess").textContent = "Eligible for referral bonus.";
             } else {
                 document.getElementById("referralError").textContent = "Enter a valid referral code.";
                 valid = false;

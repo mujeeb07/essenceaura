@@ -4,13 +4,9 @@ const Product = require("../../models/product_model")
 
 const load_shop_cart = async (req, res) => {
   try {
-    
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
     const cart = await Cart.findOne({ user: user }).populate("item.product");
-    // console.log("Cartasdf:",cart);
-
     return res.render("user/shop_cart", { cart });
-
   } catch (error) {
     console.error("Error fetching cart:", error);
     return res.status(500).json({ message: "Unable to fetch cart details" });
@@ -25,8 +21,6 @@ const shop_cart = async (req, res) => {
 
     const productData = await Product.findById(product_id)
     const sale_price_after_discount = productData.variants.find((variant) => variant.volume.toString() === volume)?.sale_price_after_discount || null;
-
-    // console.log("shop cart product price:", price)
 
     if (!user) {
       return res.status(401).json({ message: "User not authenticated" });
@@ -50,8 +44,6 @@ const shop_cart = async (req, res) => {
         await cart.save();
       }
 
-    // console.log("Cart Data:", cart );
-
     return res.status(200).json({ message: "Product added to cart successfully", cart });
   } catch (error) {
     return res.status(500).json({ message: "Unable to add product to cart" });
@@ -68,23 +60,9 @@ const update_quantity = async (req, res) => {
     const productSize = Number(req.body.productSize);
     const quantity = Number(req.body.quantity);
 
-    console.log("User ID:", user);
-    console.log("Data from the body:", productId, productSize, quantity);
-
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({ message: "Invalid productId format", success: false });
     }
-
-    // const updatedCart = await Cart.findOneAndUpdate(
-    //   {
-    //     user: new mongoose.Types.ObjectId(user),
-    //     "item.product": new mongoose.Types.ObjectId(productId),
-    //     "item.volume": productSize,
-    //   },
-    //   { $set: { "item.$.quantity": quantity } },
-    //   { new: true }
-    // );
-    // console.log("123456",updatedCart)
 
     const updatedCart = await Cart.findOne({ user: user })
     for(let item of updatedCart.item){
@@ -94,8 +72,6 @@ const update_quantity = async (req, res) => {
     }
 
     await updatedCart.save();
-
-    // console.log("UPDATED CART:",updatedCart)
 
     if (!updatedCart) {
       return res.status(404).json({ message: "Cart not found", success: false });
@@ -109,17 +85,12 @@ const update_quantity = async (req, res) => {
       return res.status(404).json({ message: "Cart item not found", success: false });
     }
 
-    // console.log("Cart Item:", cartItem);
-
     let subtotal;
     if(cartItem.offer_price){
       subtotal = cartItem.offer_price * quantity;
     }else{
       subtotal = cartItem.price * quantity;
     }
-
-    // console.log("Subtotal:", subtotal)
-  
 
     return res.status(200).json({
       subtotal,
@@ -136,7 +107,6 @@ const get_stock = async(req, res) => {
   try {
     const { productId, volume } = req.params;
     const product = await Product.findById(productId);
-    // console.log("Product data get stock:", product)
     const variant = product.variants.find((v) => v.volume === parseInt(volume));
 
     if(!variant || variant === 0){

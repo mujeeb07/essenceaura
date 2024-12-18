@@ -1,9 +1,8 @@
 const mongoose = require('mongoose');
 const connect_db = async () => {
     console.log("Checking MongoDB connection...");
-  
-    const URI = 'mongodb://yesudasmj50:tISAUWSMedq1zw7B@cluster0-shard-00-00.tzfus.mongodb.net:27017,cluster0-shard-00-01.tzfus.mongodb.net:27017,cluster0-shard-00-02.tzfus.mongodb.net:27017/?ssl=true&replicaSet=atlas-uenen9-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0'
-    // console.log(URI)
+    const URI = process.env.DATABASE_CONFIG
+    //const URI = 'mongodb://yesudasmj50:tISAUWSMedq1zw7B@cluster0-shard-00-00.tzfus.mongodb.net:27017,cluster0-shard-00-01.tzfus.mongodb.net:27017,cluster0-shard-00-02.tzfus.mongodb.net:27017/?ssl=true&replicaSet=atlas-uenen9-shard-0&authSource=admin&retryWrites=true&w=majority&appName=Cluster0'
     try {
       await mongoose.connect(URI);
       console.log("Database connected successfully"); 

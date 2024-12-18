@@ -12,9 +12,6 @@ const { get_estimated_date } = require("../../utils/estimate_date");
 const Wallet = require("../../models/wallet");
 const Wallet_txns = require("../../models/wallet_transactions");
 
-
-
-
 const checkout = async (req, res) => {
   try {
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
@@ -22,12 +19,10 @@ const checkout = async (req, res) => {
     const razorpay_key = process.env.RAZORPAY_ID;
     let address_message = req.session.address_message;
     req.session.address_message = null;
-    // console.log("Adrress message from session:", address_message)
     const userData = await User_model.findById(user_id);
     const cartItems = await Cart.findOne({ user: user_id }).populate("item.product").exec();
     const addresses = await Address.find({ user: user_id });
     const coupons = await Coupons.find({ coupon_status: true, used_by: { $nin: [user_id] } });
-    // console.log("Cart Data:", cartItems)
 
     let sub_total = 0;
     for( let i = 0; i < cartItems.item.length; i++){
@@ -47,9 +42,6 @@ const checkout = async (req, res) => {
     if (appliedCoupon && sub_total >= appliedCoupon.coupon_min_amount) {
       discount = Math.min(sub_total * (appliedCoupon.discount_percentage / 100), appliedCoupon.coupon_max_amount);
     }
-
-    
-    console.log("Address message before rendering:", address_message);
    
     return res.status(200).render("user/check_out", {
       cartItems: cartItems.item,
@@ -63,9 +55,7 @@ const checkout = async (req, res) => {
       userData,
       razorpay_key,
       address_message
-      
     });
-    
 
   } catch (error) {
     console.error("Checkout error:", error);
@@ -75,7 +65,7 @@ const checkout = async (req, res) => {
 
 const apply_coupon = async (req, res) => {
   let { selectedCoupon, total   } = req.body;
-  console.log(`Apply coupon, TOTAL: ${total}`)
+  
   total = Number(total);
 try {
   if (!selectedCoupon) {
@@ -102,13 +92,13 @@ try {
   req.session.coupon = selectedCoupon;
   
   const couponDiscount = Math.min( (total * selectedCoupon.discount_percentage) / 100, selectedCoupon.coupon_max_amount );
-  console.log('Discount amount:', couponDiscount)
+  
   req.session.coupon_discounted = couponDiscount;
 
   let a = (total - couponDiscount).toFixed(2);
-  console.log("value od a:", a)
+  
   total = a
-  console.log("value od total:", total)
+  
 
   const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
   await Cart.findOneAndUpdate({ user: user_id }, 
@@ -128,28 +118,26 @@ try {
 
 const remove_coupon = async (req, res) => {
   try {
-    let { coupon_discount, total } = req.body;
-
-    console.log("Remove coupon data:", coupon_discount, total);
-    total = Number(total) + Number(coupon_discount);
-    console.log("TOTAL:", total);
+    let { couponDiscount, finalAmount } = req.body;
+    
+    finalAmount = Number(finalAmount) + Number(couponDiscount);
+    
     req.session.coupon = null;
     req.session.coupon_discounted = 0;
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     await Cart.findOneAndUpdate({ user: user_id }, 
       { $set: { coupon_amount: 0 } }, { new: true } );
-    return res.status(200).json({ success: true, total });
+    return res.status(200).json({ success: true, finalAmount });
   } catch (error) {
     console.log(error);
-    return res.status(500).json({ success: false })
+    return res.status(500).json({ message:"An error occured while remove coupon", success: false })
   }
 }
 
 const post_checkout = async (req, res) => {
   try {
-
     const { payment, address, paymentId, final_amt } = req.body;
-    console.log("final amount from the body:", final_amt)
+    console.log("ertyudfgh",address)
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const coupon_discounted = req.session.coupon_discounted;
     const cart_data = await Cart.findOne({ user: user }).populate({ path: "item.product", populate: ["brand", "category"] });
@@ -160,8 +148,8 @@ const post_checkout = async (req, res) => {
     }
     const delivery_charge = subtotal > 2500 ? 0 : 50;
 
-    console.log("subtoal from same as the cart:", subtotal);
     let tax_amount = subtotal * 0.18.toFixed(2);
+
     const ordered_items = cart_data.item.map(item => ({
       product: {
         _id: item.product._id,
@@ -177,6 +165,7 @@ const post_checkout = async (req, res) => {
     }));
 
     const user_address = await Address.findOne({ _id: address });
+    console.log("first",user_address)
 
     const order = new Order_model({
       user,
@@ -188,7 +177,8 @@ const post_checkout = async (req, res) => {
       discount_amount: coupon_discounted,
       total: final_amt ,
       order_status: 'Pending',
-      delivery_charge: delivery_charge
+      delivery_charge: delivery_charge,
+      razorpay_payment_id:paymentId,
     });
 
     let razorpay_order;
@@ -198,10 +188,7 @@ const post_checkout = async (req, res) => {
     }
 
     if (order.payment_method === 'online') {
-      console.log('Total amount',order.total)
       razorpay_order = await create_razorpay_order( final_amt + delivery_charge );
-
-      console.log('razorpay order data: ',razorpay_order)
       const is_verified = verify_razorpay_signature(order._id, paymentId, razorpay_order.signature);
       if (!is_verified) {
         return res.status(400).json({ message: "Payment verification failed", success: false });
@@ -219,8 +206,12 @@ const post_checkout = async (req, res) => {
 
       await online_transaction.save();
 
-     
-      console.log("Razorpay Order data : ", razorpay_order);
+      const txn = await transaction_model.findOne({ order_id: order._id });
+      if(txn.payment_status === 'Failed'){
+        order.payment_status = 'pending';
+      }
+      order.payment_status = 'completed';
+      await order.save()
     }
 
     if(order.payment_method === 'wallet'){
@@ -228,17 +219,13 @@ const post_checkout = async (req, res) => {
       if(!wallet){
         const new_wallet = new Wallet({ user_id: user });
         wallet = await new_wallet.save();
-        console.log("New Wallet created. Wallet Balance:", wallet.balance)
       }
-      // console.log("User wallet data:", wallet)
 
       if(wallet.balance < Number(final_amt)){
         return res.status(400).json({ message:"Insufficient balance. Try another payment method", success: false });
       }
 
       wallet.balance -= Number(final_amt);
-      console.log("Wallet balance after :", wallet.balance);
-      console.log("ORDER DATA:",  final_amt , order.delivery_charge)
       const wallet_txns = new Wallet_txns({
         wallet_id: wallet._id,
         txn_amount: Number(final_amt + order.delivery_charge),
@@ -248,6 +235,8 @@ const post_checkout = async (req, res) => {
       });
       await wallet_txns.save();
       await wallet.save();
+      order.payment_status = 'completed';
+      await order.save()
     }
 
     order.total += order.delivery_charge;
@@ -258,19 +247,19 @@ const post_checkout = async (req, res) => {
     for(let item of order.items){
       let pId = item.product._id;
       let vol = item.product.variants.volume;
-      let qty = item.quantity
-      console.log("updating the stock, Product ID:", pId, " Product volume:", vol, " Product quantity:", qty)
+      let qty = item.quantity;
+
       await Product.findOneAndUpdate(
         {_id: pId, "variants.volume": vol },
         {$inc: {"variants.$.stock": -qty }},
-    )}
+      )
+    }
     
-
     req.session.order_id = order._id;
     return res.status(200).json({ message: "Order placed successfully", success: true });
   } catch (error) {
     console.error("Checkout error:", error);
-    return res.status(500).json({ message: "Error while checking out" });
+    return res.status(500).json({ message: "Error while placing out" });
   }
 };
 
@@ -322,8 +311,6 @@ const order_confirmation = async (req, res) => {
       req.session.coupon = null;
     }
 
-    console.log("Order details passing:", order, estimated_delivery, order.items, order.items.discount_amount)
-
     return res.status(200).render('user/order_confirmation', { order, estimated_delivery, cartItems: order.items, coupon_discount_amount: order.items.discount_amount });
   } catch (error) {
     console.error('Confirmation Error: ', error);
@@ -331,11 +318,67 @@ const order_confirmation = async (req, res) => {
   }
 };
 
+
+const decline_payment = async (req, res) => {
+  try {
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    const { address, finalAmount, isCouponApplied,  couponDiscount } = req.body
+    const cart_data = await Cart.findOne({ user: user }).populate({ path: "item.product", populate: ["brand", "category"] });
+    let subtotal = 0;
+    for(let value of cart_data.item){
+      subtotal += (value.offer_price ? value.offer_price : value.price  * value.quantity)
+    }
+    const delivery_charge = subtotal > 2500 ? 0 : 50;
+
+    let tax_amount = subtotal * 0.18.toFixed(2);
+    const ordered_items = cart_data.item.map(item => ({
+      product: {
+        _id: item.product._id,
+        name: item.product.name,
+        description: item.product.description,
+        product_card_image: item.product.product_card_image,
+        variants: { volume: item.volume, price: item.offer_price ? item.offer_price : item.price },
+        category: item.product.category,
+        brand: item.product.brand,
+      },
+      quantity: item.quantity,
+      price: item.offer_price ? item.offer_price : item.price
+    }));
+
+    const user_address = await Address.findOne({ _id: address });
+
+    const order = new Order_model({
+      user,
+      shipping_address: user_address,
+      items: ordered_items,
+      payment_method: 'online',
+      sub_total: subtotal.toFixed(2),
+      tax: tax_amount,
+      discount_amount: couponDiscount,
+      total: finalAmount ,
+      order_status: 'Not-Confirmed',
+      payment_status:'pending',
+      delivery_charge: delivery_charge
+    });
+
+    await order.save();
+    
+    await Cart.updateOne({ user: user }, { $set: { item: [] } });
+
+    return res.status(200).json({ message: 'Order payment failed. Cart cleared.' });
+  } catch (error) {
+      console.error('Error in decline payment:', error);
+      return res.status(500).json({ message: 'Failed to process decline payment request.' });
+  }
+};
+
+
 module.exports = {
   checkout,
   post_checkout,
   order_confirmation,
   apply_coupon,
   remove_coupon,
-  validate_stock
+  validate_stock,
+  decline_payment
 };
