@@ -44,12 +44,6 @@ const load_my_orders = async(req, res) => {
             item.product.cancel_request = "Cancelled";
         })
         await order_data.save();
-
-        
-
-
-
-
         if(order_data.payment_method !== "COD" && order_data.order_status !== "Delivered"){
             let wallet = await Wallet.findOne({ user_id: user });
             if(!wallet){
@@ -59,9 +53,6 @@ const load_my_orders = async(req, res) => {
 
             const order_id = order_data._id
             let balance = Number(order_data.total)
-
-            
-
 
             wallet.balance += balance;
             

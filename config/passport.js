@@ -5,9 +5,12 @@ require("dotenv").config();
 
 
 passport.use(new google_strategy({
-    clientID:process.env.GOOGLE_CLIENT_ID,
-    clientSecret:process.env.GOOGLE_CLIENT_SECRET,                                                                                      
-    callbackURL:`${process.env.URL}/auth/google/callback`,
+    clientID: process.env.GOOGLE_CLIENT_ID,
+    clientSecret: process.env.GOOGLE_CLIENT_SECRET,                                                                                      
+    // callbackURL:`${process.env.URL}/auth/google/callback`,
+    callbackURL: process.env.NODE_ENV === 'production' 
+        ? `${process.env.PROD_URL}/auth/google/callback` 
+        : `${process.env.LOCAL_URL}/auth/google/callback`,
     scope:['profile', 'email'],
     prompt: 'select_account',
     passReqToCallback: true
