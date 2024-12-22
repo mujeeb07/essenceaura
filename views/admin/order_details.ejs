@@ -18,7 +18,11 @@
                         <option value="Confirmed">Confirmed</option>
                         <option value="Shipped">Shipped</option>
                         <option value="Delivered">Delivered</option>
-                        <option value="Cancelled">Cancel</option>
+                        <% if(order_details.order_status === "Cancelled") { %>
+                            <option disabled="true" value="Cancelled">Cancel</option>
+                        <% }else{ %>
+                            <option value="Cancelled">Cancel</option>
+                        <% } %>
                     </select>
                     <a id="save-status-btn" class="btn btn-primary" href="#">Save</a>
                 </div>
