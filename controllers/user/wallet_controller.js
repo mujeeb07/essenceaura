@@ -1,6 +1,7 @@
 const mongoose = require('mongoose')
 const Wallet = require('../../models/wallet');
 const Wallet_txns = require('../../models/wallet_transactions');
+const statusCode = require('../../constance/statusCodes')
 
 const load_wallet = async (req, res) => {
     try {
@@ -8,7 +9,7 @@ const load_wallet = async (req, res) => {
     let  wallet_data = await Wallet.findOne({ user_id: user });
 
     if(!wallet_data){
-        return res.status(404).render("user/wallet", { wallet_txns: [], total_pages: 0, wallet_balance: 0 })
+        return res.status(statusCode.NOT_FOUND).render("user/wallet", { wallet_txns: [], total_pages: 0, wallet_balance: 0 })
     }
     const wallet_id = wallet_data._id;
     const wallet_balance = wallet_data.balance.toFixed(2);
@@ -21,11 +22,11 @@ const load_wallet = async (req, res) => {
 
     const wallet_txns = await Wallet_txns.find({ wallet_id }).sort({ _id:-1 }).skip((page - 1) * data_per_page).limit(data_per_page)
 
-    return res.status(200).render("user/wallet", { wallet_txns, total_pages, wallet_balance, current_page: page });
+    return res.status(statusCode.SUCCESS).render("user/wallet", { wallet_txns, total_pages, wallet_balance, current_page: page });
 
     } catch (error) {
         console.log("Error while rendering the wallet page.", error);
-        return res.status(500).json({ message: "Some went wrong while fetching wallet", success: false });
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Some went wrong while fetching wallet", success: false });
     }
 }
 

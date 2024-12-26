@@ -1,6 +1,7 @@
 const Cart = require("../../models/cart_model");
 const mongoose = require("mongoose");
-const Product = require("../../models/product_model")
+const Product = require("../../models/product_model");
+const statusCode = require('../../constance/statusCodes')
 
 const load_shop_cart = async (req, res) => {
   try {
@@ -9,7 +10,7 @@ const load_shop_cart = async (req, res) => {
     return res.render("user/shop_cart", { cart });
   } catch (error) {
     console.error("Error fetching cart:", error);
-    return res.status(500).json({ message: "Unable to fetch cart details" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Unable to fetch cart details" });
   }
 };
 
@@ -23,7 +24,7 @@ const shop_cart = async (req, res) => {
     const sale_price_after_discount = productData.variants.find((variant) => variant.volume.toString() === volume)?.sale_price_after_discount || null;
 
     if (!user) {
-      return res.status(401).json({ message: "User not authenticated" });
+      return res.status(statusCode.UNAUTHORIZED).json({ message: "User not authenticated" });
     }
 
     let cart = await Cart.findOne({ user: user });
@@ -44,9 +45,9 @@ const shop_cart = async (req, res) => {
         await cart.save();
       }
 
-    return res.status(200).json({ message: "Product added to cart successfully", cart });
+    return res.status(statusCode.SUCCESS).json({ message: "Product added to cart successfully", cart });
   } catch (error) {
-    return res.status(500).json({ message: "Unable to add product to cart" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Unable to add product to cart" });
   }
 };
 
@@ -61,7 +62,7 @@ const update_quantity = async (req, res) => {
     const quantity = Number(req.body.quantity);
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
-      return res.status(400).json({ message: "Invalid productId format", success: false });
+      return res.status(statusCode.BAD_REQUEST).json({ message: "Invalid productId format", success: false });
     }
 
     const updatedCart = await Cart.findOne({ user: user })
@@ -74,7 +75,7 @@ const update_quantity = async (req, res) => {
     await updatedCart.save();
 
     if (!updatedCart) {
-      return res.status(404).json({ message: "Cart not found", success: false });
+      return res.status(statusCode.NOT_FOUND).json({ message: "Cart not found", success: false });
     }
 
     const cartItem = updatedCart.item.find(
@@ -82,7 +83,7 @@ const update_quantity = async (req, res) => {
     );
 
     if (!cartItem) {
-      return res.status(404).json({ message: "Cart item not found", success: false });
+      return res.status(statusCode.NOT_FOUND).json({ message: "Cart item not found", success: false });
     }
 
     let subtotal;
@@ -92,14 +93,14 @@ const update_quantity = async (req, res) => {
       subtotal = cartItem.price * quantity;
     }
 
-    return res.status(200).json({
+    return res.status(statusCode.SUCCESS).json({
       subtotal,
       message: "Quantity updated successfully",
       success: true,
     });
   } catch (error) {
     console.error("Error updating quantity:", error);
-    return res.status(500).json({ message: "An error occurred", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "An error occurred", success: false });
   }
 };
 
@@ -110,14 +111,14 @@ const get_stock = async(req, res) => {
     const variant = product.variants.find((v) => v.volume === parseInt(volume));
 
     if(!variant || variant === 0){
-      return res.status(404).json({ success: false, message:"Product variant not found."});
+      return res.status(statusCode.NOT_FOUND).json({ success: false, message:"Product variant not found."});
     }
 
-    return res.status(200).json({ success: true, stock: variant.stock })
+    return res.status(statusCode.SUCCESS).json({ success: true, stock: variant.stock })
 
   } catch (error) {
     console.log("Error fetching stock:", error);
-    return res.status(500).json({ success: false, message: "Unable to fetch stock." });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Unable to fetch stock." });
   }
 
 }
@@ -131,12 +132,12 @@ const remove_item = async (req, res) => {
       { new: true }
     );
     if (updatedCart) {
-      return res.status(200).json({ success: true });
+      return res.status(statusCode.SUCCESS).json({ success: true });
     } else {
-      return res.status(404).json({ message: "Item not found" });
+      return res.status(statusCode.NOT_FOUND).json({ message: "Item not found" });
     }
   } catch (error) {
-    return res.status(500).json({ message: "An error occurred while removing item from cart" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while removing item from cart" });
   }
 };
 

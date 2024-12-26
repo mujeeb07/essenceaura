@@ -1,6 +1,7 @@
 const Wishlist = require('../../models/wishlist_model');
 const Products = require('../../models/product_model')
 const mongoose = require('mongoose');
+const statusCode = require('../../constance/statusCodes')
 
 const load_wishlist = async (req, res) => {
 
@@ -19,12 +20,12 @@ const load_wishlist = async (req, res) => {
         const product_ids = user_wishlist.product_ids || []
         const product_data = await Products.find({ _id: product_ids }).populate('category')
 
-        return res.status(200).render('user/wishlist.ejs', { user_wishlist,product_data } );
+        return res.status(statusCode.SUCCESS).render('user/wishlist.ejs', { user_wishlist,product_data } );
         
     } catch (error) {
 
         console.log('Error while rendering the wishlist page');
-        return res.status(500).json({ message:'Error while rendering the wishlist page. ', error } )
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:'Error while rendering the wishlist page. ', error } )
         
     }
 }
@@ -49,9 +50,9 @@ const add_to_wishlist = async(req, res) => {
             )
         }
         
-        return res.status(200).json({message: "product added to wishlist", success: true})
+        return res.status(statusCode.SUCCESS).json({message: "product added to wishlist", success: true})
     } catch (error) {
-        return res.status(500).json({message:"Error while adding product to wishlist", error});
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"Error while adding product to wishlist", error});
     }
 }
 
@@ -70,13 +71,13 @@ const wishlist_remove_item = async (req, res) => {
 
         if(updated_wishlist){
             console.log('Product removed successfuly')
-            return res.status(200).json({ message:"Product removed successfuly",success: true });
+            return res.status(statusCode.SUCCESS).json({ message:"Product removed successfuly",success: true });
         }else{
-            return res.status(404).json({message:"Item not found"})
+            return res.status(statusCode.NOT_FOUND).json({message:"Item not found"})
         }
         
     } catch (error) {
-        return res.status(500).json({ message:"An error occured while removing item from wishlist" });
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:"An error occured while removing item from wishlist" });
     }
 
 }

@@ -3,6 +3,9 @@ const Category = require("../../models/category_model");
 const Brand = require("../../models/brand_model");
 const { uploadToCloudinary } = require("../../config/cloudinary");
 const mongoose = require("mongoose");
+const statusCode = require('../../constance/statusCodes')
+
+
 
 const load_list_product = async (req, res) => {
   try {
@@ -13,9 +16,9 @@ const load_list_product = async (req, res) => {
 
     const products_list = await Product.find({}).populate("category").populate("brand").skip((page - 1) * items_per_page ).limit(items_per_page);
 
-    return res.status(200).render("admin/products_list", { products_list, current_page: page, total_pages: total_pages });
+    return res.status(statusCode.SUCCESS).render("admin/products_list", { products_list, current_page: page, total_pages: total_pages });
   } catch (error) {
-    return res.status(400);
+    return res.status(statusCode.BAD_REQUEST);
   }
 };
 
@@ -23,9 +26,9 @@ const load_add_product = async (req, res) => {
   try {
     const category = await Category.find();
     const brand = await Brand.find();
-    return res.status(200).render("admin/add_product", { category, brand });
+    return res.status(statusCode.SUCCESS).render("admin/add_product", { category, brand });
   } catch (error) {
-    return res.status(500).json({ message: error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
   }
 };
 
@@ -48,7 +51,7 @@ const add_product = async (req, res) => {
     const productDetailImages = req.files?.product_details_images || [];
 
     if (!productCardImage) {
-      return res.status(400).json({ error: "Product card image is required." });
+      return res.status(statusCode.BAD_REQUEST).json({ error: "Product card image is required." });
     }
 
     if (
@@ -61,7 +64,7 @@ const add_product = async (req, res) => {
       !category
     ) {
       return res
-        .status(400)
+        .status(statusCode.BAD_REQUEST)
         .json({ error: "All product details are required." });
     }
 
@@ -99,10 +102,10 @@ const add_product = async (req, res) => {
     await new_product.save()
 
     console.log('New prodcut details: ', new_product);
-    return res.status(200).json({ message: "New product added and saved", product: new_product });
+    return res.status(statusCode.SUCCESS).json({ message: "New product added and saved", product: new_product });
   } catch (error) {
     console.error("Error with add product controller:", error);
-    return res.status(500).json({ error: "Something went wrong while adding the product." });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "Something went wrong while adding the product." });
   }
 };
 
@@ -115,14 +118,14 @@ const load_edit_product = async (req, res) => {
     const brand = await Brand.find();
     const category = await Category.find();
 
-    return res.status(200).render("admin/edit_product", {
+    return res.status(statusCode.SUCCESS).render("admin/edit_product", {
       product,
       brands: brand,
       categories: category,
     });
   } catch (error) {
     console.error("Error fetching product:", error);
-    res.status(500).send("Server error");
+    res.status(statusCode.INTERNAL_SERVER_ERROR).send("Server error");
   }
 };
 
@@ -149,7 +152,15 @@ const edit_product = async (req, res) => {
         price: parseFloat(variants[volume].price),
         stock: parseInt(variants[volume].stock, 10) || 0,
       }));
+
+      if(product.variants.stock < 5){
+        product.name = "Low Quantity"
+      }
     }
+
+    
+
+    
 
     if ( req.files && req.files.product_card_image && req.files.product_card_image ) {
 
@@ -185,10 +196,10 @@ const edit_product = async (req, res) => {
 
     await product.save();
     console.log("Product updated successfully");
-    return res.status(200).redirect('/admin/admin_list_product');
+    return res.status(statusCode.SUCCESS).redirect('/admin/admin_list_product');
   } catch (error) {
     console.error("Error updating product:", error);
-    return res.status(500).json({ message: "An error occurred while updating the product", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while updating the product", success: false });
   }
 };
 

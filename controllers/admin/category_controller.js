@@ -1,20 +1,21 @@
 const Category = require("../../models/category_model");
+const statusCode = require('../../constance/statusCodes')
 
 const categories = async (req, res) => {
   try {
     const categories = await Category.find();
-    return res.status(200).render("admin/catagories", { categories });
+    return res.status(statusCode.SUCCESS).render("admin/catagories", { categories });
   } catch (error) {
-    return res.status(500).json({ error: "server error" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "server error" });
   }
 };
 
 const get_categories = async (req, res) => {
   try {
     const categories = await Category.find();
-    return res.status(200).json(categories);
+    return res.status(statusCode.SUCCESS).json(categories);
   } catch (error) {
-    return res.status(500).json({ error: "server error " });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "server error " });
   }
 };
 const add_category = async (req, res) => {
@@ -27,7 +28,7 @@ const add_category = async (req, res) => {
 
     if (existingCategory) {
       return res
-        .status(400)
+        .status(statusCode.BAD_REQUEST)
         .json({ error: "Category with this name already exists" });
     }
 
@@ -39,9 +40,9 @@ const add_category = async (req, res) => {
 
     await new_category.save();
 
-    return res.status(200).json({ message: "Category added successfully" });
+    return res.status(statusCode.SUCCESS).json({ message: "Category added successfully" });
   } catch (error) {
-    return res.status(500).json({ error: "Server error" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "Server error" });
   }
 };
 
@@ -57,7 +58,7 @@ const update_category = async (req, res) => {
     });
 
     if(existing_category){
-      return res.status(400).json({error:"Category with this name already exist"});
+      return res.status(statusCode.BAD_REQUEST).json({error:"Category with this name already exist"});
     }
     
     const updated_category = await Category.findByIdAndUpdate(
@@ -65,18 +66,18 @@ const update_category = async (req, res) => {
       { name, description, gender },
       { new: true }
     );
-    return res.status(200).json({ updated_category });
+    return res.status(statusCode.SUCCESS).json({ updated_category });
   } catch (error) {
-    return res.status(500).json({ error: "Error updating category" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "Error updating category" });
   }
 };
 
 const get_category_by_id = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
-    return res.status(200).json(category);
+    return res.status(statusCode.SUCCESS).json(category);
   } catch (error) {
-    return res.status(500).json({ error: "server error" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "server error" });
   }
 };
 
@@ -92,9 +93,9 @@ const soft_delete_category = async (req, res) => {
       { $set: { is_active: !category.is_active } },
       { new: true }
     );
-    return res.status(200).json({message: "Category soft deleted successfully",updated_category,});
+    return res.status(statusCode.SUCCESS).json({message: "Category soft deleted successfully",updated_category,});
   } catch (error) {
-    return res.status(500).json({ error: "Error deleting category" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "Error deleting category" });
   }
 };
 

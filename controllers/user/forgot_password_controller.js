@@ -3,13 +3,14 @@ const bcrypt = require('bcrypt');
 const User = require("../../models/user_model");
 const nodemailer = require("nodemailer");
 require("dotenv").config();
+const statusCode = require('../../constance/statusCodes')
 
 
 const load_forgot_password = async (req, res) => {
   try {
-    return res.status(200).render("user/forgot_password", { message:" Enter Your email" });
+    return res.status(statusCode.SUCCESS).render("user/forgot_password", { message:" Enter Your email" });
   } catch (error) {
-    return res.status(500).json({message:"Error while load forgot password. " + error.message});
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"Error while load forgot password. " + error.message});
   }
 };
 
@@ -24,11 +25,11 @@ const forgot_password = async(req, res) => {
       const user_data = await User.findOne({email: user_email});
       
       if(!user_data){
-        return res.status(400).json({message:"No User Found With that Email.", success: false});
+        return res.status(statusCode.BAD_REQUEST).json({message:"No User Found With that Email.", success: false});
       }
 
       if(user_data.google_id){
-        return res.status(400).json({message:"Try With Google Signup.", success:false});
+        return res.status(statusCode.BAD_REQUEST).json({message:"Try With Google Signup.", success:false});
       }
 
       req.session.user = user_email;
@@ -83,11 +84,11 @@ const forgot_password = async(req, res) => {
       console.log('link has been sent');
 
 
-      return res.status(400).json({ message:"Link has been sent. Please check your email.", success:true});
+      return res.status(statusCode.BAD_REQUEST).json({ message:"Link has been sent. Please check your email.", success:true});
 
   } catch (error) {
 
-    return res.status(400).json({ message:"ERROR ", success:false});
+    return res.status(statusCode.BAD_REQUEST).json({ message:"ERROR ", success:false});
 
   }
 
@@ -100,11 +101,11 @@ const load_reset_password = async (req, res) => {
 
   try {
 
-    return res.status(200).render("user/reset_password",{token});
+    return res.status(statusCode.SUCCESS).render("user/reset_password",{token});
 
   } catch (error) {
    
-    return res.status(500).json({message:"error while rendering reset password page" + error.message})
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"error while rendering reset password page" + error.message})
     
   }
 
@@ -123,15 +124,15 @@ const reset_password = async(req, res) => {
     const user_data = await User.findOne({email:user});
 
     if(!user_data){
-      return res.status(400).json({message:"user not found."});
+      return res.status(statusCode.BAD_REQUEST).json({message:"user not found."});
     }
 
     if(user_data.token_expires < Date.now()){
-      return res.status(400).json({message:"The token has expired"})
+      return res.status(statusCode.BAD_REQUEST).json({message:"The token has expired"})
     }
 
     if(token !== user_data.hashed_token){
-      return res.status(400).json({message:"Invalid token or expired token."})
+      return res.status(statusCode.BAD_REQUEST).json({message:"Invalid token or expired token."})
     }
 
     const hashed_password = await bcrypt.hash(password, 10);
@@ -144,11 +145,11 @@ const reset_password = async(req, res) => {
 
     req.session.success_message = 'Password has been reset successfully.';
 
-    return res.status(200).redirect('/login')
+    return res.status(statusCode.SUCCESS).redirect('/login')
 
   } catch (error) {
 
-   return res.status(500).json({message:"Error while resetting password." + error.message}); 
+   return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"Error while resetting password." + error.message}); 
 
   }
 }

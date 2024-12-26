@@ -5,6 +5,7 @@ const Orders = require("../../models/order_model");
 const Product = require("../../models/product_model");
 const Wallet = require("../../models/wallet")
 const Wallet_txns = require('../../models/wallet_transactions');
+const statusCode = require('../../constance/statusCodes')
 
 const users_list = async (req, res) => {
     try {
@@ -15,9 +16,9 @@ const users_list = async (req, res) => {
 
       const users = await user.find({ is_admin: false }).skip((page - 1) * users_per_page).limit(users_per_page);
 
-      return res.status(200).render("admin/users", { user_data: users, current_page: page, total_pages: total_pages });
+      return res.status(statusCode.SUCCESS).render("admin/users", { user_data: users, current_page: page, total_pages: total_pages });
     } catch (error) {
-      return res.status(500).json({ message: "Internal server side error." });
+      return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Internal server side error." });
     }
   };
   
@@ -29,7 +30,7 @@ const users_list = async (req, res) => {
       if (user_data) {
         await user.findByIdAndUpdate(id, { is_active });
   
-        return res.status(200).json({
+        return res.status(statusCode.SUCCESS).json({
           success: true,
           message: `User ${is_active ? "unblocked" : "blocked"} successfully.`,
         });
@@ -40,7 +41,7 @@ const users_list = async (req, res) => {
       }
     } catch (error) {
       console.error("Error blocking/unblocking user:", error);
-      return res.status(500).json({
+      return res.status(statusCode.INTERNAL_SERVER_ERROR).json({
         success: false,
         message: "Server error. Please try again later.",
       });
@@ -57,13 +58,13 @@ const users_list = async (req, res) => {
 
         const orders = await Orders.find().populate('user').sort({ _id: -1 }).skip((page - 1) * perPage).limit(perPage);
 
-        return res.status(200).render("admin/orders", {
+        return res.status(statusCode.SUCCESS).render("admin/orders", {
             orders,
             currentPage: page,
             totalPages,
         });
     } catch (error) {
-        return res.status(500).json({ message: error });
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
     }
 };
 
@@ -73,10 +74,10 @@ const load_order_details = async (req, res) => {
   try {
     const order_details = await Orders.findOne({_id:id}).populate('user')
     
-    return res.status(200).render('admin/order_details', { order_details })
+    return res.status(statusCode.SUCCESS).render('admin/order_details', { order_details })
   } catch (error) {
     console.log("Error while getting the orders details.", error);
-    return res.status(500).json({ message: "Error while getting the orders details.", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while getting the orders details.", success: false });
     
   }
 }
@@ -90,10 +91,10 @@ const order_details = async(req, res) => {
     })
     await order_data.save();
 
-    return res.status(200).json({success: true});
+    return res.status(statusCode.SUCCESS).json({success: true});
   } catch (error) {
     console.log("order status error :", error);
-    return res.status(500).json({ message:"Error while changing order status", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:"Error while changing order status", success: false });
   }
 }
 
@@ -116,10 +117,10 @@ const returns = async (req, res) => {
         // await order.save(); 
       })
     });
-    return res.status(200).render("admin/return_management", { orders, currentPage: page, totalPages });
+    return res.status(statusCode.SUCCESS).render("admin/return_management", { orders, currentPage: page, totalPages });
   } catch (error) {
     console.log("Error while rendering the return management page.", error);
-    return res.status(500).json({ message: "Error while getting the return management page.", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while getting the return management page.", success: false });
   }
 };
 
@@ -134,6 +135,9 @@ const return_action = async(req, res) => {
       for (let item of order_data.items) {
         if(String(order_data._id) === orderId){
           price = item.product.variants.price * item.quantity;
+          console.log("Price to be pay back:", price);
+          price = price / 2;
+          console.log("Price reduced to 50% :", price)
           product_name = item.product.name;
           price += price * 0.18;
           let discount = (price * order_data.discount_amount) / order_data.total + order_data.discount_amount
@@ -173,10 +177,10 @@ const return_action = async(req, res) => {
     }
     await order_data.save();
 
-    return res.status(200).json({ success: true });
+    return res.status(statusCode.SUCCESS).json({ success: true });
   } catch (error) {
     console.log('Error while updating return action.', error);
-    return res.status(500).json({ success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 }
 
@@ -195,10 +199,10 @@ const return_qty_update = async (req, res) => {
 
     await product_to_update.save();
     
-    return res.status(200).json({ success:true })
+    return res.status(statusCode.SUCCESS).json({ success:true })
   } catch (error) {
     console.log('Error while updating returned item quantity.', error);
-    return res.status(200).json({ success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false });
   }
 }
 

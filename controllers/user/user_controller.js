@@ -12,6 +12,7 @@ const generate_referral_code = require("../../utils/generate_referral_code");
 const create_mail_options = require("../../utils/create_email");
 const Wallet = require("../../models/wallet");
 const Wallet_txns = require('../../models/wallet_transactions');
+const statusCode = require('../../constance/statusCodes')
 
 const load_login = async (req, res) => {
   try {
@@ -20,7 +21,7 @@ const load_login = async (req, res) => {
 
     req.session.success_message;
 
-    return res.status(200).render("user/user_login", { message: "", show_message: true, });
+    return res.status(statusCode.SUCCESS).render("user/user_login", { message: "", show_message: true, });
 
   } catch (error) {
 
@@ -34,7 +35,7 @@ const load_register = async (req, res) => {
 
   try {
 
-    return res.status(200).render("user/user_register", { message: null });
+    return res.status(statusCode.SUCCESS).render("user/user_register", { message: null });
 
   } catch (error) {
 
@@ -108,7 +109,7 @@ const register_user = async (req, res) => {
 
 const user_send_otp = async (req, res) => {
   try {
-    return res.status(200).render("user/user_send_otp");
+    return res.status(statusCode.SUCCESS).render("user/user_send_otp");
   } catch (error) {
     console.log("Error with OTP:", error.message);
     return res.status(400).send("Error while sending the OTP");
@@ -198,7 +199,7 @@ const verify_otp = async (req, res) => {
       await referrer_user.save();
     }
 
-    return res.status(200).json({ message: "OTP verified successfully", success: true });
+    return res.status(statusCode.SUCCESS).json({ message: "OTP verified successfully", success: true });
   } catch (err) {
     console.log("Error from verify OTP function:", err);
     return res.status(500).json({ message: "Verification failed. Please try again.", success: false });
@@ -253,7 +254,7 @@ const resend_otp = async (req, res) => {
     transporter.sendMail(mailOptions);
 
     console.log("OTP email has been sent");
-    return res.status(200).json({ message: "OTP has been sent to your email.", success: true });
+    return res.status(statusCode.SUCCESS).json({ message: "OTP has been sent to your email.", success: true });
   } catch (error) {
     console.log(`Error resending OTP: ${error.message}`);
     return res.status(500).json({ message: "Failed to resend OTP.", success: false })
@@ -308,7 +309,7 @@ const login_user = async (req, res) => {
     req.session.success_message = ` Welcome ${user_data.name}`
     req.session.user = user_data._id;
 
-    return res.status(200).redirect("/");
+    return res.status(statusCode.SUCCESS).redirect("/");
   } catch (error) {
     console.error("Error while logging in:", error.message);
     return res.status(500).render("user/user_login", { message: "Something went wrong. Please try again later.", show_message: true });
@@ -349,7 +350,7 @@ const view_product = async (req, res) => {
       offerPrice = default_variant.sale_price_after_discount
     }
 
-    return res.status(200).render("user/view_product", { 
+    return res.status(statusCode.SUCCESS).render("user/view_product", { 
       product, 
       actualPrice, 
       offerPrice,
@@ -388,7 +389,7 @@ const user_address = async (req, res) => {
       req.session.address_message = `Address added successfully`
       return res.redirect("/checkout");
     }
-    return res.status(200).json({ message:"New address added successfully.", success: true });
+    return res.status(statusCode.SUCCESS).json({ message:"New address added successfully.", success: true });
   } catch (error) {
     console.log("error for adding address", error);
     return res.status(500).json({ message: "Error add address.", success: false });
@@ -401,7 +402,7 @@ const delete_address = async (req, res) => {
   try {
     await Address.findByIdAndDelete(addressId);
     await user.updateOne({ _id: user_id }, { $pull: {address_id: addressId} });
-    return res.status(200).json({ success: true, message: 'Address deleted successfully' });
+    return res.status(statusCode.SUCCESS).json({ success: true, message: 'Address deleted successfully' });
   } catch (error) {
     console.log("Error while delete address.", error);
     return res.status(500).json({ success: false, message: 'Failed to delete address' })
@@ -425,7 +426,7 @@ const load_edit_address = async (req, res) => {
   const address_id = req.params.id;
   try {
     const address = await Address.findOne({_id:address_id});
-    return res.status(200).render('user/edit_address', {address});
+    return res.status(statusCode.SUCCESS).render('user/edit_address', {address});
   } catch (error) {
     return res.status(500).json({ message:'error while rendering edit page', error });
   }
@@ -443,7 +444,7 @@ const edit_address = async (req, res) => {
       postal_code:postal_code,
       landmark:landmark
     });
-    return res.status(200).redirect('/user_profile');
+    return res.status(statusCode.SUCCESS).redirect('/user_profile');
   } catch (error) {
    return res.status(500).console.log("error while updating user addres", error);
   }

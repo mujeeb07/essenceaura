@@ -2,6 +2,7 @@ const Product = require("../../models/product_model");
 const Category = require("../../models/category_model");
 const Brand = require("../../models/brand_model");
 const { options } = require("../../routes/user/user_route");
+const statusCode = require('../../constance/statusCodes')
 
 const load_shop_page = async (req, res) => {
   try {
@@ -31,7 +32,7 @@ const load_shop_page = async (req, res) => {
     const categories = await Category.find();
     const brands = await Brand.find();
 
-    return res.status(200).render("user/shopping_page", {
+    return res.status(statusCode.SUCCESS).render("user/shopping_page", {
       products,
       categories,
       brands,
@@ -41,7 +42,7 @@ const load_shop_page = async (req, res) => {
   } catch (error) {
     console.error("Error loading shop page:", error);
     return res
-      .status(500)
+      .status(statusCode.INTERNAL_SERVER_ERROR)
       .json({ message: "Something went wrong with the shop page" });
   }
 };
@@ -78,10 +79,10 @@ const filter_items = async (req, res) => {
       .populate("brand")
       .populate("category");
 
-    return res.status(200).json({ success: true, products: filtered_products });
+    return res.status(statusCode.SUCCESS).json({ success: true, products: filtered_products });
   } catch (error) {
     console.error("Error filtering products:", error);
-    return res.status(500).json({ success: false, error: "Failed to filter products" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: "Failed to filter products" });
   }
 };
 
@@ -91,10 +92,10 @@ const search_filter =  async (req, res) => {
     const products =  await Product.find({
       name: { $regex: serach_query, $options: "i" }
     }).populate("brand").populate("category");
-    return res.status(200).json({ success: true, products: products });
+    return res.status(statusCode.SUCCESS).json({ success: true, products: products });
   } catch (error) {
     console.log("Error while search products.", error);
-    return res.status(500).json({ success: false, error: "Error while search products"});
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: "Error while search products"});
   }
 }
 

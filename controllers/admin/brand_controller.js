@@ -1,22 +1,23 @@
 const brand = require("../../models/brand_model");
 const { uploadToCloudinary } = require("../../config/cloudinary");
+const statusCode = require('../../constance/statusCodes')
 
 const load_brands = async (req, res) => {
   try {
     const brands = await brand.find({ is_deleted: false });
 
-    return res.status(200).render("admin/brands", { brands: brands });
+    return res.status(statusCode.SUCCESS).render("admin/brands", { brands: brands });
   } catch (error) {
-    return res.status(500).json({ message: error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
   }
 };
 
 const load_add_new_brand = async (req, res) => {
   try {
-    return res.status(200).render("admin/add_new_brand");
+    return res.status(statusCode.SUCCESS).render("admin/add_new_brand");
   } catch (err) {
     res
-      .status(500)
+      .status(statusCode.INTERNAL_SERVER_ERROR)
       .json({ message: "Failed to create brand", error: err.message });
   }
 };
@@ -26,7 +27,7 @@ const add_new_brand = async (req, res) => {
     const { name, description } = req.body;
 
     if (!req.files || !req.files.file) {
-      return res.status(400).json({ message: "No logo file uploaded." });
+      return res.status(statusCode.BAD_REQUEST).json({ message: "No logo file uploaded." });
     }
     const logo = req.files.file;
 
@@ -38,9 +39,9 @@ const add_new_brand = async (req, res) => {
       logo: upload_result.url,
     });
 
-    return res.status(200).json({ message: "new brand added and saved" });
+    return res.status(statusCode.SUCCESS).json({ message: "new brand added and saved" });
   } catch (error) {
-    return res.status(500).json({ message: "Failed to create new brand" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to create new brand" });
   }
 };
 
@@ -49,9 +50,9 @@ const load_edit_brand = async (req, res) => {
     const brand_id = req.params.id;
     const brand_data = await brand.findOne({ _id: brand_id });
 
-    res.status(200).render("admin/edit_brand", { brand: brand_data });
+    res.status(statusCode.SUCCESS).render("admin/edit_brand", { brand: brand_data });
   } catch (error) {
-    res.status(500).json({ message: "Failed to edit brand" });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to edit brand" });
   }
 };
 
@@ -67,9 +68,9 @@ const edit_brand = async (req, res) => {
       description: description,
       is_deleted: is_deleted,
     });
-    return res.status(200).json({ success: true, message: "brand updated" });
+    return res.status(statusCode.SUCCESS).json({ success: true, message: "brand updated" });
   } catch (error) {
-    return res.status(500).json({ message: error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
   }
 };
 

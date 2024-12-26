@@ -3,6 +3,7 @@ const razorpay_lib = require('razorpay');
 const crypto = require('crypto');
 const Orders = require('../../models/order_model');
 const Transaction =  require('../../models/online_transaction_model');
+const statusCode = require('../../constance/statusCodes');
 
 const razorpay_id = process.env.RAZORPAY_ID;
 const razorpay_key = process.env.RAZORPAY_SCRET_KEY
@@ -60,17 +61,17 @@ const verify_online_payment = async (req, res) => {
                 { online_payment_order_id: orderId },
                 {$set: { payment_status: 'Paid'} }
             );
-            return res.status(200).json({success: true, message:"Online payment verfied Success"});
+            return res.status(statusCode.SUCCESS).json({success: true, message:"Online payment verfied Success"});
         } else {
             await Transaction.findOneAndUpdate(
                 { online_payment_order_id: orderId },
                 {$set: { payment_status: 'Failed'} }
             );
-            return res.status(400).json({success: false, message:"Online payment failed"});
+            return res.status(statusCode.BAD_REQUEST).json({success: false, message:"Online payment failed"});
         }
     } catch (error) {
         copnsole.log("Error while operating online payment.", error.message);
-        return res(500).json({ success: false, message:"Error verify online payment" });
+        return res(statusCode.INTERNAL_SERVER_ERROR).json({ success: false, message:"Error verify online payment" });
     }
 }
 
