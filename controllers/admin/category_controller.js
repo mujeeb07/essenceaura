@@ -10,7 +10,7 @@ const categories = async (req, res) => {
   }
 };
 
-const get_categories = async (req, res) => {
+const loadCategories = async (req, res) => {
   try {
     const categories = await Category.find();
     return res.status(statusCode.SUCCESS).json(categories);
@@ -18,7 +18,7 @@ const get_categories = async (req, res) => {
     return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "server error " });
   }
 };
-const add_category = async (req, res) => {
+const createCategory = async (req, res) => {
   try {
     const { name, description, gender } = req.body;
 
@@ -46,7 +46,7 @@ const add_category = async (req, res) => {
   }
 };
 
-const update_category = async (req, res) => {
+const editCategory = async (req, res) => {
   try {
     const { name, description, gender } = req.body;
 
@@ -72,7 +72,7 @@ const update_category = async (req, res) => {
   }
 };
 
-const get_category_by_id = async (req, res) => {
+const fetchCategoryById = async (req, res) => {
   try {
     const category = await Category.findById(req.params.id);
     return res.status(statusCode.SUCCESS).json(category);
@@ -83,7 +83,7 @@ const get_category_by_id = async (req, res) => {
 
 
 
-const soft_delete_category = async (req, res) => {
+const disableCategory = async (req, res) => {
   try {
     const { id } = req.params;
     const category = await Category.findById(id);
@@ -101,9 +101,9 @@ const soft_delete_category = async (req, res) => {
 
 module.exports = {
   categories,
-  add_category,
-  get_categories,
-  update_category,
-  get_category_by_id,
-  soft_delete_category,
+  createCategory,
+  loadCategories,
+  editCategory,
+  fetchCategoryById,
+  disableCategory,
 };

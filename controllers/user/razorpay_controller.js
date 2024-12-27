@@ -51,7 +51,7 @@ const verify_razorpay_signature = async (orderId, paymentId, signature) => {
     }
 }
 
-const verify_online_payment = async (req, res) => {
+const verifyOnlinePayment = async (req, res) => {
     try {
         const { address, payment, paymentId, orderId, signature } = req.body;
         const is_valid_payment = verify_razorpay_signature(paymentId, orderId, signature);
@@ -79,5 +79,5 @@ const verify_online_payment = async (req, res) => {
 module.exports = {
     create_razorpay_order,
     verify_razorpay_signature,
-    verify_online_payment
+    verifyOnlinePayment
 }

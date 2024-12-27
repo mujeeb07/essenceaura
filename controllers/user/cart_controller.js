@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Product = require("../../models/product_model");
 const statusCode = require('../../constance/statusCodes')
 
-const load_shop_cart = async (req, res) => {
+const loadShoppingCart = async (req, res) => {
   try {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
     const cart = await Cart.findOne({ user: user }).populate("item.product");
@@ -14,7 +14,7 @@ const load_shop_cart = async (req, res) => {
   }
 };
 
-const shop_cart = async (req, res) => {
+const shoppingCart = async (req, res) => {
   try {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user)
 
@@ -53,7 +53,7 @@ const shop_cart = async (req, res) => {
 
 
 
-const update_quantity = async (req, res) => {
+const updateItemQuantity = async (req, res) => {
   try {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
 
@@ -104,7 +104,7 @@ const update_quantity = async (req, res) => {
   }
 };
 
-const get_stock = async(req, res) => {
+const checkStockLevel = async(req, res) => {
   try {
     const { productId, volume } = req.params;
     const product = await Product.findById(productId);
@@ -123,7 +123,7 @@ const get_stock = async(req, res) => {
 
 }
 
-const remove_item = async (req, res) => {
+const removeFromCart = async (req, res) => {
   try {
     const cartItem = req.params.id;
     const updatedCart = await Cart.findOneAndUpdate(
@@ -142,9 +142,9 @@ const remove_item = async (req, res) => {
 };
 
 module.exports = {
-  shop_cart,
-  load_shop_cart,
-  update_quantity,
-  remove_item,
-  get_stock
+  shoppingCart,
+  loadShoppingCart,
+  updateItemQuantity,
+  removeFromCart,
+  checkStockLevel
 };

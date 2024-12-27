@@ -7,7 +7,7 @@ const statusCode = require('../../constance/statusCodes')
 
 
 
-const load_list_product = async (req, res) => {
+const loadProductList = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1 ;
     const items_per_page = 5;
@@ -22,7 +22,7 @@ const load_list_product = async (req, res) => {
   }
 };
 
-const load_add_product = async (req, res) => {
+const showAddProductPage = async (req, res) => {
   try {
     const category = await Category.find();
     const brand = await Brand.find();
@@ -32,7 +32,7 @@ const load_add_product = async (req, res) => {
   }
 };
 
-const add_product = async (req, res) => {
+const addNewProduct = async (req, res) => {
 
   console.log('Add product page.')
 
@@ -109,7 +109,7 @@ const add_product = async (req, res) => {
   }
 };
 
-const load_edit_product = async (req, res) => {
+const loadProductEditor = async (req, res) => {
   try {
     const productId = req.params.id;
     const product = await Product.findOne({ _id: productId })
@@ -129,7 +129,7 @@ const load_edit_product = async (req, res) => {
   }
 };
 
-const edit_product = async (req, res) => {
+const updateProduct = async (req, res) => {
   try {
     const productId = req.params.id;
     const { product_name, product_description, brand, category, status } = req.body;
@@ -157,10 +157,6 @@ const edit_product = async (req, res) => {
         product.name = "Low Quantity"
       }
     }
-
-    
-
-    
 
     if ( req.files && req.files.product_card_image && req.files.product_card_image ) {
 
@@ -204,9 +200,9 @@ const edit_product = async (req, res) => {
 };
 
 module.exports = {
-  load_add_product,
-  add_product,
-  load_list_product,
-  load_edit_product,
-  edit_product,
+  showAddProductPage,
+  addNewProduct,
+  loadProductList,
+  loadProductEditor,
+  updateProduct,
 };

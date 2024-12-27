@@ -3,7 +3,7 @@ const Wallet = require('../../models/wallet');
 const Wallet_txns = require('../../models/wallet_transactions');
 const statusCode = require('../../constance/statusCodes')
 
-const load_wallet = async (req, res) => {
+const loadWalletPage = async (req, res) => {
     try {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     let  wallet_data = await Wallet.findOne({ user_id: user });
@@ -32,5 +32,5 @@ const load_wallet = async (req, res) => {
 
 
 module.exports = { 
-    load_wallet 
+    loadWalletPage 
 }

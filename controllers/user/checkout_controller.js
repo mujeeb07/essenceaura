@@ -13,7 +13,7 @@ const Wallet = require("../../models/wallet");
 const Wallet_txns = require("../../models/wallet_transactions");
 const statusCode = require('../../constance/statusCodes')
 
-const checkout = async (req, res) => {
+const loadCheckoutPage = async (req, res) => {
   try {
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const appliedCoupon = req.session.coupon;
@@ -64,7 +64,7 @@ const checkout = async (req, res) => {
   }
 };
 
-const apply_coupon = async (req, res) => {
+const applyDiscountCoupon = async (req, res) => {
   let { selectedCoupon, total   } = req.body;
   
   total = Number(total);
@@ -117,7 +117,7 @@ try {
 
 };
 
-const remove_coupon = async (req, res) => {
+const removeDiscountCoupon = async (req, res) => {
   try {
     let { couponDiscount, finalAmount } = req.body;
     
@@ -135,7 +135,7 @@ const remove_coupon = async (req, res) => {
   }
 }
 
-const post_checkout = async (req, res) => {
+const processCheckout = async (req, res) => {
   try {
     const { payment, address, paymentId, final_amt } = req.body;
     console.log("ertyudfgh",address)
@@ -265,7 +265,7 @@ const post_checkout = async (req, res) => {
   }
 };
 
-const validate_stock = async (req, res) => {
+const checkStockAvailability = async (req, res) => {
   try {
     const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     
@@ -298,7 +298,7 @@ const validate_stock = async (req, res) => {
 };
  
 
-const order_confirmation = async (req, res) => {
+const loadOrderConfirmationPage = async (req, res) => {
   try {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const order = await Order_model.findOne({ user: user }).sort({ createdAt: -1 });
@@ -321,7 +321,7 @@ const order_confirmation = async (req, res) => {
 };
 
 
-const decline_payment = async (req, res) => {
+const cancelPayment = async (req, res) => {
   try {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const { address, finalAmount, isCouponApplied,  couponDiscount } = req.body
@@ -376,11 +376,11 @@ const decline_payment = async (req, res) => {
 
 
 module.exports = {
-  checkout,
-  post_checkout,
-  order_confirmation,
-  apply_coupon,
-  remove_coupon,
-  validate_stock,
-  decline_payment
+  loadCheckoutPage,
+  processCheckout,
+  loadOrderConfirmationPage,
+  applyDiscountCoupon,
+  removeDiscountCoupon,
+  checkStockAvailability,
+  cancelPayment
 };

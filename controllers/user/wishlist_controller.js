@@ -3,7 +3,7 @@ const Products = require('../../models/product_model')
 const mongoose = require('mongoose');
 const statusCode = require('../../constance/statusCodes')
 
-const load_wishlist = async (req, res) => {
+const loadWishlistPage = async (req, res) => {
 
     try {
         const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
@@ -30,7 +30,7 @@ const load_wishlist = async (req, res) => {
     }
 }
 
-const add_to_wishlist = async(req, res) => {
+const addItemToWishlist = async(req, res) => {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
     const { productId }  = req.body
    
@@ -56,7 +56,7 @@ const add_to_wishlist = async(req, res) => {
     }
 }
 
-const wishlist_remove_item = async (req, res) => {
+const removeItemFromWishlist = async (req, res) => {
 
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
     const { productId } = req.body;
@@ -83,7 +83,7 @@ const wishlist_remove_item = async (req, res) => {
 }
 
 module.exports = {
-    load_wishlist,
-    add_to_wishlist,
-    wishlist_remove_item
+    loadWishlistPage,
+    addItemToWishlist,
+    removeItemFromWishlist
 }

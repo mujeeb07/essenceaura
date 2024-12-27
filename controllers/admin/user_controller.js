@@ -7,7 +7,7 @@ const Wallet = require("../../models/wallet")
 const Wallet_txns = require('../../models/wallet_transactions');
 const statusCode = require('../../constance/statusCodes')
 
-const users_list = async (req, res) => {
+const usersList = async (req, res) => {
     try {
       const page = parseInt(req.query.page) || 1 ;
       const users_per_page = 5;
@@ -22,7 +22,7 @@ const users_list = async (req, res) => {
     }
   };
   
-  const block_user = async (req, res) => {
+  const blockUser = async (req, res) => {
     try {
       const { id, is_active } = req.body;
       const user_data = await user.findById(id);
@@ -69,7 +69,7 @@ const users_list = async (req, res) => {
 };
 
 
-const load_order_details = async (req, res) => {
+const getOrderDetails  = async (req, res) => {
   const { id } = req.params;
   try {
     const order_details = await Orders.findOne({_id:id}).populate('user')
@@ -82,7 +82,7 @@ const load_order_details = async (req, res) => {
   }
 }
 
-const order_details = async(req, res) => {
+const orderDetails = async(req, res) => {
   const { orderId, status } = req.body
   try {
     let order_data = await Orders.findByIdAndUpdate(orderId, {order_status: status});
@@ -124,7 +124,7 @@ const returns = async (req, res) => {
   }
 };
 
-const return_action = async(req, res) => {
+const handleReturn  = async(req, res) => {
   try {
 
     const { orderId, itemId, variant, status, quantity, reason } = req.body;
@@ -135,9 +135,6 @@ const return_action = async(req, res) => {
       for (let item of order_data.items) {
         if(String(order_data._id) === orderId){
           price = item.product.variants.price * item.quantity;
-          console.log("Price to be pay back:", price);
-          price = price / 2;
-          console.log("Price reduced to 50% :", price)
           product_name = item.product.name;
           price += price * 0.18;
           let discount = (price * order_data.discount_amount) / order_data.total + order_data.discount_amount
@@ -184,7 +181,7 @@ const return_action = async(req, res) => {
   }
 }
 
-const return_qty_update = async (req, res) => {
+const updateReturnQuantity  = async (req, res) => {
   try {
     const { itemId, variant, quantity } = req.body;
 
@@ -207,12 +204,12 @@ const return_qty_update = async (req, res) => {
 }
 
   module.exports = {
-  users_list,
-  block_user,
+  usersList,
+  blockUser,
   orders,
-  load_order_details,
-  order_details,
+  getOrderDetails ,
+  orderDetails,
   returns,
-  return_action,
-  return_qty_update
+  handleReturn ,
+  updateReturnQuantity 
 }

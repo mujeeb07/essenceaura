@@ -6,7 +6,7 @@ require("dotenv").config();
 const statusCode = require('../../constance/statusCodes')
 
 
-const load_forgot_password = async (req, res) => {
+const loadForgotPasswordPage = async (req, res) => {
   try {
     return res.status(statusCode.SUCCESS).render("user/forgot_password", { message:" Enter Your email" });
   } catch (error) {
@@ -14,7 +14,7 @@ const load_forgot_password = async (req, res) => {
   }
 };
 
-const forgot_password = async(req, res) => {
+const resetPassword = async(req, res) => {
 
   try {
 
@@ -95,7 +95,7 @@ const forgot_password = async(req, res) => {
 }
 
 
-const load_reset_password = async (req, res) => {
+const loadPasswordResetPage = async (req, res) => {
 
   const {token} = req.params
 
@@ -112,7 +112,7 @@ const load_reset_password = async (req, res) => {
 }
 
 
-const reset_password = async(req, res) => {
+const saveNewPassword = async(req, res) => {
 
   try {
     
@@ -156,8 +156,8 @@ const reset_password = async(req, res) => {
 
 
 module.exports = {
-  load_forgot_password,
-  forgot_password,
-  load_reset_password,
-  reset_password
+  loadForgotPasswordPage,
+  resetPassword,
+  loadPasswordResetPage,
+  saveNewPassword
 }

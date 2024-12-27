@@ -16,7 +16,7 @@ const {
   verify_online_payment,
 } = require("../../controllers/user/razorpay_controller");
 
-const load_my_orders = async (req, res) => {
+const showMyOrders = async (req, res) => {
   try {
     const user =
       req.session.user ||
@@ -47,7 +47,7 @@ const load_my_orders = async (req, res) => {
 };
 
 // CANCELLATION CONTROLLERS
-const cancel_order = async (req, res) => {
+const cancelOrder = async (req, res) => {
   const user =
     req.session.user ||
     mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
@@ -103,7 +103,7 @@ const cancel_order = async (req, res) => {
   }
 };
 
-const order_details = async (req, res) => {
+const orderDetails = async (req, res) => {
   try {
     const order_id = req.params.order_id;
     const order = await Orders.findById(order_id);
@@ -121,7 +121,7 @@ const order_details = async (req, res) => {
   }
 };
 
-const cancel_product = async (req, res) => {
+const cancelProduct = async (req, res) => {
   try {
     const user =
       req.session.user ||
@@ -223,7 +223,7 @@ const cancel_product = async (req, res) => {
 };
 
 //RETURN CONTROLLERS
-const return_product = async (req, res) => {
+const returnProduct = async (req, res) => {
   try {
     const user =
       req.session.user ||
@@ -328,7 +328,7 @@ const get_invoice = async (req, res) => {
   }
 };
 
-const orders_retrypayment = async (req, res) => {
+const retryOrderPayment = async (req, res) => {
   try {
     const { orderId } = req.body;
     const order_data = await Orders.findById(orderId);
@@ -341,7 +341,7 @@ const orders_retrypayment = async (req, res) => {
   }
 };
 
-const update_order_status = async (req, res) => {
+const updateOrderStatus = async (req, res) => {
   const { orderId } = req.body;
   try {
     await Orders.findByIdAndUpdate(
@@ -363,12 +363,12 @@ const update_order_status = async (req, res) => {
 };
 
 module.exports = {
-  load_my_orders,
-  cancel_order,
-  order_details,
-  cancel_product,
-  return_product,
+  showMyOrders,
+  cancelOrder,
+  orderDetails,
+  cancelProduct,
+  returnProduct,
   get_invoice,
-  orders_retrypayment,
-  update_order_status,
+  retryOrderPayment,
+  updateOrderStatus,
 };

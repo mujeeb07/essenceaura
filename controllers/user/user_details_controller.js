@@ -3,7 +3,7 @@ const Address = require("../../models/address_model");
 const mongoose = require("mongoose");
 const statusCode = require('../../constance/statusCodes')
 
-const edit_details = async (req, res) => {
+const updateDetails = async (req, res) => {
     try {
         const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
         // console.log("user id: ", user_id)
@@ -14,7 +14,7 @@ const edit_details = async (req, res) => {
     }
 }
 
-const post_edit_details = async (req, res) => {
+const saveEditedDetails = async (req, res) => {
     try {
         const user_id = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
         const {dname, mobile} = req.body;
@@ -29,6 +29,6 @@ const post_edit_details = async (req, res) => {
 }
 
 module.exports = {
-    edit_details,
-    post_edit_details
+    updateDetails,
+    saveEditedDetails
 } 

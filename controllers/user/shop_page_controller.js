@@ -4,7 +4,7 @@ const Brand = require("../../models/brand_model");
 const { options } = require("../../routes/user/user_route");
 const statusCode = require('../../constance/statusCodes')
 
-const load_shop_page = async (req, res) => {
+const loadShopPage = async (req, res) => {
   try {
     const { categoryId, brandId, sortPrice, sortName } = req.query;
 
@@ -47,7 +47,7 @@ const load_shop_page = async (req, res) => {
   }
 };
 
-const filter_items = async (req, res) => {
+const filterProducts = async (req, res) => {
   const { categories, brands, price, nameSort } = req.body;
 
   let filter_query = {};
@@ -86,7 +86,7 @@ const filter_items = async (req, res) => {
   }
 };
 
-const search_filter =  async (req, res) => {
+const filterSearchResults =  async (req, res) => {
   try {
     const serach_query = req.query.q || "";
     const products =  await Product.find({
@@ -100,7 +100,7 @@ const search_filter =  async (req, res) => {
 }
 
 module.exports = {
-  load_shop_page,
-  filter_items,
-  search_filter
+  loadShopPage,
+  filterProducts,
+  filterSearchResults
 };

@@ -9,7 +9,7 @@ const statusCode = require ('../../constance/statusCodes')
 
 
 
-const admin_login = async (req, res) => {
+const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
     const admin_data = await user.findOne({ email: email.trim() });
@@ -21,7 +21,7 @@ const admin_login = async (req, res) => {
       req.session.admin = admin_data._id  
       return res.status(statusCode.SUCCESS).redirect("/admin/dashboard")
     } else {
-      return res.status(statusCode.BAD_REQUEST).render("admin/admin_login", { message: "Enter valid email and password" });
+      return res.status(statusCode.BAD_REQUEST).render("admin/adminLogin", { message: "Enter valid email and password" });
     }
   } catch (error) {
     console.log("admin login error", error)
@@ -29,16 +29,16 @@ const admin_login = async (req, res) => {
   }
 };
 
-const load_admin_login = async (req, res) => {
+const showAdminLogin = async (req, res) => {
   try {
-    return res.status(statusCode.SUCCESS).render("admin/admin_login", { message: "" });
+    return res.status(statusCode.SUCCESS).render("admin/adminLogin", { message: "" });
   } catch (error) {
     console.log("Error while getting the admin login page.", error)
     return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
   }
 };
 
-const admin_logout = async (req, res) => {
+const adminLogout = async (req, res) => {
   try {
     req.session.destroy();
     return res.status(204).redirect("/admin");
@@ -48,7 +48,7 @@ const admin_logout = async (req, res) => {
   }
 }
 
-const admin_dashboard = async (req, res) => {
+const adminDashboard = async (req, res) => {
   try {
   
     const totals = await total_orders.find({}, { total:1, _id:0 });
@@ -106,7 +106,7 @@ const admin_dashboard = async (req, res) => {
             0
         );
 
-    return res.status(statusCode.SUCCESS).render("admin/admin_dashboard", { 
+    return res.status(statusCode.SUCCESS).render("admin/adminDashboard", { 
       revenue ,
       order_count,
       total_products, 
@@ -123,7 +123,7 @@ const admin_dashboard = async (req, res) => {
 };
 
 //Sales Report
-const load_create_sales_report = async (req, res) => {
+const loadSalesReportCreationPage = async (req, res) => {
   try {
     const sales_report_data = await total_orders.find({ order_status: "Delivered" });
 
@@ -135,7 +135,7 @@ const load_create_sales_report = async (req, res) => {
 }
 
 //Sales Report Table
-const sales_report_table = async (req, res) => {
+const salesReportTable = async (req, res) => {
   try {
     const { type, startDate, endDate } = req.query;
     console.log("Query Data:", type, startDate, endDate);
@@ -184,7 +184,7 @@ const sales_report_table = async (req, res) => {
 
 
 // For Diagram //
-const daily_sales_data = async (req, res) => {
+const dailySalesReport = async (req, res) => {
   try {
     const data = await daily_sales();
     return res.status(statusCode.SUCCESS).json(data);
@@ -194,7 +194,7 @@ const daily_sales_data = async (req, res) => {
   }
 };
 
-const weekly_sales_data = async (req, res) => {
+const weeklySalesReport = async (req, res) => {
   try {
     const data = await weekly_sales();
     return res.status(statusCode.SUCCESS).json(data);
@@ -204,7 +204,7 @@ const weekly_sales_data = async (req, res) => {
   }
 };
 
-const monthly_sales_data = async (req, res) => {
+const monthlySalesReport = async (req, res) => {
   try {
     const data = await monthly_sales();
     return res.status(statusCode.SUCCESS).json(data);
@@ -214,7 +214,7 @@ const monthly_sales_data = async (req, res) => {
   }
 };
 
-const yearly_sales_data = async (req, res) => {
+const yearlySalesReport = async (req, res) => {
   try {
     const data = await yearly_sales();
     return res.status(statusCode.SUCCESS).json(data);
@@ -227,14 +227,14 @@ const yearly_sales_data = async (req, res) => {
 // Diagram end //
 
 module.exports = {
-  admin_login,
-  load_admin_login,
-  admin_dashboard,
-  admin_logout,
-  load_create_sales_report,
-  daily_sales_data,
-  weekly_sales_data,
-  monthly_sales_data,
-  yearly_sales_data,
-  sales_report_table
+  adminLogin,
+  showAdminLogin,
+  adminDashboard,
+  adminLogout,
+  loadSalesReportCreationPage,
+  dailySalesReport,
+  weeklySalesReport,
+  monthlySalesReport,
+  yearlySalesReport,
+  salesReportTable
 };

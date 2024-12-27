@@ -2,7 +2,7 @@ const brand = require("../../models/brand_model");
 const { uploadToCloudinary } = require("../../config/cloudinary");
 const statusCode = require('../../constance/statusCodes')
 
-const load_brands = async (req, res) => {
+const getBrands  = async (req, res) => {
   try {
     const brands = await brand.find({ is_deleted: false });
 
@@ -12,9 +12,9 @@ const load_brands = async (req, res) => {
   }
 };
 
-const load_add_new_brand = async (req, res) => {
+const loadBrandCreation  = async (req, res) => {
   try {
-    return res.status(statusCode.SUCCESS).render("admin/add_new_brand");
+    return res.status(statusCode.SUCCESS).render("admin/createBrand ");
   } catch (err) {
     res
       .status(statusCode.INTERNAL_SERVER_ERROR)
@@ -22,7 +22,7 @@ const load_add_new_brand = async (req, res) => {
   }
 };
 
-const add_new_brand = async (req, res) => {
+const createBrand  = async (req, res) => {
   try {
     const { name, description } = req.body;
 
@@ -45,18 +45,18 @@ const add_new_brand = async (req, res) => {
   }
 };
 
-const load_edit_brand = async (req, res) => {
+const loadBrandEditor = async (req, res) => {
   try {
     const brand_id = req.params.id;
     const brand_data = await brand.findOne({ _id: brand_id });
 
-    res.status(statusCode.SUCCESS).render("admin/edit_brand", { brand: brand_data });
+    res.status(statusCode.SUCCESS).render("admin/updateBrand ", { brand: brand_data });
   } catch (error) {
     res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to edit brand" });
   }
 };
 
-const edit_brand = async (req, res) => {
+const updateBrand  = async (req, res) => {
   try {
     const { name, description, status } = req.body;
     const { id } = req.params;
@@ -75,9 +75,9 @@ const edit_brand = async (req, res) => {
 };
 
 module.exports = {
-  load_brands,
-  load_add_new_brand,
-  add_new_brand,
-  load_edit_brand,
-  edit_brand,
+  getBrands ,
+  loadBrandCreation ,
+  createBrand ,
+  loadBrandEditor,
+  updateBrand ,
 };

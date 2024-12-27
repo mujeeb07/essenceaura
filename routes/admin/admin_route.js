@@ -9,71 +9,73 @@ const coupon_controller = require('../../controllers/admin/coupon_controller');
 const offer_controller = require("../../controllers/admin/offer_controller");
 const admin_auth = require("../../middleware/admin_auth");
 
-// Admin.
-admin_route.get("/", admin_controller.load_admin_login);
-admin_route.post("/", admin_controller.admin_login);
-admin_route.get('/dashboard', admin_auth, admin_controller.admin_dashboard);
-admin_route.get("/logout", admin_controller.admin_logout);
+// ADMIN_CONTROLLERS
+//admin
+admin_route.get("/", admin_controller.showAdminLogin);
+admin_route.post("/", admin_controller.adminLogin);
+admin_route.get('/dashboard', admin_auth, admin_controller.adminDashboard);
+admin_route.get("/logout", admin_controller.adminLogout);
+//Sales report
+admin_route.get('/create_sales_report', admin_auth, admin_controller.loadSalesReportCreationPage);
+admin_route.get('/sales_report_table', admin_auth, admin_controller.salesReportTable);
+//Diagram 
+admin_route.get('/daily_sales', admin_auth, admin_controller.dailySalesReport);
+admin_route.get('/weekly_sales', admin_auth, admin_controller.weeklySalesReport);
+admin_route.get('/monthly_sales', admin_auth, admin_controller.monthlySalesReport);
+admin_route.get('/yearly_sales', admin_auth, admin_controller.yearlySalesReport);
 
+
+//USER_CONTROLLERS
 //users
-admin_route.get('/users', admin_auth, user_controller.users_list);
-admin_route.post("/block_user", admin_auth, user_controller.block_user);
-
+admin_route.get('/users', admin_auth, user_controller.usersList);
+admin_route.post("/block_user", admin_auth, user_controller.blockUser);
 //Order
 admin_route.get("/orders", admin_auth, user_controller.orders);
-admin_route.get("/order_details/:id", admin_auth, user_controller.load_order_details);
-admin_route.post("/update_order_status", admin_auth, user_controller.order_details);
-
+admin_route.get("/order_details/:id", admin_auth, user_controller.getOrderDetails );
+admin_route.post("/update_order_status", admin_auth, user_controller.orderDetails);
 //Return Management
 admin_route.get("/return_management", admin_auth, user_controller.returns);
-admin_route.post("/returns/update", admin_auth, user_controller.return_action);
-admin_route.post("/return_qty_update", admin_auth, user_controller.return_qty_update);
+admin_route.post("/returns/update", admin_auth, user_controller.handleReturn );
+admin_route.post("/return_qty_update", admin_auth, user_controller.updateReturnQuantity );
 
-// Brand
-admin_route.get('/brands', admin_auth, brand_controller.load_brands);
-admin_route.get('/add_new_brand', admin_auth, brand_controller.load_add_new_brand);
-admin_route.post('/add_new_brand', admin_auth, brand_controller.add_new_brand);
-admin_route.get('/edit_brand/:id', admin_auth, brand_controller.load_edit_brand);
-admin_route.post('/edit_brand/:id', admin_auth, brand_controller.edit_brand);
 
-// Product
-admin_route.get('/load_add_product', admin_auth, product_controller.load_add_product);
-admin_route.post('/add_product', admin_auth, product_controller.add_product);
-admin_route.get('/admin_list_product', admin_auth, product_controller.load_list_product);
-admin_route.get('/edit_product/:id', admin_auth, product_controller.load_edit_product);
-admin_route.post('/edit_product/:id', admin_auth, product_controller.edit_product);
+// BRAND_CONTROLLERS
+admin_route.get('/brands', admin_auth, brand_controller.getBrands );
+admin_route.get('/add_new_brand', admin_auth, brand_controller.loadBrandCreation );
+admin_route.post('/add_new_brand', admin_auth, brand_controller.createBrand );
+admin_route.get('/edit_brand/:id', admin_auth, brand_controller.loadBrandEditor );
+admin_route.post('/edit_brand/:id', admin_auth, brand_controller.updateBrand );
 
-// Category
+
+
+// PRODUCT_CONTRIOLLERS
+admin_route.get('/load_add_product', admin_auth, product_controller.showAddProductPage);
+admin_route.post('/add_product', admin_auth, product_controller.addNewProduct);
+admin_route.get('/admin_list_product', admin_auth, product_controller.loadProductList);
+admin_route.get('/edit_product/:id', admin_auth, product_controller.loadProductEditor);
+admin_route.post('/edit_product/:id', admin_auth, product_controller.updateProduct);
+
+// CATEGORY_CONTROLLERS
 admin_route.get("/categories", admin_auth, category_controller.categories);
-admin_route.post("/add_category", admin_auth, category_controller.add_category);
-admin_route.get('/get_category', admin_auth, category_controller.get_categories);
-admin_route.get('/get_category/:id', admin_auth, category_controller.get_category_by_id);
-admin_route.put('/update_category/:id', admin_auth, category_controller.update_category);
-admin_route.put('/soft_delete_category/:id', admin_auth, category_controller.soft_delete_category);
+admin_route.post("/add_category", admin_auth, category_controller.createCategory);
+admin_route.get('/get_category', admin_auth, category_controller.loadCategories);
+admin_route.get('/get_category/:id', admin_auth, category_controller.fetchCategoryById);
+admin_route.put('/update_category/:id', admin_auth, category_controller.editCategory);
+admin_route.put('/soft_delete_category/:id', admin_auth, category_controller.disableCategory);
 
-// Coupon
-admin_route.get('/coupon_management', admin_auth, coupon_controller.load_coupon_management);
-admin_route.get('/create_coupon', admin_auth, coupon_controller.load_coupon_create_page);
-admin_route.post('/activation', admin_auth, coupon_controller.activation_coupon);
-admin_route.post('/create_coupon', admin_auth, coupon_controller.coupon_create_page);
-admin_route.get('/edit_coupon', admin_auth, coupon_controller.edit_coupon);
-admin_route.post('/edit_coupon', admin_auth, coupon_controller.update_coupon);
+// COUPON_CONTROLLERS
+admin_route.get('/coupon_management', admin_auth, coupon_controller.loadCouponDashboard);
+admin_route.get('/create_coupon', admin_auth, coupon_controller.loadCreateCoupon);
+admin_route.post('/activation', admin_auth, coupon_controller.activateCoupon);
+admin_route.post('/create_coupon', admin_auth, coupon_controller.createCouponPage);
+admin_route.get('/edit_coupon', admin_auth, coupon_controller.updateCoupon);
+admin_route.post('/edit_coupon', admin_auth, coupon_controller.applyCouponUpdate);
 
-// Offer management
-admin_route.get('/offer_management',  admin_auth, offer_controller.load_offer_management);
-admin_route.get('/create_offer', admin_auth, offer_controller.load_create_offer);
-admin_route.post('/create_offer', admin_auth, offer_controller.create_offer);
-admin_route.get('/edit_offer/:id', admin_auth, offer_controller.load_edit_offer);
-admin_route.post('/edit_offer', admin_auth, offer_controller.update_offer);
-
-//Sales report
-admin_route.get('/create_sales_report', admin_auth, admin_controller.load_create_sales_report);
-admin_route.get('/sales_report_table', admin_auth, admin_controller.sales_report_table)
-
-//Diagram 
-admin_route.get('/daily_sales', admin_auth, admin_controller.daily_sales_data)
-admin_route.get('/weekly_sales', admin_auth, admin_controller.weekly_sales_data)
-admin_route.get('/monthly_sales', admin_auth, admin_controller.monthly_sales_data)
-admin_route.get('/yearly_sales', admin_auth, admin_controller.yearly_sales_data)
+// OFFER_CONTROLLERS
+admin_route.get('/offer_management',  admin_auth, offer_controller.loadOfferDashboard);
+admin_route.get('/create_offer', admin_auth, offer_controller.loadOfferCreationPage);
+admin_route.post('/create_offer', admin_auth, offer_controller.createNewOffer);
+admin_route.get('/edit_offer/:id', admin_auth, offer_controller.loadOfferEditPage);
+admin_route.post('/edit_offer', admin_auth, offer_controller.applyOfferUpdate);
 
 module.exports = admin_route;
