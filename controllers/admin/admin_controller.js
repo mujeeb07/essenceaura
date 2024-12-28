@@ -21,7 +21,7 @@ const adminLogin = async (req, res) => {
       req.session.admin = admin_data._id  
       return res.status(statusCode.SUCCESS).redirect("/admin/dashboard")
     } else {
-      return res.status(statusCode.BAD_REQUEST).render("admin/adminLogin", { message: "Enter valid email and password" });
+      return res.status(statusCode.BAD_REQUEST).render("admin/admin_login", { message: "Enter valid email and password" });
     }
   } catch (error) {
     console.log("admin login error", error)
@@ -31,7 +31,7 @@ const adminLogin = async (req, res) => {
 
 const showAdminLogin = async (req, res) => {
   try {
-    return res.status(statusCode.SUCCESS).render("admin/adminLogin", { message: "" });
+    return res.status(statusCode.SUCCESS).render("admin/admin_login", { message: "" });
   } catch (error) {
     console.log("Error while getting the admin login page.", error)
     return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
@@ -106,7 +106,7 @@ const adminDashboard = async (req, res) => {
             0
         );
 
-    return res.status(statusCode.SUCCESS).render("admin/adminDashboard", { 
+    return res.status(statusCode.SUCCESS).render("admin/admin_dashboard", { 
       revenue ,
       order_count,
       total_products, 

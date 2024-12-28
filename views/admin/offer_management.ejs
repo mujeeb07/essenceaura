@@ -73,10 +73,16 @@
                                                 </a>
                                             </td>
                                             <td>
-                                                <span class="badge rounded-pill <%= offer.product_offer.offer_status ? 'alert-success' : 'alert-danger' %>">
-                                                    <%= offer.product_offer.offer_status ? 'Active' : 'Expired' %>
-                                                </span>
-                                            </td>
+                                                <% if (new Date(offer.product_offer.offer_expire_date) < new Date()) { %>
+                                                    <span class="badge rounded-pill alert-danger">
+                                                        Expired
+                                                    </span>
+                                                <% } else { %>
+                                                    <span class="badge rounded-pill alert-success">
+                                                        Active
+                                                    </span>
+                                                <% } %>
+                                            </td>                                            
                                         </tr>
                                     <% }) %>
                                 </tbody>

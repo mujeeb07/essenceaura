@@ -237,11 +237,26 @@ const returnProduct = async (req, res) => {
     }
 
     let product_found = false;
-    let product_name;
-    let date = new Date();
-    let ordered_date = new Date(order_data.date);
+    let return_period = 15; // DAYS
 
-    if (ordered_date - date)
+    function isOrderWithinDays(order, period){
+      const today = new Date();
+      const order_date = new Date(order.createdAt);
+
+      const differenceInTime = today - order_date;
+
+      const differecneInDays = differenceInTime / (1000 * 60 * 60 * 24);
+
+      
+      return  differecneInDays < period;
+    }
+
+      const withinPeriod = isOrderWithinDays(order_data, return_period);
+
+      if(withinPeriod === false){
+          return res.status(statusCode.BAD_REQUEST).json({message: "Return could not be initiated due to return period (15 Days) exceeded.", success:false})
+      } 
+
       order_data.items.forEach((item) => {
         if (
           item.product._id.toString() === product_id &&
@@ -255,9 +270,7 @@ const returnProduct = async (req, res) => {
       });
 
     if (!product_found) {
-      return res
-        .status(statusCode.NOT_FOUND)
-        .json({ message: "Product not found in the order" });
+      return res.status(statusCode.NOT_FOUND).json({ message: "Product not found in the order" });
     }
 
     const allCancelled = order_data.items.every((i) => {
