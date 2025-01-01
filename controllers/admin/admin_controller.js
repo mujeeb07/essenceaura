@@ -226,6 +226,9 @@ const yearlySalesReport = async (req, res) => {
 
 // Diagram end //
 
+
+
+
 module.exports = {
   adminLogin,
   showAdminLogin,
@@ -236,5 +239,6 @@ module.exports = {
   weeklySalesReport,
   monthlySalesReport,
   yearlySalesReport,
-  salesReportTable
+  salesReportTable,
+
 };
