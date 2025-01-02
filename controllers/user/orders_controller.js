@@ -18,9 +18,7 @@ const {
 
 const showMyOrders = async (req, res) => {
   try {
-    const user =
-      req.session.user ||
-      mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const limit = 6;
     const page = parseInt(req.query.page) || 1;
     const skip = (page - 1) * limit;
@@ -37,6 +35,7 @@ const showMyOrders = async (req, res) => {
       current_page: page,
       total_pages,
       razorpay_key,
+      user: true
     });
   } catch (error) {
     console.log("error while renders the my orders page", error);
@@ -110,9 +109,7 @@ const orderDetails = async (req, res) => {
 
     if (!order) console.log("Couldn't find the order details");
 
-    return res
-      .status(statusCode.SUCCESS)
-      .render("user/order_details", { order });
+    return res.status(statusCode.SUCCESS).render("user/order_details", { order, user: true });
   } catch (error) {
     console.log("Error while getting order details.", error);
     return res
@@ -330,9 +327,7 @@ const get_invoice = async (req, res) => {
       });
     }
 
-    return res
-      .status(statusCode.SUCCESS)
-      .render("user/invoice", { cartItems, order });
+    return res.status(statusCode.SUCCESS).render("user/invoice", { cartItems, order, user: true });
   } catch (error) {
     console.log("Error while generating Invoice pdf", error);
     return res

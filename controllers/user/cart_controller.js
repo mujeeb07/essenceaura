@@ -7,7 +7,7 @@ const loadShoppingCart = async (req, res) => {
   try {
     const user = req.session.user || mongoose.Types.ObjectId.createFromHexString (req.session.passport.user);
     const cart = await Cart.findOne({ user: user }).populate("item.product");
-    return res.render("user/shop_cart", { cart });
+    return res.render("user/shop_cart", { cart, user:true });
   } catch (error) {
     console.error("Error fetching cart:", error);
     return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Unable to fetch cart details" });

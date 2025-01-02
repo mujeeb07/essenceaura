@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 require("dotenv").config();
 const bcrypt = require("bcrypt");
 const mongoose = require("mongoose");
+const ObjectId = require('mongoose').Types.ObjectId;
 const generate_referral_code = require("../../utils/generate_referral_code");
 const create_mail_options = require("../../utils/create_email");
 const Wallet = require("../../models/wallet");
@@ -285,13 +286,14 @@ const loadHomePage = async (req, res) => {
     const products_list = await Product.find({ is_blocked: false })
       .populate("brand")
       .populate("category");
-
-    return res.render("user/user_landing", { products_list, success_message });
+    let user = false
+    if(req.session.user || req.session?.passport?.user){
+      user = true
+    }
+    return res.render("user/user_landing", { products_list, success_message, user });
   } catch (error) {
     console.log("error while rendering home page.", error);
-    return res
-      .status(500)
-      .json({ message: "Error while rendering home page." });
+    return res.status(500).json({ message: "Error while rendering home page." });
   }
 };
 
@@ -367,7 +369,7 @@ const logoutUser = async (req, res) => {
   try {
     req.session.destroy() ||
       mongoose.Types.ObjectId.createFromHexString(
-        req.session.passport.user
+        req.session?.passport?.user
       ).destroy();
     return res.status(204).redirect("/login");
   } catch (error) {
@@ -431,7 +433,7 @@ const userAddressDetails = async (req, res) => {
 
     const user_id =
       req.session.user ||
-      mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+      req.session?.passport?.user;
     const address_data = new Address({
       user: user_id,
       name: full_name,
@@ -468,7 +470,7 @@ const deleteUserAddress = async (req, res) => {
   const addressId = req.params.id;
   const user_id =
     req.session.user ||
-    mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    req.session?.passport?.user;
   try {
     await Address.findByIdAndDelete(addressId);
     await user.updateOne(
@@ -488,9 +490,7 @@ const deleteUserAddress = async (req, res) => {
 
 const userProfileDetails = async (req, res) => {
   try {
-    const user_id =
-      req.session.user ||
-      mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    const user_id = req.session.user || req.session?.passport?.user;
     const id = await user.findById({ _id: user_id });
     const order = await orders.find({ user: user_id });
     const addresses = await Address.find({ user: user_id });
@@ -498,6 +498,7 @@ const userProfileDetails = async (req, res) => {
       addresses: addresses,
       id,
       orders: order,
+      user: true
     });
   } catch (error) {
     console.log("error while in user profile", error.message);
@@ -511,7 +512,7 @@ const loadEditAddressPage = async (req, res) => {
     const address = await Address.findOne({ _id: address_id });
     return res
       .status(statusCode.SUCCESS)
-      .render("user/edit_address", { address });
+      .render("user/edit_address", { address, user: true });
   } catch (error) {
     return res
       .status(500)

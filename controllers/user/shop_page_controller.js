@@ -1,3 +1,5 @@
+const mongoose = require("mongoose");
+const ObjectId = require("mongoose").Types.ObjectId;
 const Product = require("../../models/product_model");
 const Category = require("../../models/category_model");
 const Brand = require("../../models/brand_model");
@@ -7,6 +9,10 @@ const statusCode = require('../../constance/statusCodes')
 const loadShopPage = async (req, res) => {
   try {
     const { categoryId, brandId, sortPrice, sortName } = req.query;
+    let user = false
+    if(req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user)){
+      user = true
+    }
 
     let filter = { is_blocked: false, "variants.stock": { $gte: 1 } };
     let sort = {};
@@ -38,6 +44,7 @@ const loadShopPage = async (req, res) => {
       brands,
       selectedCategory: categoryId,
       selectedBrand: brandId,
+      user
     });
   } catch (error) {
     console.error("Error loading shop page:", error);

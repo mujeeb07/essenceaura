@@ -55,7 +55,8 @@ const loadCheckoutPage = async (req, res) => {
       appliedCoupon,
       userData,
       razorpay_key,
-      address_message
+      address_message,
+      user: true
     });
 
   } catch (error) {
@@ -313,7 +314,7 @@ const loadOrderConfirmationPage = async (req, res) => {
       req.session.coupon = null;
     }
 
-    return res.status(statusCode.SUCCESS).render('user/order_confirmation', { order, estimated_delivery, cartItems: order.items, coupon_discount_amount: order.items.discount_amount });
+    return res.status(statusCode.SUCCESS).render('user/order_confirmation', { order, estimated_delivery, cartItems: order.items, coupon_discount_amount: order.items.discount_amount, user: true });
   } catch (error) {
     console.error('Confirmation Error: ', error);
     return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while rendering the order confirmation page.", error });

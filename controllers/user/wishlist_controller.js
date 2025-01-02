@@ -20,7 +20,7 @@ const loadWishlistPage = async (req, res) => {
         const product_ids = user_wishlist.product_ids || []
         const product_data = await Products.find({ _id: product_ids }).populate('category')
 
-        return res.status(statusCode.SUCCESS).render('user/wishlist.ejs', { user_wishlist,product_data } );
+        return res.status(statusCode.SUCCESS).render('user/wishlist.ejs', { user_wishlist,product_data, user } );
         
     } catch (error) {
 

@@ -9,7 +9,7 @@ const loadWalletPage = async (req, res) => {
     let  wallet_data = await Wallet.findOne({ user_id: user });
 
     if(!wallet_data){
-        return res.status(statusCode.NOT_FOUND).render("user/wallet", { wallet_txns: [], total_pages: 0, wallet_balance: 0 })
+        return res.status(statusCode.NOT_FOUND).render("user/wallet", { wallet_txns: [], total_pages: 0, wallet_balance: 0, user })
     }
     const wallet_id = wallet_data._id;
     const wallet_balance = wallet_data.balance.toFixed(2);
@@ -22,7 +22,7 @@ const loadWalletPage = async (req, res) => {
 
     const wallet_txns = await Wallet_txns.find({ wallet_id }).sort({ _id:-1 }).skip((page - 1) * data_per_page).limit(data_per_page)
 
-    return res.status(statusCode.SUCCESS).render("user/wallet", { wallet_txns, total_pages, wallet_balance, current_page: page });
+    return res.status(statusCode.SUCCESS).render("user/wallet", { wallet_txns, total_pages, wallet_balance, current_page: page, user });
 
     } catch (error) {
         console.log("Error while rendering the wallet page.", error);

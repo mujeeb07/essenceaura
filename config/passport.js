@@ -31,7 +31,6 @@ passport.use(new google_strategy({
                 await user.save();
             }
             req.session.user = user._id;
-            // console.log("helfsdfhsdfklsf", req.session.user );
             req.session.userType = 'google'
             return cb(null, user)
         } catch (error) {
