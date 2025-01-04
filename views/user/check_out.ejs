@@ -105,9 +105,8 @@
                             <div class="card-header">
                                 <div class="form-check">
                                     <input class="form-check-input address-checkbox" type="radio" name="selectedAddress" id="address<%= index %>" value="<%= address._id %>">
-                                    <label class="form-check-label" for="address<%= index %>">
-                                        <h5 class="mb-0">Billing Address <%= index + 1 %></h5>
-                                    </label>
+                                    <label class="form-check-label" for="address<%= index %>"><h5 class="mb-0">Billing Address <%= index + 1 %></h5></label>
+                                    <input type="hidden" name="sourcePage" value="checkout">
                                 </div>
                             </div>
                             <div class="card-body">
@@ -118,7 +117,7 @@
                                     <%= address.city %>, <%= address.postal_code %>
                                 </address>
                                 <div style="display: flex; gap: 10px;">
-                                    <a href="/edit_address/<%= address._id %>" class="btn-small">Edit</a>
+                                    <a href="/edit_address/<%= address._id %>?redirect_to=checkout" class="btn-small">Edit</a>
                                     <a class="btn-small text-danger" id="delete_btn_<%= address._id %>" address_data="<%= address._id %>">Delete</a>
                                 </div>
                             </div>

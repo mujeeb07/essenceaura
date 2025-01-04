@@ -39,9 +39,7 @@ const showMyOrders = async (req, res) => {
     });
   } catch (error) {
     console.log("error while renders the my orders page", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ messge: "error while renders the my orders page.", error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -96,9 +94,7 @@ const cancelOrder = async (req, res) => {
       .json({ message: "Order Cancelled Successfully", success: true });
   } catch (error) {
     console.log("Something went wrong while cancel order", error);
-    return res.status
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Something went wrong while cancel order", error });
+    return res.status.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -112,9 +108,7 @@ const orderDetails = async (req, res) => {
     return res.status(statusCode.SUCCESS).render("user/order_details", { order, user: true });
   } catch (error) {
     console.log("Error while getting order details.", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Error while getting order details." });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -210,21 +204,17 @@ const cancelProduct = async (req, res) => {
       await new_wallet_txn.save();
     }
 
-    return res
-      .status(statusCode.SUCCESS)
-      .json({ message: "Product cancelled successfully", success: true });
+    return res.status(statusCode.SUCCESS).json({ message: "Product cancelled successfully", success: true });
   } catch (error) {
     console.log("Error while cancel product", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while cancel product." });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
 //RETURN CONTROLLERS
 const returnProduct = async (req, res) => {
   try {
-    const user =
-      req.session.user ||
-      mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
+    const user = req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user);
     const { order_id, product_id, product_variant, reason } = req.body;
     const order_data = await Orders.findById(order_id);
     if (!order_data) {
@@ -297,9 +287,7 @@ const returnProduct = async (req, res) => {
     });
   } catch (error) {
     console.log("Error while return order.", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Error while return order.", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -311,9 +299,7 @@ const get_invoice = async (req, res) => {
     const order = await Orders.findById(order_id).populate("items");
 
     if (!order) {
-      return res
-        .status(statusCode.NOT_FOUND)
-        .json({ message: "Order not found.", success: false });
+      return res.status(statusCode.NOT_FOUND).json({ message: "Order not found.", success: false });
     }
 
     let cartItems = [];
@@ -330,9 +316,7 @@ const get_invoice = async (req, res) => {
     return res.status(statusCode.SUCCESS).render("user/invoice", { cartItems, order, user: true });
   } catch (error) {
     console.log("Error while generating Invoice pdf", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Error while generating Invoice pdf", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -345,7 +329,7 @@ const retryOrderPayment = async (req, res) => {
     return res.status(statusCode.SUCCESS).json({ success: true, order_data });
   } catch (error) {
     console.log("error retry payment", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -359,14 +343,10 @@ const updateOrderStatus = async (req, res) => {
         order_status: "Pending",
       }
     );
-    return res
-      .status(statusCode.SUCCESS)
-      .json({ success: true, message: "order status updated" });
+    return res.status(statusCode.SUCCESS).json({ success: true, message: "order status updated" });
   } catch (error) {
     console.log("Error while updatign order status", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ success: false, message: "Error while updatign order status" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 

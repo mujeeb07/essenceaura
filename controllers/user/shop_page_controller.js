@@ -10,7 +10,7 @@ const loadShopPage = async (req, res) => {
   try {
     const { categoryId, brandId, sortPrice, sortName } = req.query;
     let user = false
-    if(req.session.user || mongoose.Types.ObjectId.createFromHexString(req.session.passport.user)){
+    if(req.session.user || req.session?.passport?.user){
       user = true
     }
 
@@ -48,9 +48,7 @@ const loadShopPage = async (req, res) => {
     });
   } catch (error) {
     console.error("Error loading shop page:", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Something went wrong with the shop page" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -89,7 +87,7 @@ const filterProducts = async (req, res) => {
     return res.status(statusCode.SUCCESS).json({ success: true, products: filtered_products });
   } catch (error) {
     console.error("Error filtering products:", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: "Failed to filter products" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -102,7 +100,7 @@ const filterSearchResults =  async (req, res) => {
     return res.status(statusCode.SUCCESS).json({ success: true, products: products });
   } catch (error) {
     console.log("Error while search products.", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false, error: "Error while search products"});
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 }
 

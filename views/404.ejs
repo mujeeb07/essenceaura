@@ -1,0 +1,46 @@
+<style>
+.not-found-container {
+    text-align: center;
+    padding: 50px;
+    font-family: Arial, sans-serif;
+    color: #333;
+  }
+  
+  .error-code {
+    font-size: 100px;
+    font-weight: bold;
+    color: #088178; /* Highlight with the specified color */
+  }
+  
+  .error-message {
+    font-size: 24px;
+    margin: 20px 0;
+    color: #555;
+  }
+  
+  .back-home-btn {
+    display: inline-block;
+    margin-top: 20px;
+    padding: 10px 20px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #088178; /* Button with the specified color */
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .back-home-btn:hover {
+    background-color: #065d54; /* Slightly darker shade on hover */
+  }
+</style>
+
+<%- include('layouts/user/header.ejs') %>
+
+    <div class="not-found-container">
+        <h1 class="error-code">404</h1>
+        <p class="error-message">Oops! The page you're looking for doesn't exist.</p>
+        <a href="/" class="back-home-btn">Go Back to Home</a>
+    </div>
+
+<%- include('layouts/user/footer.ejs') %>

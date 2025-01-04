@@ -10,7 +10,7 @@ const loadForgotPasswordPage = async (req, res) => {
   try {
     return res.status(statusCode.SUCCESS).render("user/forgot_password", { message:" Enter Your email" });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"Error while load forgot password. " + error.message});
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500');
   }
 };
 
@@ -149,7 +149,7 @@ const saveNewPassword = async(req, res) => {
 
   } catch (error) {
 
-   return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"Error while resetting password." + error.message}); 
+   return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500'); 
 
   }
 }

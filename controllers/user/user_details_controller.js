@@ -10,7 +10,7 @@ const updateDetails = async (req, res) => {
         const user = await User.findOne({ _id:user_id });
         return res.status(statusCode.SUCCESS).render('user/user_profile',user);
     } catch (error) {
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"edit details page error",error})
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
     }
 }
 
@@ -24,7 +24,7 @@ const saveEditedDetails = async (req, res) => {
         }, {new: true});
         return res.status(statusCode.SUCCESS).json({ message: true });
     } catch (error) {
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "error while post from edit profile", error: error.message });
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
     }
 }
 

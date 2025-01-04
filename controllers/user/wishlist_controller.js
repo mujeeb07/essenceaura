@@ -25,7 +25,7 @@ const loadWishlistPage = async (req, res) => {
     } catch (error) {
 
         console.log('Error while rendering the wishlist page');
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:'Error while rendering the wishlist page. ', error } )
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
         
     }
 }
@@ -52,7 +52,7 @@ const addItemToWishlist = async(req, res) => {
         
         return res.status(statusCode.SUCCESS).json({message: "product added to wishlist", success: true})
     } catch (error) {
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"Error while adding product to wishlist", error});
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
     }
 }
 
@@ -73,11 +73,11 @@ const removeItemFromWishlist = async (req, res) => {
             console.log('Product removed successfuly')
             return res.status(statusCode.SUCCESS).json({ message:"Product removed successfuly",success: true });
         }else{
-            return res.status(statusCode.NOT_FOUND).json({message:"Item not found"})
+            return res.status(statusCode.NOT_FOUND).render('../views/404', { user: req.session.user || null });
         }
         
     } catch (error) {
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:"An error occured while removing item from wishlist" });
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
     }
 
 }

@@ -61,7 +61,7 @@ const loadCheckoutPage = async (req, res) => {
 
   } catch (error) {
     console.error("Checkout error:", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "checkout server error", error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -262,7 +262,7 @@ const processCheckout = async (req, res) => {
     return res.status(statusCode.SUCCESS).json({ message: "Order placed successfully", success: true });
   } catch (error) {
     console.error("Checkout error:", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while placing out" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -294,7 +294,7 @@ const checkStockAvailability = async (req, res) => {
     return res.json({ items: itemsWithStock });
   } catch (error) {
     console.error('Error validating stock:', error);
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: 'Internal server error.' });
+    res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
  
@@ -317,7 +317,7 @@ const loadOrderConfirmationPage = async (req, res) => {
     return res.status(statusCode.SUCCESS).render('user/order_confirmation', { order, estimated_delivery, cartItems: order.items, coupon_discount_amount: order.items.discount_amount, user: true });
   } catch (error) {
     console.error('Confirmation Error: ', error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while rendering the order confirmation page.", error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 
@@ -371,7 +371,7 @@ const cancelPayment = async (req, res) => {
     return res.status(statusCode.SUCCESS).json({ message: 'Order payment failed. Cart cleared.' });
   } catch (error) {
       console.error('Error in decline payment:', error);
-      return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: 'Failed to process decline payment request.' });
+      return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
   }
 };
 

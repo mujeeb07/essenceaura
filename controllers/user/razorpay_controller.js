@@ -71,7 +71,7 @@ const verifyOnlinePayment = async (req, res) => {
         }
     } catch (error) {
         copnsole.log("Error while operating online payment.", error.message);
-        return res(statusCode.INTERNAL_SERVER_ERROR).json({ success: false, message:"Error verify online payment" });
+        return res(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
     }
 }
 

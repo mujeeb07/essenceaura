@@ -80,35 +80,35 @@
                                             <div class="col-lg-12">
                                                 <% if (!addresses || addresses.length===0) { %>
                                                     <p>No addresses added yet.</p>
-                                                    <% } else { %>
-                                                        <% addresses.forEach((address, index)=> { %>
-                                                            <div class="card mb-15 mb-sm-0">
-                                                                <div class="card-header">
-                                                                    <h5 class="mb-0">Address <%= index + 1 %>
-                                                                    </h5>
-                                                                </div>
-                                                                <div class="card-body">
-                                                                    <address>
-                                                                        <%= address.name %><br>
-                                                                            <%= address.address %><br>
-                                                                                <%= address.state %><br>
-                                                                                    <%= address.city %>, <%=
-                                                                                            address.postal_code %><br>
-                                                                                            <%= address.mobile %>
-                                                                    </address>
-                                                                    <div style="display: flex; gap: 10px;">
-                                                                        <a href="/edit_address/<%= address._id %>"
-                                                                            id="edit_btn_<%= address._id %>"
-                                                                            address_data="<%= address._id %>"
-                                                                            class="btn-small">Edit</a>
-                                                                        <a class="btn-small text-danger"
-                                                                            id="delete_btn_<%= address._id %>"
-                                                                            address_data="<%= address._id %>">Delete</a>
-                                                                    </div>
+                                                <% } else { %>
+                                                    <% addresses.forEach((address, index)=> { %>
+                                                        <div class="card mb-15 mb-sm-0">
+                                                            <div class="card-header">
+                                                                <h5 class="mb-0">Address <%= index + 1 %>
+                                                                </h5>
+                                                            </div>
+                                                            <div class="card-body">
+                                                                <address>
+                                                                    <%= address.name %><br>
+                                                                        <%= address.address %><br>
+                                                                            <%= address.state %><br>
+                                                                                <%= address.city %>, <%=
+                                                                                        address.postal_code %><br>
+                                                                                        <%= address.mobile %>
+                                                                </address>
+                                                                <div style="display: flex; gap: 10px;">
+                                                                    <a href="/edit_address/<%= address._id %>"
+                                                                        id="edit_btn_<%= address._id %>"
+                                                                        address_data="<%= address._id %>"
+                                                                        class="btn-small">Edit</a>
+                                                                    <a class="btn-small text-danger"
+                                                                        id="delete_btn_<%= address._id %>"
+                                                                        address_data="<%= address._id %>">Delete</a>
                                                                 </div>
                                                             </div>
-                                                            <% }) %>
-                                                                <% } %>
+                                                        </div>
+                                                    <% }) %>
+                                                <% } %>
                                             </div>
 
                                             <!-- Modal Structure -->
@@ -128,68 +128,37 @@
                                                                     <!-- Left side of the form -->
                                                                     <div class="col-md-6">
                                                                         <div class="mb-3">
-                                                                            <label for="full-name"
-                                                                                class="form-label">Full name (First and
-                                                                                Last name)</label>
-                                                                            <input type="text" class="form-control"
-                                                                                id="full-name" name="full_name"
-                                                                                placeholder="Full Name">
-                                                                            <div class="invalid-feedback"
-                                                                                id="nameError">Please enter your full
-                                                                                name.</div>
+                                                                            <label for="full-name" class="form-label">Full name (First and Last name)</label>
+                                                                            <input type="text" class="form-control" id="full-name" name="full_name" placeholder="Full Name">
+                                                                            <div class="invalid-feedback" id="nameError">Please enter your full name.</div>
                                                                         </div>
                                                                         <div class="mb-3">
-                                                                            <label for="mobile-number"
-                                                                                class="form-label">Mobile number</label>
-                                                                            <input type="tel" class="form-control"
-                                                                                id="mobile-number" name="mobile_number"
-                                                                                placeholder="+1 (234) 567-8900">
-                                                                            <div class="invalid-feedback"
-                                                                                id="mobileError">Please enter a valid
-                                                                                mobile number.</div>
+                                                                            <label for="mobile-number" class="form-label">Mobile number</label>
+                                                                            <input type="tel" class="form-control" id="mobile-number" name="mobile_number" placeholder="+1 (234) 567-8900">
+                                                                            <div class="invalid-feedback" id="mobileError">Please enter a valid mobile number.</div>
                                                                         </div>
                                                                         <div class="mb-3">
-                                                                            <label for="pincode"
-                                                                                class="form-label">Pincode</label>
-                                                                            <input type="text" class="form-control"
-                                                                                id="pincode" name="pincode"
-                                                                                placeholder="6 digits PIN code">
-                                                                            <div class="invalid-feedback"
-                                                                                id="pincodeError">Please enter a valid
-                                                                                6-digit PIN code.</div>
+                                                                            <label for="pincode" class="form-label">Pincode</label>
+                                                                            <input type="text" class="form-control" id="pincode" name="pincode" placeholder="6 digits PIN code">
+                                                                            <div class="invalid-feedback" id="pincodeError">Please enter a valid 6-digit PIN code.</div>
                                                                         </div>
                                                                     </div>
                                                                     <!-- Right side of the form -->
                                                                     <div class="col-md-6">
                                                                         <div class="mb-3">
-                                                                            <label for="address"
-                                                                                class="form-label">Address</label>
-                                                                            <input type="text" class="form-control"
-                                                                                id="addressInput" name="address"
-                                                                                placeholder="Address">
-                                                                            <div class="invalid-feedback"
-                                                                                id="addressError">Please enter your
-                                                                                address.</div>
+                                                                            <label for="address" class="form-label">Address</label>
+                                                                            <input type="text" class="form-control" id="addressInput" name="address" placeholder="Address">
+                                                                            <div class="invalid-feedback" id="addressError">Please enter your address.</div>
                                                                         </div>
                                                                         <div class="mb-3">
-                                                                            <label for="landmark"
-                                                                                class="form-label">Landmark</label>
-                                                                            <input type="text" class="form-control"
-                                                                                id="landmark" name="landmark"
-                                                                                placeholder="Landmark">
-                                                                            <div class="invalid-feedback"
-                                                                                id="landmarkError">Please provide a
-                                                                                landmark.</div>
+                                                                            <label for="landmark" class="form-label">Landmark</label>
+                                                                            <input type="text" class="form-control" id="landmark" name="landmark" placeholder="Landmark">
+                                                                            <div class="invalid-feedback" id="landmarkError">Please provide a landmark.</div>
                                                                         </div>
                                                                         <div class="mb-3">
-                                                                            <label for="town-city"
-                                                                                class="form-label">Town/City</label>
-                                                                            <input type="text" class="form-control"
-                                                                                id="town-city" name="town_city"
-                                                                                placeholder="City">
-                                                                            <div class="invalid-feedback"
-                                                                                id="cityError">Please enter your town or
-                                                                                city.</div>
+                                                                            <label for="town-city" class="form-label">Town/City</label>
+                                                                            <input type="text" class="form-control" id="town-city" name="town_city" placeholder="City">
+                                                                            <div class="invalid-feedback" id="cityError">Please enter your town or city.</div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -197,31 +166,23 @@
                                                                 <div class="row">
                                                                     <!-- Left side -->
                                                                     <div class="col-md-6 mb-3">
-                                                                        <label for="state"
-                                                                            class="form-label">State</label>
-                                                                        <select class="form-select" id="state"
-                                                                            name="state">
+                                                                        <label for="state" class="form-label">State</label>
+                                                                        <select class="form-select" id="state" name="state">
                                                                             <option value="">Choose a state</option>
-                                                                            <option value="Andhra Pradesh">Andhra
-                                                                                Pradesh</option>
-                                                                            <option value="Arunachal Pradesh">Arunachal
-                                                                                Pradesh</option>
+                                                                            <option value="Andhra Pradesh">Andhra Pradesh</option>
+                                                                            <option value="Arunachal Pradesh">Arunachal Pradesh</option>
                                                                             <option value="Assam">Assam</option>
                                                                             <option value="Bihar">Bihar</option>
-                                                                            <option value="Chhattisgarh">Chhattisgarh
-                                                                            </option>
+                                                                            <option value="Chhattisgarh">Chhattisgarh</option>
                                                                             <option value="Goa">Goa</option>
                                                                             <option value="Gujarat">Gujarat</option>
                                                                             <option value="Haryana">Haryana</option>
-                                                                            <option value="Himachal Pradesh">Himachal
-                                                                                Pradesh</option>
+                                                                            <option value="Himachal Pradesh">Himachal Pradesh</option>
                                                                             <option value="Jharkhand">Jharkhand</option>
                                                                             <option value="Karnataka">Karnataka</option>
                                                                             <option value="Kerala">Kerala</option>
-                                                                            <option value="Madhya Pradesh">Madhya
-                                                                                Pradesh</option>
-                                                                            <option value="Maharashtra">Maharashtra
-                                                                            </option>
+                                                                            <option value="Madhya Pradesh">Madhya Pradesh</option>
+                                                                            <option value="Maharashtra">Maharashtra</option>
                                                                             <option value="Manipur">Manipur</option>
                                                                             <option value="Meghalaya">Meghalaya</option>
                                                                             <option value="Mizoram">Mizoram</option>
@@ -230,44 +191,30 @@
                                                                             <option value="Punjab">Punjab</option>
                                                                             <option value="Rajasthan">Rajasthan</option>
                                                                             <option value="Sikkim">Sikkim</option>
-                                                                            <option value="Tamil Nadu">Tamil Nadu
-                                                                            </option>
+                                                                            <option value="Tamil Nadu">Tamil Nadu</option>
                                                                             <option value="Telangana">Telangana</option>
                                                                             <option value="Tripura">Tripura</option>
-                                                                            <option value="Uttar Pradesh">Uttar Pradesh
-                                                                            </option>
-                                                                            <option value="Uttarakhand">Uttarakhand
-                                                                            </option>
-                                                                            <option value="West Bengal">West Bengal
-                                                                            </option>
-                                                                            <option value="Andaman and Nicobar Islands">
-                                                                                Andaman and Nicobar Islands</option>
-                                                                            <option value="Chandigarh">Chandigarh
-                                                                            </option>
-                                                                            <option value="Dadra and Nagar Haveli">Dadra
-                                                                                and Nagar Haveli</option>
-                                                                            <option value="Daman and Diu">Daman and Diu
-                                                                            </option>
-                                                                            <option value="Lakshadweep">Lakshadweep
-                                                                            </option>
+                                                                            <option value="Uttar Pradesh">Uttar Pradesh</option>
+                                                                            <option value="Uttarakhand">Uttarakhand</option>
+                                                                            <option value="West Bengal">West Bengal</option>
+                                                                            <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
+                                                                            <option value="Chandigarh">Chandigarh</option>
+                                                                            <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
+                                                                            <option value="Daman and Diu">Daman and Diu</option>
+                                                                            <option value="Lakshadweep">Lakshadweep</option>
                                                                             <option value="Delhi">Delhi</option>
-                                                                            <option value="Puducherry">Puducherry
-                                                                            </option>
+                                                                            <option value="Puducherry">Puducherry</option>
                                                                             <option value="Ladakh">Ladakh</option>
-                                                                            <option value="Jammu and Kashmir">Jammu and
-                                                                                Kashmir</option>
+                                                                            <option value="Jammu and Kashmir">Jammu and Kashmir</option>
                                                                         </select>
-                                                                        <div class="invalid-feedback" id="stateError">
-                                                                            Please select your state.</div>
+                                                                        <div class="invalid-feedback" id="stateError"> Please select your state.</div>
                                                                     </div>
                                                                     <div class="col-md-6"></div>
                                                                 </div>
-                                                                <div class="modal-footer">
 
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-bs-dismiss="modal">Close</button>
-                                                                    <button type="submit" class="btn btn-primary">Save
-                                                                        Address</button>
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                                                    <button type="submit" class="btn btn-primary">Save Address</button>
                                                                 </div>
                                                             </form>
                                                         </div>

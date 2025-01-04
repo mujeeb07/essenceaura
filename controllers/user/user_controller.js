@@ -21,23 +21,19 @@ const loadUserLoginPage = async (req, res) => {
 
     req.session.success_message;
 
-    return res
-      .status(statusCode.SUCCESS)
-      .render("user/user_login", { message: "", show_message: true });
+    return res.status(statusCode.SUCCESS).render("user/user_login", { message: "", show_message: true });
   } catch (error) {
     console.log(`error while loading the login page ${error.message}`);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
 const loadUserRegistrationPage = async (req, res) => {
   try {
-    return res
-      .status(statusCode.SUCCESS)
-      .render("user/user_register", { message: null });
+    return res.status(statusCode.SUCCESS).render("user/user_register", { message: null });
   } catch (error) {
-    console.log(
-      `error while loading the loding registration page ${error.message}`
-    );
+    console.log(`error while loading the loding registration page ${error.message}`);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -46,16 +42,12 @@ const registerNewUser = async (req, res) => {
     const { name, email, referral, password, cpassword } = req.body;
 
     if (password !== cpassword) {
-      return res
-        .status(400)
-        .render("user/user_register", { message: "Passwords do not match!" });
+      return res.status(statusCode.BAD_REQUEST).render("user/user_register", { message: "Passwords do not match!" });
     }
 
     const existing_user = await user.findOne({ email: email });
     if (existing_user) {
-      return res
-        .status(400)
-        .render("user/user_login", {
+      return res.status(statusCode.BAD_REQUEST).render("user/user_login", {
           message: "User already exists! Please log in.",
         });
     }
@@ -65,9 +57,7 @@ const registerNewUser = async (req, res) => {
       const referrer = await user.findOne({ referral_code: referral });
 
       if (!referrer) {
-        return res
-          .status(400)
-          .render("user/user_register", { message: "Invalid referral code!" });
+        return res.status(statusCode.BAD_REQUEST).render("user/user_register", { message: "Invalid referral code!" });
       }
       referrer_id = referrer._id;
     }
@@ -106,7 +96,7 @@ const registerNewUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in register_user function:", error);
-    return res.status(500);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -115,7 +105,7 @@ const sendUserOtp = async (req, res) => {
     return res.status(statusCode.SUCCESS).render("user/user_send_otp");
   } catch (error) {
     console.log("Error with OTP:", error.message);
-    return res.status(400).send("Error while sending the OTP");
+    return res.status(statusCode.BAD_REQUEST).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -125,6 +115,7 @@ const secure_password = async (password) => {
     return password_hash;
   } catch (error) {
     console.log(error.message);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null })
   }
 };
 
@@ -135,9 +126,7 @@ const otpVerification = async (req, res) => {
     const otp_data = await user_otp.findOne({ otpCode: otp, email });
 
     if (!otp_data) {
-      return res
-        .status(400)
-        .json({ message: "Invalid or expired OTP", success: false });
+      return res.status(statusCode.BAD_REQUEST).json({ message: "Invalid or expired OTP", success: false });
     }
 
     //new user
@@ -206,17 +195,10 @@ const otpVerification = async (req, res) => {
       await referrer_user.save();
     }
 
-    return res
-      .status(statusCode.SUCCESS)
-      .json({ message: "OTP verified successfully", success: true });
+    return res.status(statusCode.SUCCESS).json({ message: "OTP verified successfully", success: true });
   } catch (err) {
     console.log("Error from verify OTP function:", err);
-    return res
-      .status(500)
-      .json({
-        message: "Verification failed. Please try again.",
-        success: false,
-      });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -225,9 +207,7 @@ const resendOtp = async (req, res) => {
     const { email } = req.session.form_data;
 
     if (!email) {
-      return res
-        .status(400)
-        .json({ message: "No email found in session.", success: false });
+      return res.status(statusCode.BAD_REQUEST).render('../views/400', { user: req.session.user || null });
     }
 
     const otp = otp_generator.generate(6, {
@@ -268,14 +248,10 @@ const resendOtp = async (req, res) => {
     transporter.sendMail(mailOptions);
 
     console.log("OTP email has been sent");
-    return res
-      .status(statusCode.SUCCESS)
-      .json({ message: "OTP has been sent to your email.", success: true });
+    return res.status(statusCode.SUCCESS).json({ message: "OTP has been sent to your email.", success: true });
   } catch (error) {
     console.log(`Error resending OTP: ${error.message}`);
-    return res
-      .status(500)
-      .json({ message: "Failed to resend OTP.", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -293,7 +269,7 @@ const loadHomePage = async (req, res) => {
     return res.render("user/user_landing", { products_list, success_message, user });
   } catch (error) {
     console.log("error while rendering home page.", error);
-    return res.status(500).json({ message: "Error while rendering home page." });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -303,51 +279,27 @@ const userLogin = async (req, res) => {
 
     if (!email || !password) {
       return res
-        .status(400)
-        .render("user/user_login", {
-          message: "Please enter both email and password.",
-          show_message: true,
-        });
+        .status(statusCode.BAD_REQUEST).render("user/user_login", {message: "Please enter both email and password.", show_message: true,});
     }
 
     const user_data = await user.findOne({ email: email.trim() });
 
     if (!user_data) {
-      return res
-        .status(400)
-        .render("user/user_login", {
-          message: "No user found! Please register first.",
-          show_message: true,
-        });
+      return res.status(statusCode.BAD_REQUEST).render("user/user_login", { message: "No user found! Please register first.", show_message: true,});
     }
 
     if (!user_data.is_active) {
-      return res
-        .status(400)
-        .render("user/user_login", {
-          message: "Can't login, user has been blocked.",
-          show_message: true,
-        });
+      return res.status(statusCode.BAD_REQUEST).render("user/user_login", { message: "Can't login, user has been blocked.", show_message: true,});
     }
 
     if (user_data.is_admin) {
-      return res
-        .status(400)
-        .render("user/user_login", {
-          message: "Admin can't login here.",
-          show_message: true,
-        });
+      return res.status(statusCode.BAD_REQUEST).render("user/user_login", { message: "Admin can't login here.", show_message: true,});
     }
 
     const password_match = bcrypt.compare(password.trim(), user_data.password);
 
     if (!password_match) {
-      return res
-        .status(400)
-        .render("user/user_login", {
-          message: "Invalid email or password.",
-          show_message: "false",
-        });
+      return res.status(statusCode.BAD_REQUEST).render("user/user_login", { message: "Invalid email or password.", show_message: "false",});
     }
 
     req.session.success_message = ` Welcome ${user_data.name}`;
@@ -356,12 +308,7 @@ const userLogin = async (req, res) => {
     return res.status(statusCode.SUCCESS).redirect("/");
   } catch (error) {
     console.error("Error while logging in:", error.message);
-    return res
-      .status(500)
-      .render("user/user_login", {
-        message: "Something went wrong. Please try again later.",
-        show_message: true,
-      });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -371,10 +318,10 @@ const logoutUser = async (req, res) => {
       mongoose.Types.ObjectId.createFromHexString(
         req.session?.passport?.user
       ).destroy();
-    return res.status(204).redirect("/login");
+    return res.status(statusCode.NO_CONTENT).redirect("/login");
   } catch (error) {
     console.log("Error while Logout.", error);
-    return res.status(500).json({ message: "error while login out", error });
+    return res.status(statusCode).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -386,7 +333,7 @@ const displayProduct = async (req, res) => {
       .populate("brand");
 
     if (!product) {
-      return res.status(404).json({ error: "Product not found" });
+      return res.status(statusCode.NOT_FOUND).render('../views/404', { user: req.session.user || null });
     }
 
     const default_variant =
@@ -413,9 +360,7 @@ const displayProduct = async (req, res) => {
     });
   } catch (error) {
     console.error("Error while rendering the product view page", error);
-    return res
-      .status(500)
-      .json({ message: "Error while viewing product", error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/404', { user: req.session.user || null });
   }
 };
 
@@ -431,9 +376,7 @@ const userAddressDetails = async (req, res) => {
       state,
     } = req.body;
 
-    const user_id =
-      req.session.user ||
-      req.session?.passport?.user;
+    const user_id = req.session.user || req.session?.passport?.user;
     const address_data = new Address({
       user: user_id,
       name: full_name,
@@ -455,14 +398,10 @@ const userAddressDetails = async (req, res) => {
       req.session.address_message = `Address added successfully`;
       return res.redirect("/checkout");
     }
-    return res
-      .status(statusCode.SUCCESS)
-      .json({ message: "New address added successfully.", success: true });
+    return res.status(statusCode.SUCCESS).json({ message: "New address added successfully.", success: true });
   } catch (error) {
     console.log("error for adding address", error);
-    return res
-      .status(500)
-      .json({ message: "Error add address.", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -482,9 +421,7 @@ const deleteUserAddress = async (req, res) => {
       .json({ success: true, message: "Address deleted successfully" });
   } catch (error) {
     console.log("Error while delete address.", error);
-    return res
-      .status(500)
-      .json({ success: false, message: "Failed to delete address" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
@@ -494,7 +431,7 @@ const userProfileDetails = async (req, res) => {
     const id = await user.findById({ _id: user_id });
     const order = await orders.find({ user: user_id });
     const addresses = await Address.find({ user: user_id });
-    return res.render("user/user_profile", {
+    return res.status(statusCode.SUCCESS).render("user/user_profile", {
       addresses: addresses,
       id,
       orders: order,
@@ -502,45 +439,35 @@ const userProfileDetails = async (req, res) => {
     });
   } catch (error) {
     console.log("error while in user profile", error.message);
-    return res.status(500).json({ message: "error whith user profile", error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 
 const loadEditAddressPage = async (req, res) => {
   const address_id = req.params.id;
+  const redirect_to = req.query.redirect_to || 'user_profile'
   try {
     const address = await Address.findOne({ _id: address_id });
-    return res
-      .status(statusCode.SUCCESS)
-      .render("user/edit_address", { address, user: true });
+    return res.status(statusCode.SUCCESS).render("user/edit_address", { address, user: true, redirect_to });
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "error while rendering edit page", error });
+    console.log('ERROR:',error)
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/404', { user: req.session.user || null });
   }
 };
 
 const updateAddress = async (req, res) => {
-  const { id, name, mobile, address, city, state, postal_code, landmark } =
-    req.body;
+  const { id } = req.params;
+  const { redirect_to } = req.body;
+  const { name, mobile, address, city, state, postal_code, landmark } = req.body;
+  
   try {
-    await Address.findByIdAndUpdate(
-      { _id: id },
-      {
-        name: name,
-        address: address,
-        city: city,
-        state: state,
-        mobile: mobile,
-        postal_code: postal_code,
-        landmark: landmark,
-      }
-    );
-    return res.status(statusCode.SUCCESS).redirect("/user_profile");
+    const updateData = { name, mobile, address, city, state, postal_code, landmark }
+    await Address.findByIdAndUpdate({ _id: id }, updateData);
+    const redirectPath = redirect_to === 'checkout' ? '/checkout' : '/user_profile';
+    return res.status(statusCode.SUCCESS).redirect(redirectPath);
   } catch (error) {
-    return res
-      .status(500)
-      .console.log("error while updating user addres", error);
+    console.log("error while updating user addres", error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/500', { user: req.session.user || null });
   }
 };
 

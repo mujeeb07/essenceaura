@@ -7,7 +7,7 @@ const user_route = require("./routes/user/user_route");
 const admin_route = require("./routes/admin/admin_route");
 const file_upload = require("express-fileupload");
 const path = require("path");
-
+const { handleNotFound, handleServerError } = require('./middleware/error_handler');
 const app = express();
 
 connect_db(); 
@@ -31,6 +31,9 @@ app.use(
 app.use("/", user_route);
 
 app.use("/admin", admin_route);
+
+app.use(handleNotFound);
+app.use(handleServerError);
 
 app.use(passport.initialize());
 app.use(passport.session());

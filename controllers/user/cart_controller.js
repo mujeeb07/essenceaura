@@ -1,7 +1,7 @@
 const Cart = require("../../models/cart_model");
 const mongoose = require("mongoose");
 const Product = require("../../models/product_model");
-const statusCode = require('../../constance/statusCodes')
+const statusCode = require('../../constance/statusCodes');
 
 const loadShoppingCart = async (req, res) => {
   try {
@@ -10,7 +10,7 @@ const loadShoppingCart = async (req, res) => {
     return res.render("user/shop_cart", { cart, user:true });
   } catch (error) {
     console.error("Error fetching cart:", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Unable to fetch cart details" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render("../../views/500", { user: req.session.user || null });
   }
 };
 
@@ -47,7 +47,7 @@ const shoppingCart = async (req, res) => {
 
     return res.status(statusCode.SUCCESS).json({ message: "Product added to cart successfully", cart });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Unable to add product to cart" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render("../../views/500", { user: req.session.user || null });
   }
 };
 
@@ -100,7 +100,7 @@ const updateItemQuantity = async (req, res) => {
     });
   } catch (error) {
     console.error("Error updating quantity:", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "An error occurred", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render("../../views/500", { user: req.session.user || null });
   }
 };
 
@@ -118,7 +118,7 @@ const checkStockLevel = async(req, res) => {
 
   } catch (error) {
     console.log("Error fetching stock:", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false, message: "Unable to fetch stock." });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render("../../views/500", { user: req.session.user || null });
   }
 
 }
@@ -137,7 +137,7 @@ const removeFromCart = async (req, res) => {
       return res.status(statusCode.NOT_FOUND).json({ message: "Item not found" });
     }
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while removing item from cart" });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render("../../views/500", { user: req.session.user || null });
   }
 };
 

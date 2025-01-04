@@ -26,7 +26,7 @@ const loadWalletPage = async (req, res) => {
 
     } catch (error) {
         console.log("Error while rendering the wallet page.", error);
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Some went wrong while fetching wallet", success: false });
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../../views/500', { user: req.session.user || null });
     }
 }
 
