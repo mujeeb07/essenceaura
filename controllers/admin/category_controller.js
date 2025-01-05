@@ -6,7 +6,8 @@ const categories = async (req, res) => {
     const categories = await Category.find();
     return res.status(statusCode.SUCCESS).render("admin/catagories", { categories });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "server error" });
+    console.log('Error geting catagory page.', error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -15,7 +16,8 @@ const loadCategories = async (req, res) => {
     const categories = await Category.find();
     return res.status(statusCode.SUCCESS).json(categories);
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "server error " });
+    console.log('Error catagory loading.', error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 const createCategory = async (req, res) => {
@@ -42,7 +44,8 @@ const createCategory = async (req, res) => {
 
     return res.status(statusCode.SUCCESS).json({ message: "Category added successfully" });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "Server error" });
+    console.log('Error while cerating catagory.', error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -68,7 +71,8 @@ const editCategory = async (req, res) => {
     );
     return res.status(statusCode.SUCCESS).json({ updated_category });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "Error updating category" });
+    console.log('Error while edit catagory.', error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -77,7 +81,8 @@ const fetchCategoryById = async (req, res) => {
     const category = await Category.findById(req.params.id);
     return res.status(statusCode.SUCCESS).json(category);
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "server error" });
+    console.log('Error while fetching catagory.', error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -95,7 +100,8 @@ const disableCategory = async (req, res) => {
     );
     return res.status(statusCode.SUCCESS).json({message: "Category soft deleted successfully",updated_category,});
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "Error deleting category" });
+    console.log('Error while delete catagory.', error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 

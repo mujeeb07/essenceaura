@@ -76,7 +76,6 @@
                                 </div>
                             </div>
 
-
                             <!-- Product Status Checkbox -->
                             <div class="mb-4">
                                 <label for="product_status" class="form-label">Product Status</label>
@@ -93,7 +92,7 @@
                             <div class="row">
                                 <% product.variants.forEach(function(variant) { %>
                                     <div class="col-lg-4 mb-3">
-                                        <input type="checkbox" id="size<%= variant.volume %>" checked onchange="toggleVariant('<%= variant.volume %>')" />
+                                        <input type="checkbox" id="size<%= variant.volume %>" checked />
                                         <label for="size<%= variant.volume %>"><%= variant.volume %> ML</label>
                                         <div id="variant<%= variant.volume %>" class="row gx-2 mt-2">
                                             <div class="col-lg-6">

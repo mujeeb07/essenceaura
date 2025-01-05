@@ -18,7 +18,8 @@ const usersList = async (req, res) => {
 
       return res.status(statusCode.SUCCESS).render("admin/users", { user_data: users, current_page: page, total_pages: total_pages });
     } catch (error) {
-      return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Internal server side error." });
+      console.log("Error while getting user list.", error)
+      return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     }
   };
   
@@ -35,16 +36,11 @@ const usersList = async (req, res) => {
           message: `User ${is_active ? "unblocked" : "blocked"} successfully.`,
         });
       } else {
-        return res
-          .status(404)
-          .json({ success: false, message: "User not found." });
+        return res.status(statusCode.NOT_FOUND).json({ success: false, message: "User not found." });
       }
     } catch (error) {
       console.error("Error blocking/unblocking user:", error);
-      return res.status(statusCode.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: "Server error. Please try again later.",
-      });
+      return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     }
   };
 
@@ -58,13 +54,10 @@ const usersList = async (req, res) => {
 
         const orders = await Orders.find().populate('user').sort({ _id: -1 }).skip((page - 1) * perPage).limit(perPage);
 
-        return res.status(statusCode.SUCCESS).render("admin/orders", {
-            orders,
-            currentPage: page,
-            totalPages,
-        });
+        return res.status(statusCode.SUCCESS).render("admin/orders", { orders, currentPage: page, totalPages });
     } catch (error) {
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
+      console.log('Error while fetching orders', error);
+      return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     }
 };
 
@@ -77,7 +70,7 @@ const getOrderDetails  = async (req, res) => {
     return res.status(statusCode.SUCCESS).render('admin/order_details', { order_details })
   } catch (error) {
     console.log("Error while getting the orders details.", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while getting the orders details.", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     
   }
 }
@@ -94,7 +87,7 @@ const orderDetails = async(req, res) => {
     return res.status(statusCode.SUCCESS).json({success: true});
   } catch (error) {
     console.log("order status error :", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:"Error while changing order status", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 }
 
@@ -120,7 +113,7 @@ const returns = async (req, res) => {
     return res.status(statusCode.SUCCESS).render("admin/return_management", { orders, currentPage: page, totalPages });
   } catch (error) {
     console.log("Error while rendering the return management page.", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while getting the return management page.", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -145,7 +138,7 @@ const handleReturn  = async(req, res) => {
       await order_data.save();
       
       const wallet = await Wallet.findOne({ user_id : order_data.user });
-      console.log(wallet)
+      
       if(!wallet){
         const new_wallet = new Wallet({ user_id: order_data.user });
         wallet = await new_wallet.save();
@@ -177,7 +170,7 @@ const handleReturn  = async(req, res) => {
     return res.status(statusCode.SUCCESS).json({ success: true });
   } catch (error) {
     console.log('Error while updating return action.', error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 }
 
@@ -187,7 +180,6 @@ const updateReturnQuantity  = async (req, res) => {
 
     let product_to_update = await Product.findById( new ObjectId(itemId) );
     let price;
-    // console.log("PRODUCT DATA TO UPDATE:", product_to_update);
     product_to_update.variants.forEach((i) => {
       if(i.volume === Number(variant)){
         i.stock += Number(quantity)
@@ -199,7 +191,7 @@ const updateReturnQuantity  = async (req, res) => {
     return res.status(statusCode.SUCCESS).json({ success:true })
   } catch (error) {
     console.log('Error while updating returned item quantity.', error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 }
 

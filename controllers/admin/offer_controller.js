@@ -27,13 +27,8 @@ const loadOfferDashboard = async (req, res) => {
         total_pages: total_pages,
       });
   } catch (error) {
-    console.log("Error while rendering offer management page", error.message);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        message: "Error while rendering offer management page.",
-        success: false,
-      });
+    console.log("Error while rendering offer management page", error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -46,35 +41,20 @@ const loadOfferCreationPage = async (req, res) => {
         { product_offer: { $exists: false } },
       ],
     });
-    return res
-      .status(statusCode.SUCCESS)
-      .render("admin/create_offer", { offer_products });
+    return res.status(statusCode.SUCCESS).render("admin/create_offer", { offer_products });
   } catch (error) {
     console.log("Error while rendering create offer page", error.message);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        message: "Error while rendering create offer page",
-        success: false,
-      });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
 const createNewOffer = async (req, res) => {
   try {
-    const {
-      offer_name,
-      product,
-      discount_percentage,
-      start_date,
-      expiry_date,
-    } = req.body;
+    const { offer_name, product, discount_percentage, start_date, expiry_date } = req.body;
 
     const product_data = await Products.findById(product);
     if (!product_data) {
-      return res
-        .status(statusCode.NOT_FOUND)
-        .json({ message: "Product not found", success: false });
+      return res.status(statusCode.NOT_FOUND).render('../views/admin404', { title: 'Product Not Found' });
     }
 
     product_data.variants.forEach((variant) => {
@@ -94,57 +74,34 @@ const createNewOffer = async (req, res) => {
 
     await product_data.save();
 
-    return res
-      .status(statusCode.SUCCESS)
-      .json({ success: true, message: "Offer created successfully" });
+    return res.status(statusCode.SUCCESS).json({ success: true, message: "Offer created successfully" });
   } catch (error) {
     console.error("Error creating offer:", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Error while creating the offer", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
 const loadOfferEditPage = async (req, res) => {
   try {
     const productId = req.params.id;
-    // console.log("Offer Id: ", productId)
-    const product = await Products.findById(productId).populate(
-      "category brand"
-    );
+    const product = await Products.findById(productId).populate( "category brand" );
 
     if (!product) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .json({ mesage: "Product not found", success: false });
+      return res.status(statusCode.BAD_REQUEST).render('../views/admin404', { title: "Product Not Found." });
     }
 
     const offer = product.product_offer || {};
-    return res
-      .status(statusCode.SUCCESS)
-      .render("admin/edit_offer", { offer, productId, product });
+    return res.status(statusCode.SUCCESS).render("admin/edit_offer", { offer, productId, product });
   } catch (error) {
     console.log("Error while rendering the edit offer page", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({
-        message: "Error while rendering the edit offer page",
-        success: false,
-      });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
 const applyOfferUpdate = async (req, res) => {
   try {
-    const {
-      product_id,
-      offer_name,
-      discount_percentage,
-      start_date,
-      expiry_date,
-    } = req.body;
+    const { product_id, offer_name, discount_percentage, start_date, expiry_date } = req.body;
 
-    console.log(product_id);
     const productIdstr = ObjectId.createFromHexString(product_id);
     const updated_product = await Products.findByIdAndUpdate(
       product_id,
@@ -167,22 +124,14 @@ const applyOfferUpdate = async (req, res) => {
     });
 
     await updated_product.save();
-    console.log("Updated offer details:", updated_product);
-
+    
     if (!updated_product) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .json({ message: "Product not found", success: false });
+      return res.status(statusCode.BAD_REQUEST).render('../views/admin500', { title: 'Product Not Found' });
     }
-
-    return res
-      .status(statusCode.SUCCESS)
-      .json({ message: "Offer details updated successfylly", success: true });
+    return res.status(statusCode.SUCCESS).json({ message: "Offer details updated successfylly", success: true });
   } catch (error) {
     console.log("Error while updating the offer", error);
-    return res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Error while updating the offer", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 

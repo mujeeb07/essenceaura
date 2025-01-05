@@ -18,7 +18,7 @@ const loadProductList = async (req, res) => {
 
     return res.status(statusCode.SUCCESS).render("admin/products_list", { products_list, current_page: page, total_pages: total_pages });
   } catch (error) {
-    return res.status(statusCode.BAD_REQUEST);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -28,25 +28,13 @@ const showAddProductPage = async (req, res) => {
     const brand = await Brand.find();
     return res.status(statusCode.SUCCESS).render("admin/add_product", { category, brand });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
 const addNewProduct = async (req, res) => {
-
-  console.log('Add product page.')
-
   try {
-    const {
-      product_name,
-      product_description,
-      volumeVariants,
-      priceVariants,
-      stockVariants,
-      brand,
-      category,
-    } = req.body;
-
+    const { product_name, product_description, volumeVariants, priceVariants, stockVariants, brand, category } = req.body;
     const productCardImage = req.files?.product_card_image[0];
     const productDetailImages = req.files?.product_details_images || [];
 
@@ -54,18 +42,8 @@ const addNewProduct = async (req, res) => {
       return res.status(statusCode.BAD_REQUEST).json({ error: "Product card image is required." });
     }
 
-    if (
-      !product_name ||
-      !product_description ||
-      !volumeVariants ||
-      !priceVariants ||
-      !stockVariants ||
-      !brand ||
-      !category
-    ) {
-      return res
-        .status(statusCode.BAD_REQUEST)
-        .json({ error: "All product details are required." });
+    if ( !product_name || !product_description || !volumeVariants || !priceVariants || !stockVariants || !brand || !category) {
+      return res.status(statusCode.BAD_REQUEST).json({ error: "All product details are required." });
     }
 
     const brandId = mongoose.Types.ObjectId.createFromHexString(brand);
@@ -101,23 +79,19 @@ const addNewProduct = async (req, res) => {
 
     await new_product.save()
 
-    console.log('New prodcut details: ', new_product);
     return res.status(statusCode.SUCCESS).json({ message: "New product added and saved", product: new_product });
   } catch (error) {
     console.error("Error with add product controller:", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ error: "Something went wrong while adding the product." });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
 const loadProductEditor = async (req, res) => {
   try {
     const productId = req.params.id;
-    const product = await Product.findOne({ _id: productId })
-      .populate("brand")
-      .populate("category");
+    const product = await Product.findOne({ _id: productId }).populate("brand").populate("category");
     const brand = await Brand.find();
     const category = await Category.find();
-
     return res.status(statusCode.SUCCESS).render("admin/edit_product", {
       product,
       brands: brand,
@@ -125,7 +99,7 @@ const loadProductEditor = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching product:", error);
-    res.status(statusCode.INTERNAL_SERVER_ERROR).send("Server error");
+    res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500')
   }
 };
 
@@ -136,9 +110,10 @@ const updateProduct = async (req, res) => {
 
     let variants = {};
     if (req.body.variants) { variants = JSON.parse(req.body.variants) }
+    console.log("Updated Varinats Data : ", variants);
 
     let product = await Product.findById(productId);
-    if (!product) { return res.status(404).json({ message: "Product not found", success: false }) }
+    if (!product) { return res.status(statusCode.NOT_FOUND).render('../views/admin404', { title: 'Product Not Found' }); }
 
     product.name = product_name || product.name;
     product.description = product_description || product.description;
@@ -152,10 +127,6 @@ const updateProduct = async (req, res) => {
         price: parseFloat(variants[volume].price),
         stock: parseInt(variants[volume].stock, 10) || 0,
       }));
-
-      if(product.variants.stock < 5){
-        product.name = "Low Quantity"
-      }
     }
 
     if ( req.files && req.files.product_card_image && req.files.product_card_image ) {
@@ -191,11 +162,11 @@ const updateProduct = async (req, res) => {
     }
 
     await product.save();
-    console.log("Product updated successfully");
+    
     return res.status(statusCode.SUCCESS).redirect('/admin/admin_list_product');
   } catch (error) {
     console.error("Error updating product:", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "An error occurred while updating the product", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500')
   }
 };
 

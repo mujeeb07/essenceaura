@@ -8,7 +8,8 @@ const getBrands  = async (req, res) => {
 
     return res.status(statusCode.SUCCESS).render("admin/brands", { brands: brands });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
+    console.log('Brand page error', error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -16,9 +17,8 @@ const loadBrandCreation  = async (req, res) => {
   try {
     return res.status(statusCode.SUCCESS).render("admin/createBrand ");
   } catch (err) {
-    res
-      .status(statusCode.INTERNAL_SERVER_ERROR)
-      .json({ message: "Failed to create brand", error: err.message });
+    console.log('Brand create page render error', err)
+    res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -41,7 +41,8 @@ const createBrand  = async (req, res) => {
 
     return res.status(statusCode.SUCCESS).json({ message: "new brand added and saved" });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to create new brand" });
+    console.log('new brand create page error', error)
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -52,7 +53,8 @@ const loadBrandEditor = async (req, res) => {
 
     res.status(statusCode.SUCCESS).render("admin/updateBrand ", { brand: brand_data });
   } catch (error) {
-    res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Failed to edit brand" });
+    console.log('Error brand update page', error)
+    res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -70,7 +72,8 @@ const updateBrand  = async (req, res) => {
     });
     return res.status(statusCode.SUCCESS).json({ success: true, message: "brand updated" });
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
+    console.log('Error update update brand.', error);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 

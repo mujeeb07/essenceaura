@@ -53,7 +53,10 @@
                                     <td class="col-1"><%= new Date(coupon_data[i].coupon_expires).toLocaleDateString() %></td>     
 
                                     <td class="col-1" id="user-status-<%= coupon_data[i]._id %>">
-                                        <% if(coupon_data[i].coupon_status) { %>
+                                        <% const isExpired = new Date(coupon_data[i].coupon_expires) < new Date();
+                                        if (isExpired) { %>
+                                            <span class="badge rounded-pill alert-warning">Expired</span>
+                                        <% } else if (coupon_data[i].coupon_status) { %>
                                             <span class="badge rounded-pill alert-success">Active</span>
                                         <% } else { %>
                                             <span class="badge rounded-pill alert-danger">Blocked</span>

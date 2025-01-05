@@ -6,34 +6,28 @@ const statusCode = require('../../constance/statusCodes')
 
 
 const loadCouponDashboard = async (req, res) => {
-
     try {
         const coupons = await Coupon.find({})
         return res.status(statusCode.SUCCESS).render('admin/coupon_list', { coupon_data: coupons } );
-
     } catch (error) {
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:"something went wrong while rendering coupon list." });
+        console.log("something went wrong while rendering coupon list.", error);
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     }
 }
 
 const loadCreateCoupon = async (req, res) => {
-
     try {
-        
         return res.status(statusCode.SUCCESS).render('admin/create_coupon');
-
     } catch (error) {
-
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:"error while rendering create coupon page." });
+        console.log('Error while getting create coupon page.', error);
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
 
     }
 
 }
 
 const createCouponPage = async (req, res) => {
-    console.log('coupon create page.')
     const {coupon_name, description, coupon_code, discount, max_amount, min_amount, valid_upto} = req.body;
-    console.log('data from the body:', coupon_name, description, coupon_code, discount, max_amount, min_amount, valid_upto)
 
     try {
         const coupon_data = new Coupon({
@@ -47,54 +41,41 @@ const createCouponPage = async (req, res) => {
         });
 
         await coupon_data.save();
-        console.log("coupon created and saved successfully.")
-
         return res.status(statusCode.SUCCESS).json({ success: true });
     } catch (error) {
-        console.log("Error: ", error.message)
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message: "error while rendering the created coupon details."});
+        console.log("Error while getting coupon details.", error);
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     }
 }
 
 const activateCoupon = async (req, res) => {
 const { id, is_active  }  = req.body;
-console.log('coupon id:',id, "status: ",is_active);
-
     try {
         await Coupon.findByIdAndUpdate( { _id: id }, {
             coupon_status: is_active
         })
-
         return res.status(statusCode.SUCCESS).json({message: "cuopon status updated"})
     } catch (error) {
         console.log('Error while update coupon status', error);
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message: error });
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     }
 
 }
 
 const updateCoupon = async (req, res) => {
     const { id } = req.query;
-    console.log('Coupon id from params:', id);
-
     try {
         const coupon_data = await Coupon.findById(id);
-        console.log('coupon data:', coupon_data);
         return res.status(statusCode.SUCCESS).render('admin/edit_coupon', { coupon: coupon_data });
-
     } catch (error) {
-        console.log('Error while fetching the data from the database:', error.message);
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).send("Server error while fetching coupon data.");
+        console.log('Error while fetching the data from the database:', error);
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     }
 };
 
 const applyCouponUpdate = async (req, res) => {
     const { id, coupon_name, description, coupon_code, discount, max_amount, min_amount, valid_upto } = req.body;
-    
-    console.log("data for updation: ", id, coupon_name, description, coupon_code, discount, max_amount, min_amount, valid_upto );
-
     try {
-
         const update_data = await Coupon.findByIdAndUpdate(
             {_id : id},
             {
@@ -112,7 +93,7 @@ const applyCouponUpdate = async (req, res) => {
         return res.status(statusCode.SUCCESS).json({ message:"Coupon udpated successfully", success:true });
     } catch (error) {
         console.log("Error while updating the coupon. ", error);
-        return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message:"Error while updating the coupon. ", error });
+        return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
     }
 }
 

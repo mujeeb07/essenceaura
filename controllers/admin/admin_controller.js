@@ -7,8 +7,6 @@ const {startOfDay, endOfDay, startOfWeek, endOfWeek, startOfMonth, endOfMonth, s
 const  generate_report  = require("../../utils/generate_report");
 const statusCode = require ('../../constance/statusCodes')
 
-
-
 const adminLogin = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -25,7 +23,7 @@ const adminLogin = async (req, res) => {
     }
   } catch (error) {
     console.log("admin login error", error)
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "admin login error", error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -34,17 +32,17 @@ const showAdminLogin = async (req, res) => {
     return res.status(statusCode.SUCCESS).render("admin/admin_login", { message: "" });
   } catch (error) {
     console.log("Error while getting the admin login page.", error)
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: error });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
 const adminLogout = async (req, res) => {
   try {
     req.session.destroy();
-    return res.status(204).redirect("/admin");
+    return res.status(statusCode.NO_CONTENT).redirect("/admin");
   } catch (error) {
     console.log('error admin logout.',error)
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({message:"admin logout controller error"})
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 }
 
@@ -93,7 +91,7 @@ const adminDashboard = async (req, res) => {
       },
       { $sort: { category_quantity:-1 } }
     ]).limit(5);
-    console.log("Top category:",top_categories)
+    
     const start_of_month = new Date();
         start_of_month.setDate(1);
         start_of_month.setHours(0, 0, 0, 0);
@@ -118,7 +116,7 @@ const adminDashboard = async (req, res) => {
     });
   } catch (error) {
     console.log("admin dashboard controller error", error)
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json("admin dashboard controller error", error.message);
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -130,7 +128,7 @@ const loadSalesReportCreationPage = async (req, res) => {
     return res.status(statusCode.SUCCESS).render("admin/create_sales_report",{ sales_report_data });
   } catch (error) {
     console.log("Error while rendering sales report page", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Error while rendering sales report page", success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 }
 
@@ -138,12 +136,9 @@ const loadSalesReportCreationPage = async (req, res) => {
 const salesReportTable = async (req, res) => {
   try {
     const { type, startDate, endDate } = req.query;
-    console.log("Query Data:", type, startDate, endDate);
-
     let date_start, date_end;
 
     if(startDate && endDate){
-      console.log('Table for custome range data.');
       date_start = new Date(startDate);
       date_end = new Date(endDate);
     }else{
@@ -167,18 +162,16 @@ const salesReportTable = async (req, res) => {
           date_end = new endOfYear(today);
           break;
         default:
-          return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ message: "Invalid Period Selected." });
+          return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
       }
     }
 
    const report = await generate_report(date_start, date_end);
 
-   console.log("Report Data:",report);
-
    return res.status(statusCode.SUCCESS).json({ success: true, report });
   
   } catch (error) {
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success:false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 }
 
@@ -190,7 +183,7 @@ const dailySalesReport = async (req, res) => {
     return res.status(statusCode.SUCCESS).json(data);
   } catch (error) {
     console.log("Error fetching daily sales diagram", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -200,7 +193,7 @@ const weeklySalesReport = async (req, res) => {
     return res.status(statusCode.SUCCESS).json(data);
   } catch (error) {
     console.log("Error while fetching weekly sales diagram", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -210,7 +203,7 @@ const monthlySalesReport = async (req, res) => {
     return res.status(statusCode.SUCCESS).json(data);
   } catch (error) {
     console.log("Error while fetching monthly sales diagram", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
@@ -220,7 +213,7 @@ const yearlySalesReport = async (req, res) => {
     return res.status(statusCode.SUCCESS).json(data);
   } catch (error) {
     console.log("Error while fetching yearly sales diagram.", error);
-    return res.status(statusCode.INTERNAL_SERVER_ERROR).json({ success: false });
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 
