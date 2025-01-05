@@ -46,8 +46,8 @@ const resetPassword = async(req, res) => {
 
 
       await user_data.save();
-
-      const reset_link = `${process.env.URL}/reset_password/${hashed_token}`;
+      const domain = 'https://essenceaura.store';
+      const reset_link = `${domain}/reset_password/${hashed_token}`;
 
       const transporter = nodemailer.createTransport({
 

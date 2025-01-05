@@ -15,7 +15,7 @@ const loadProductList = async (req, res) => {
     const total_pages = Math.ceil( total_products / items_per_page );
 
     const products_list = await Product.find({}).populate("category").populate("brand").skip((page - 1) * items_per_page ).limit(items_per_page);
-
+    
     return res.status(statusCode.SUCCESS).render("admin/products_list", { products_list, current_page: page, total_pages: total_pages });
   } catch (error) {
     return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
