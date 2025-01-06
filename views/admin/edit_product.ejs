@@ -123,33 +123,118 @@
 
 <%- include('../layouts/admin/footer.ejs') %>
 
-<script>
-document.getElementById('submitButton').addEventListener('click', async function(event) {
-  event.preventDefault();
-  
-  const variants = {};
-  document.querySelectorAll('[id^="size"]').forEach(input => {
-    if (input.checked) {
-      const volume = input.id.replace('size', '');
-      const price = document.getElementById(`price${volume}`).value;
-      const stock = document.getElementById(`stock${volume}`).value;
-      variants[volume] = { price, stock };
-    }
+<!-- <script>
+    document.getElementById('submitButton').addEventListener('click', async function(event) {
+    event.preventDefault();
+
+    const variants = {};
+    let isValid = true; 
+    let errorMessage = "";
+
+    document.querySelectorAll('[id^="size"]').forEach(input => {
+        if (input.checked) {
+            const volume = input.id.replace('size', '');
+            const price = document.getElementById(`price${volume}`).value;
+            const stock = document.getElementById(`stock${volume}`).value;
+
+            
+            if (price <= 0) {
+                isValid = false;
+                errorMessage += `Price for size ${volume} cannot be less than 0.\n`;
+            }
+            if (stock <= 0) {
+                isValid = false;
+                errorMessage += `Stock for size ${volume} cannot be less than 0.\n`;
+            }
+
+            variants[volume] = { price, stock };
+        }
+    });
+
     const product_name = document.getElementById("product_name").value;
     const product_description = document.getElementById("product_description").value;
-    // console.log(product_name,product_description)
-  });
 
-  const form = document.getElementById('editProductForm');
-  const variantsInput = document.createElement('input');
-  variantsInput.type = 'hidden';
-  variantsInput.name = 'variants';
-  variantsInput.value = JSON.stringify(variants);
-  const product_name = document.getElementById("product_name").value;
-  const product_description = document.getElementById("product_description").value;
-  form.appendChild(variantsInput);
-  form.submit();
+    
+    if (!isValid) {
+        alert(errorMessage); 
+        return; 
+    }
 
+    
+    const form = document.getElementById('editProductForm');
+    const variantsInput = document.createElement('input');
+    variantsInput.type = 'hidden';
+    variantsInput.name = 'variants';
+    variantsInput.value = JSON.stringify(variants);
+    form.appendChild(variantsInput);
+
+    form.submit();
 });
+
+
+</script> -->
+
+<script>
+    document.getElementById('submitButton').addEventListener('click', async function(event) {
+    event.preventDefault();
+
+    // Clear existing error messages
+    document.querySelectorAll('.error-message').forEach(error => error.remove());
+
+    const variants = {};
+    let isValid = true; // Flag to track validation
+
+    document.querySelectorAll('[id^="size"]').forEach(input => {
+        if (input.checked) {
+            const volume = input.id.replace('size', '');
+            const priceId = `price${volume}`;
+            const stockId = `stock${volume}`;
+            const price = document.getElementById(priceId).value;
+            const stock = document.getElementById(stockId).value;
+
+            // Validation for price and stock
+            if (price <= 0) {
+                isValid = false;
+                showError(priceId, `Price for ${volume}ml must be greater than 0.`);
+            }
+            if (stock <= 0) {
+                isValid = false;
+                showError(stockId, `Stock for ${volume}ml must be greater than 0.`);
+            }
+
+            variants[volume] = { price, stock };
+        }
+    });
+
+    const product_name = document.getElementById("product_name").value;
+    const product_description = document.getElementById("product_description").value;
+
+    // If validation fails, stop submission
+    if (!isValid) {
+        return;
+    }
+
+    // Continue if validation passes
+    const form = document.getElementById('editProductForm');
+    const variantsInput = document.createElement('input');
+    variantsInput.type = 'hidden';
+    variantsInput.name = 'variants';
+    variantsInput.value = JSON.stringify(variants);
+    form.appendChild(variantsInput);
+
+    form.submit();
+});
+
+// Function to display error messages
+function showError(elementId, message) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.color = 'red';
+        errorDiv.textContent = message;
+        element.parentNode.insertBefore(errorDiv, element.nextSibling);
+    }
+}
 
 </script>

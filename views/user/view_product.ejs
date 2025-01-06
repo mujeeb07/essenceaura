@@ -41,29 +41,29 @@
     position: relative;
     transition: all 0.3s ease;
     padding: 5px 10px;
-    border: 2px solid transparent; /* Default border */
+    border: 2px solid transparent;
     display: inline-block;
 }
 
 .size-button:hover {
-    border-color: #088178; /* Blue border on hover */
+    border-color: #088178; 
 }
 
 .size-button.selected, 
-.size-button.default { /* Apply styles to default and selected buttons */
-    border: 2px solid #088178; /* Highlight border */
+.size-button.default { 
+    border: 2px solid #088178;
     background-color: #f0f0f0;
 }
 
 .size-button.selected::after,
-.size-button.default::after { /* Add underline for selected and default */
+.size-button.default::after { 
     content: '';
     position: absolute;
     bottom: -3px;
     left: 0;
     right: 0;
     height: 2px;
-    background-color: #088178; /* Underline color */
+    background-color: #088178; 
     transition: all 0.3s ease;
 }
 
@@ -210,11 +210,8 @@
                                     <div class="bt-1 border-color-1 mt-30 mb-30"></div>                                    
                                     <div class="detail-extralink">
                                         <div class="product-extra-link2">
-                                            <!-- <button id="shop_cart" class="button button-add-to-cart" >Add to cart</button> -->
                                             <button id="shop_cart" class="button button-add-to-cart">Add to cart</button>
                                             <a aria-label="Add To Wishlist" id="product-<%= product._id %>" name="productId" value="<%= product._id %>" class="action-btn hover-up"><i class="fi-rs-heart"></i></a>
-                                            <a aria-label="Compare" class="action-btn hover-up"
-                                                href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
                                         </div>
                                     </div>
                                     <ul class="product-meta font-xs color-grey mt-50">

@@ -868,6 +868,9 @@
             const namePattern = /^[a-zA-Z ]{2,}$/;
             const mobilePattern = /^[0-9]{10}$/;
             const pincodePattern = /^[0-9]{6}$/;
+            const cityPattern = /^[a-zA-Z\s]+$/;
+            const addressPattern = /^[a-zA-Z0-9\s(),.-]+$/;
+            const landmarkPattern = /^[a-zA-Z0-9\s,.-]+$/;
     
             function validateInput(input, pattern, errorId) {
                 const isValid = pattern ? pattern.test(input.value.trim()) : input.value.trim() !== "";
@@ -880,9 +883,9 @@
                 const isValid = validateInput(fullNameInput, namePattern, "nameError") &&
                     validateInput(mobileInput, mobilePattern, "mobileError") &&
                     validateInput(pincodeInput, pincodePattern, "pincodeError") &&
-                    validateInput(addressInput, null, "flatError") &&
-                    validateInput(landmarkInput, null, "landmarkError") &&
-                    validateInput(townCityInput, null, "cityError") &&
+                    validateInput(addressInput, addressPattern, "flatError") &&
+                    validateInput(landmarkInput, landmarkPattern, "landmarkError") &&
+                    validateInput(townCityInput, cityPattern, "cityError") &&
                     validateInput(stateSelect, null, "stateError");
                 
                 submitButton.disabled = !isValid;
@@ -903,8 +906,6 @@
                     state: stateSelect.value.trim(),
                     sourcePage: form.querySelector('[name="sourcePage"]').value
                 };
-    
-                // console.log('form data :', data);
     
                 try {
                     const response = await fetch("/user_address", {

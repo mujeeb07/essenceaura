@@ -92,7 +92,7 @@
             }
 
             const discount = document.getElementById('discount_percentage').value.trim();
-            if (!discount || isNaN(discount) || discount <= 0) {
+            if (!discount || isNaN(discount) || discount <= 0 || discount >= 60) {
                 isValid = false;
                 showError('discount_percentage', 'Please enter a valid discount percentage.');
             }

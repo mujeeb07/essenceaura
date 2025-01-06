@@ -126,7 +126,7 @@ const handleReturn  = async(req, res) => {
     let product_name = '';
     if(status === 'Approve'){
       for (let item of order_data.items) {
-        if(String(order_data._id) === orderId){
+        if(item.product._id==itemId){
           price = item.product.variants.price * item.quantity;
           product_name = item.product.name;
           price += price * 0.18;

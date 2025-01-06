@@ -15,7 +15,7 @@ const getBrands  = async (req, res) => {
 
 const loadBrandCreation  = async (req, res) => {
   try {
-    return res.status(statusCode.SUCCESS).render("admin/createBrand ");
+    return res.status(statusCode.SUCCESS).render("admin/add_new_brand");
   } catch (err) {
     console.log('Brand create page render error', err)
     res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
@@ -50,11 +50,11 @@ const loadBrandEditor = async (req, res) => {
   try {
     const brand_id = req.params.id;
     const brand_data = await brand.findOne({ _id: brand_id });
-
-    res.status(statusCode.SUCCESS).render("admin/updateBrand ", { brand: brand_data });
+    console.log(brand_data)
+    return res.status(statusCode.SUCCESS).render('admin/edit_brand', { brand: brand_data });
   } catch (error) {
     console.log('Error brand update page', error)
-    res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
+    return res.status(statusCode.INTERNAL_SERVER_ERROR).render('../views/admin500');
   }
 };
 

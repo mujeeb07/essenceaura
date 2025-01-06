@@ -116,9 +116,10 @@
             }
 
             const discount = document.getElementById('discount').value.trim();
-            if (!discount) {
+            console.log('DISCOUNT PERCENTAGE:', discount, typeof(discount))
+            if (!discount || discount >= 60 ) {
                 isValid = false;
-                showError('discount', 'Please enter a discount percentage.');
+                showError('discount', 'Please enter a valid discount percentage.');
             }
 
             const maxAmount = document.getElementById('max_amount').value.trim();

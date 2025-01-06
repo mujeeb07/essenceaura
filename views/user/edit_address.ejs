@@ -88,65 +88,106 @@
 
 
 <%- include('../layouts/user/footer.ejs') %>
-  
+
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-    const editForm = document.getElementById("editAddressForm");
-    const nameInput = document.getElementById("name");
-    const addressInput = document.getElementById("address");
-    const cityInput = document.getElementById("city");
-    const stateInput = document.getElementById("state");
-    const mobileInput = document.getElementById("mobile");
-    const postalCodeInput = document.getElementById("postal_code");
-    const landmarkInput = document.getElementById("landmark");
-    const submitButton = document.getElementById("editAddressSubmit");
+        document.addEventListener("DOMContentLoaded", function () {
+        const editForm = document.getElementById("editAddressForm");
+        const nameInput = document.querySelector("input[name='name']");
+        const addressInput = document.getElementById("address");
+        const cityInput = document.getElementById("city");
+        const stateInput = document.getElementById("state");
+        const mobileInput = document.getElementById("mobile");
+        const postalCodeInput = document.getElementById("postal_code");
+        const landmarkInput = document.getElementById("landmark");
+        const submitButton = document.getElementById("editAddressSubmit");
 
-    const mobilePattern = /^[0-9]{10}$/;
-    const postalCodePattern = /^[0-9]{6}$/;
+        
+        const patterns = {
+            name: /^[a-zA-Z\s]+$/, 
+            mobile: /^[0-9]{10}$/,
+            postalCode: /^[0-9]{6}$/,
+            city: /^[a-zA-Z\s]+$/, 
+            address: /^[a-zA-Z0-9\s,.-]+$/, 
+            landmark: /^[a-zA-Z0-9\s,.-]+$/ 
+        };
 
-    function validateInput(input, errorId, pattern = null) {
-        const value = input.value.trim();
-        const isValid = pattern ? pattern.test(value) : value !== "";
-        input.classList.toggle("is-invalid", !isValid);
-        document.getElementById(errorId).style.display = isValid ? "none" : "block";
-        return isValid;
-    }
+        const errorMessages = {
+            name: "Please enter a valid name (letters only, no special characters)",
+            mobile: "Please enter a valid 10-digit mobile number",
+            postalCode: "Please enter a valid 6-digit postal code",
+            city: "Please enter a valid city name ",
+            address: "Please enter a valid address",
+            landmark: "Please enter a valid landmark",
+            state: "Please select your state"
+        };
 
-    function validateForm() {
-        const validName = validateInput(nameInput, "nameError");
-        const validAddress = validateInput(addressInput, "addressError");
-        const validCity = validateInput(cityInput, "cityError");
-        const validState = validateInput(stateInput, "stateError");
-        const validMobile = validateInput(mobileInput, "mobileError", mobilePattern);
-        const validPostalCode = validateInput(postalCodeInput, "postalCodeError", postalCodePattern);
-        const validLandmark = validateInput(landmarkInput, "landmarkError");
+        function validateInput(input, pattern, errorId) {
+            const value = input.value.trim();
+            let isValid = true;
 
-        const isFormValid = validName && validAddress && validCity && validState && validMobile && validPostalCode && validLandmark;
-        submitButton.disabled = !isFormValid;
-        return isFormValid;
-    }
+            if (pattern) {
+                isValid = pattern.test(value);
+            } else {
+                isValid = value !== "";
+            }
 
-    [nameInput, addressInput, cityInput, stateInput, mobileInput, postalCodeInput, landmarkInput].forEach(input => {
-        input.addEventListener("input", validateForm);
-    });
+            input.classList.toggle("is-invalid", !isValid);
+            const errorElement = document.getElementById(errorId);
+            if (errorElement) {
+                errorElement.style.display = isValid ? "none" : "block";
+                errorElement.textContent = errorMessages[input.name] || "Please Enter a Valid Data";
+            }
 
-    editForm.addEventListener("submit", function (event) {
-        if (!validateForm()) {
-            event.preventDefault();
-        } else {
+            return isValid;
+        }
+
+        function validateForm() {
+            const validations = [
+                validateInput(nameInput, patterns.name, "nameError"),
+                validateInput(mobileInput, patterns.mobile, "mobileError"),
+                validateInput(addressInput, patterns.address, "addressError"),
+                validateInput(cityInput, patterns.city, "cityError"),
+                validateInput(stateInput, null, "stateError"),
+                validateInput(postalCodeInput, patterns.postalCode, "postalCodeError"),
+                validateInput(landmarkInput, patterns.landmark, "landmarkError")
+            ];
+
+            const isFormValid = validations.every(validation => validation === true);
+            submitButton.disabled = !isFormValid;
+            return isFormValid;
+        }
+
+        const inputs = [nameInput, addressInput, cityInput, stateInput, mobileInput, postalCodeInput, landmarkInput];
+        inputs.forEach(input => {
+            input.addEventListener("input", function() {
+                const errorId = this.id + "Error";
+                const pattern = patterns[this.name];
+                validateInput(this, pattern, errorId);
+                validateForm();
+            });
+
+            
+            input.addEventListener("blur", function() {
+                const errorId = this.id + "Error";
+                const pattern = patterns[this.name];
+                validateInput(this, pattern, errorId);
+                validateForm();
+            });
+        });
+
+        editForm.addEventListener("submit", function (event) {
             event.preventDefault();
             
-            Swal.fire({
-                title: 'Success!',
-                text: 'Your address has been updated successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                window.location.href = "/user_profile";
-            });
-        }
+            if (validateForm()) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Your address has been updated successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    this.submit();
+                });
+            }
+        });
     });
-});
-
-
-  </script>
+</script>

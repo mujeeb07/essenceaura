@@ -13,17 +13,20 @@
                     
                     <select id="order-status-dropdown" class="form-select d-inline-block mb-lg-0 mb-15 mw-200">
                         <option value="">Change status</option>
-                        <option value="Pending">Pending</option>
-                        <option value="Awaiting payment">Awaiting payment</option>
-                        <option value="Confirmed">Confirmed</option>
-                        <option value="Shipped">Shipped</option>
-                        <option value="Delivered">Delivered</option>
-                        <% if(order_details.order_status === "Cancelled") { %>
-                            <option disabled="true" value="Cancelled">Cancel</option>
-                        <% }else{ %>
+                        <option value="Pending" <%= order_details.order_status === "Pending" ? 'selected' : '' %>>Pending</option>
+                        <option value="Confirmed" <%= order_details.order_status === "Confirmed" ? 'selected' : '' %>>Confirmed</option>
+                        <option value="Shipped" <%= order_details.order_status === "Shipped" ? 'selected' : '' %>>Shipped</option>
+                        <option value="Delivered" <%= order_details.order_status === "Delivered" ? 'selected' : '' %> 
+                            <%= ["Cancelled", "Delivered", "Returned"].includes(order_details.order_status) ? 'disabled' : '' %>>Delivered</option>
+                        <% if (order_details.order_status === "Cancelled") { %>
+                            <option disabled="true" value="Cancelled" selected>Cancelled</option>
+                        <% } else { %>
                             <option value="Cancelled">Cancel</option>
                         <% } %>
+                        <option value="Returned" <%= order_details.order_status === "Returned" ? 'selected' : '' %> 
+                            <%= ["Cancelled", "Delivered", "Returned"].includes(order_details.order_status) ? 'disabled' : '' %>>Returned</option>
                     </select>
+                    
                     <a id="save-status-btn" class="btn btn-primary" href="#">Save</a>
                 </div>
             </div>
@@ -193,4 +196,4 @@
             );
         }
     });
-</script>
+</script>    

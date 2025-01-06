@@ -152,7 +152,7 @@
 
 <%- include('../layouts/admin/footer.ejs') %>
 
-<script>
+<!-- <script>
 
     document.getElementById('submitButton').addEventListener('click', async (e) => {
         e.preventDefault();
@@ -445,4 +445,318 @@
         stockInput.disabled = true;
     });
 
+</script> -->
+
+<script>
+    document.getElementById('submitButton').addEventListener('click', async (e) => {
+    e.preventDefault();
+    clearErrors();
+    if (!validateForm()) {
+        return;
+    }
+
+    const form = document.getElementById('addProductForm');
+    const formData = new FormData(form);
+
+    const volumeVariants = [];
+    const priceVariants = [];
+    const stockVariants = [];
+
+    // Process variants with validation
+    if (document.getElementById('size100ml').checked) {
+        const price100ml = document.getElementById('price100ml').value;
+        const stock100ml = document.getElementById('stock100ml').value;
+
+        if (parseFloat(price100ml) > 0 && parseInt(stock100ml) > 0) {
+            volumeVariants.push('100ml');
+            priceVariants.push(price100ml);
+            stockVariants.push(stock100ml);
+        } else {
+            volumeVariants.push('100ml');
+            priceVariants.push('0');
+            stockVariants.push('0');
+        }
+    } else {
+        volumeVariants.push('100ml');
+        priceVariants.push('0');
+        stockVariants.push('0');
+    }
+
+    if (document.getElementById('size75ml').checked) {
+        const price75ml = document.getElementById('price75ml').value;
+        const stock75ml = document.getElementById('stock75ml').value;
+
+        if (parseFloat(price75ml) > 0 && parseInt(stock75ml) > 0) {
+            volumeVariants.push('75ml');
+            priceVariants.push(price75ml);
+            stockVariants.push(stock75ml);
+        } else {
+            volumeVariants.push('75ml');
+            priceVariants.push('0');
+            stockVariants.push('0');
+        }
+    } else {
+        volumeVariants.push('75ml');
+        priceVariants.push('0');
+        stockVariants.push('0');
+    }
+
+    if (document.getElementById('size50ml').checked) {
+        const price50ml = document.getElementById('price50ml').value;
+        const stock50ml = document.getElementById('stock50ml').value;
+
+        if (parseFloat(price50ml) > 0 && parseInt(stock50ml) > 0) {
+            volumeVariants.push('50ml');
+            priceVariants.push(price50ml);
+            stockVariants.push(stock50ml);
+        } else {
+            volumeVariants.push('50ml');
+            priceVariants.push('0');
+            stockVariants.push('0');
+        }
+    } else {
+        volumeVariants.push('50ml');
+        priceVariants.push('0');
+        stockVariants.push('0');
+    }
+
+    formData.append('volumeVariants', JSON.stringify(volumeVariants));
+    formData.append('priceVariants', JSON.stringify(priceVariants));
+    formData.append('stockVariants', JSON.stringify(stockVariants));
+
+    formData.append('brand', document.getElementById('brand').value);
+    formData.append('category', document.getElementById('category').value);
+
+    const productCardImage = document.getElementById('product_card_image').files[0];
+    if (productCardImage) {
+        formData.append('product_card_image', productCardImage);
+    }
+
+    const productDetailImages = document.getElementById('product_details_images').files;
+    for (let i = 0; i < productDetailImages.length; i++) {
+        formData.append('product_details_images', productDetailImages[i]);
+    }
+
+    try {
+        const response = await fetch('/admin/add_product', {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            showSuccess('Product added successfully!');
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showError('submitButton', result.error || 'Failed to add product.');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        showError('submitButton', 'An error occurred while adding the product.');
+    }
+});
+
+function validateForm() {
+    let isValid = true;
+
+    const productName = document.getElementById('product_name').value;
+    if (!productName.trim()) {
+        isValid = false;
+        showError('product_name', 'Product name is required.');
+    }
+
+    const productDescription = document.getElementById('product_description').value;
+    if (!productDescription.trim()) {
+        isValid = false;
+        showError('product_description', 'Product description is required.');
+    }
+
+    const productDetailsImages = document.getElementById('product_details_images').files;
+    if (productDetailsImages.length === 0) {
+        isValid = false;
+        showError('product_details_images', 'Please select at least one product detail image.');
+    }
+
+    const productCardImage = document.getElementById('product_card_image').files;
+    if (productCardImage.length === 0) {
+        isValid = false;
+        showError('product_card_image', 'Product card image is required.');
+    }
+
+    const brand = document.getElementById('brand').value;
+    if (!brand) {
+        isValid = false;
+        showError('brand', 'Please select a brand.');
+    }
+
+    const category = document.getElementById('category').value;
+    if (!category) {
+        isValid = false;
+        showError('category', 'Please select a category.');
+    }
+
+    // Enhanced validation for variants
+    if (document.getElementById('size100ml').checked) {
+        const price100ml = parseFloat(document.getElementById('price100ml').value);
+        const stock100ml = parseInt(document.getElementById('stock100ml').value);
+        
+        if (isNaN(price100ml) || isNaN(stock100ml)) {
+            isValid = false;
+            showError('price100ml', 'Price and stock for 100ml are required.');
+        } else if (price100ml <= 0) {
+            isValid = false;
+            showError('price100ml', 'Price for 100ml must be a valid price.');
+        } else if (stock100ml <= 0) {
+            isValid = false;
+            showError('stock100ml', 'Stock for 100ml must be a valid stock.');
+        }
+    }
+
+    if (document.getElementById('size75ml').checked) {
+        const price75ml = parseFloat(document.getElementById('price75ml').value);
+        const stock75ml = parseInt(document.getElementById('stock75ml').value);
+        
+        if (isNaN(price75ml) || isNaN(stock75ml)) {
+            isValid = false;
+            showError('price75ml', 'Price and stock for 75ml are required.');
+        } else if (price75ml <= 0) {
+            isValid = false;
+            showError('price75ml', 'Price for 75ml must be a valid stock.');
+        } else if (stock75ml <= 0) {
+            isValid = false;
+            showError('stock75ml', 'Stock for 75ml must be a valid price.');
+        }
+    }
+
+    if (document.getElementById('size50ml').checked) {
+        const price50ml = parseFloat(document.getElementById('price50ml').value);
+        const stock50ml = parseInt(document.getElementById('stock50ml').value);
+        
+        if (isNaN(price50ml) || isNaN(stock50ml)) {
+            isValid = false;
+            showError('price50ml', 'Price and stock for 50ml are required.');
+        } else if (price50ml <= 0) {
+            isValid = false;
+            showError('price50ml', 'Price for 50ml must be a valid price.');
+        } else if (stock50ml <= 0) {
+            isValid = false;
+            showError('stock50ml', 'Stock for 50ml must be a valid stock.');
+        }
+    }
+
+    return isValid;
+}
+
+function showError(elementId, message) {
+    const element = document.getElementById(elementId);
+    if (element) {
+        const errorDiv = document.createElement('div');
+        errorDiv.className = 'error-message';
+        errorDiv.style.color = 'red';
+        errorDiv.textContent = message;
+        element.parentNode.insertBefore(errorDiv, element.nextSibling);
+    }
+}
+
+function showSuccess(message) {
+    const successDiv = document.createElement('div');
+    successDiv.className = 'success-message';
+    successDiv.style.color = 'green';
+    successDiv.textContent = message;
+    document.getElementById('submitButton').parentNode.appendChild(successDiv);
+}
+
+function clearErrors() {
+    const errorMessages = document.querySelectorAll('.error-message');
+    errorMessages.forEach((error) => error.remove());
+}
+
+document.getElementById('product_card_image').addEventListener('change', function () {
+    const productCardImage = this.files[0];
+    const preview = document.getElementById('product_card_image_preview');
+    const removeButton = document.getElementById('remove_card_image');
+
+    if (productCardImage) {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            removeButton.style.display = 'block';
+        };
+        reader.readAsDataURL(productCardImage);
+    } else {
+        preview.style.display = 'none';
+        removeButton.style.display = 'none';
+    }
+});
+
+document.getElementById('remove_card_image').addEventListener('click', function () {
+    const input = document.getElementById('product_card_image');
+    input.value = '';
+    document.getElementById('product_card_image_preview').style.display = 'none';
+    this.style.display = 'none';
+});
+
+document.getElementById('product_details_images').addEventListener('change', function () {
+    const files = Array.from(this.files);
+    const previewContainer = document.getElementById('product_details_images_preview');
+    previewContainer.innerHTML = '';
+
+    files.forEach((file, index) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            const imageElement = document.createElement('div');
+            imageElement.classList.add('col-lg-3', 'mb-3', 'position-relative');
+            imageElement.innerHTML = `
+                <img src="${e.target.result}" alt="Detail Image Preview" style="max-width: 100%;" class="img-thumbnail">
+                <button type="button" class="btn btn-danger btn-sm position-absolute top-0 end-0" onclick="removeDetailImage(${index})">Remove</button>
+            `;
+            previewContainer.appendChild(imageElement);
+        };
+        reader.readAsDataURL(file);
+    });
+});
+
+function removeDetailImage(index) {
+    const productDetailsImages = document.getElementById('product_details_images');
+    const dataTransfer = new DataTransfer();
+
+    Array.from(productDetailsImages.files).forEach((file, i) => {
+        if (i !== index) {
+            dataTransfer.items.add(file);
+        }
+    });
+
+    productDetailsImages.files = dataTransfer.files;
+    document.getElementById('product_details_images').dispatchEvent(new Event('change'));
+}
+
+function toggleVariant(size) {
+    const checkbox = document.getElementById(`size${size}`);
+    const variantFields = document.getElementById(`variant${size}`);
+    const priceInput = document.getElementById(`price${size}`);
+    const stockInput = document.getElementById(`stock${size}`);
+
+    if (checkbox.checked) {
+        variantFields.style.display = 'flex';
+        priceInput.disabled = false;
+        stockInput.disabled = false;
+    } else {
+        variantFields.style.display = 'none';
+        priceInput.disabled = true;
+        stockInput.disabled = true;
+    }
+}
+
+// Initialize variant fields
+['100ml', '75ml', '50ml'].forEach(size => {
+    const variantFields = document.getElementById(`variant${size}`);
+    const priceInput = document.getElementById(`price${size}`);
+    const stockInput = document.getElementById(`stock${size}`);
+    variantFields.style.display = 'none';
+    priceInput.disabled = true;
+    stockInput.disabled = true;
+});
 </script>
