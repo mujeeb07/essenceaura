@@ -29,11 +29,6 @@
                                                     <img class="default-img" src="<%= product.product_card_image %>" alt="product image">
                                                 </a>
                                             </div>
-                                            <div class="product-action-1">
-                                                <a aria-label="Quick view" class="action-btn hover-up" data-bs-toggle="modal" data-bs-target="#quickViewModal"><i class="fi-rs-search"></i></a>
-                                                <a aria-label="Add To Wishlist" class="action-btn hover-up" href="shop-wishlist.html"><i class="fi-rs-heart"></i></a>
-                                                <a aria-label="Compare" class="action-btn hover-up" href="shop-compare.html"><i class="fi-rs-shuffle"></i></a>
-                                            </div>
                                             <div class="product-badges product-badges-position product-badges-mrg">
                                                 <% if(product.category.gender === 'Unisex') { %>
                                                     <span class="hot"><%=  product.category.gender %></span>
@@ -67,27 +62,10 @@
                                                     <span>₹<%= actualPrice %></span>
                                                 <% } %>
                                             </div>
-                                            <div class="product-action-1 show">
-                                                <a aria-label="Add To Cart" class="action-btn hover-up" href="shop-cart.html"><i class="fi-rs-shopping-bag-add"></i></a>
-                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             <% }) %>
-                        </div>
-                        
-                        <!--pagination-->
-                        <div class="pagination-area mt-15 mb-sm-5 mb-lg-0">
-                            <nav aria-label="Page navigation example">
-                                <ul class="pagination justify-content-start">
-                                    <li class="page-item active"><a class="page-link" href="#">01</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">02</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">03</a></li>
-                                    <li class="page-item"><a class="page-link dot" href="#">...</a></li>
-                                    <li class="page-item"><a class="page-link" href="#">16</a></li>
-                                    <li class="page-item"><a class="page-link" href="#"><i class="fi-rs-angle-double-small-right"></i></a></li>
-                                </ul>
-                            </nav>
                         </div>
                     </div>
                     <div class="col-lg-3 primary-sidebar sticky-sidebar">
