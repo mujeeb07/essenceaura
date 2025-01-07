@@ -2,6 +2,7 @@
 <%- include('../layouts/admin/sidebar.ejs') %>
 
 <style>
+
 .pagination {
   display: flex;
   justify-content: center;
@@ -9,9 +10,11 @@
 }
 
 .pagination a {
+  display: inline-block; 
   padding: 5px 10px;
   margin: 0 3px;
   text-decoration: none;
+  white-space: nowrap; 
 }
 
 .pagination .btn-outline-secondary {
@@ -22,6 +25,14 @@
 .pagination .btn-sm {
   font-size: 14px;
 }
+
+
+.pagination .page-item.active a {
+  background-color: #088178;
+  color: #fff;
+  border-color: #088178;
+}
+
 
 </style>
 
