@@ -15,7 +15,7 @@ connect_db();
 
 app.use(session_config);
 
-const PORT = process.env.PORT;
+const PORT = 4000 || process.env.PORT;
 app.set("view engine", "ejs");
 app.use(express.json());
 app.use(express.static("public"));
