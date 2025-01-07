@@ -26,8 +26,11 @@ app.use(
     limits: { fileSize: 50 * 1024 * 1024, files: 6 },
     useTempFiles: true,
     tempFileDir: path.join(__dirname, "public/tmp"),
-  })
+  })   
 );
+
+
+
 
 app.use("/", user_route);
 app.use("/admin", admin_route);
