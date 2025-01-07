@@ -3,7 +3,7 @@ const session_config = require("./config/session_config");
 const passport = require("./config/passport");
 require("dotenv").config();
 const connect_db = require("./config/database_config");
-const user_route = require("./routes/user/user_route");
+const user_route = require("./routes/user/user_route");   
 const admin_route = require("./routes/admin/admin_route");
 const file_upload = require("express-fileupload");
 const path = require("path");
